@@ -3,6 +3,9 @@ uuid = "71182807-4d06-4237-8dd0-bdafe4d097e2"
 authors = ["Dale <djblack@uci.edu> and contributors"]
 version = "0.1.0"
 
+[deps]
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+
 [compat]
 julia = "1"
 
