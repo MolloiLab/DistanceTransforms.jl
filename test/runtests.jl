@@ -1,6 +1,4 @@
-using DistanceTransforms
-using Test
+include("./imports.jl")
 
-@testset "DistanceTransforms.jl" begin
-    # Write your tests here.
-end
+
+include("metrics.jl")
