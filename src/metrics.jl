@@ -40,3 +40,13 @@ function mean_hausdorff(u, v)
     # Take the average of each of these points to return the average Hausdorff distance 
     return mean([mean(min_euc_list_u), mean(min_euc_list_v)])
 end
+
+function mean_dice(score, target)
+    smooth = 1e-5
+    intersect = sum(score .* target)
+    y_sum = sum(target .* target)
+    z_sum = sum(score .* score)
+    metric = (2 * intersect + smooth) / (z_sum + y_sum + smooth)
+    return metric
+end
+

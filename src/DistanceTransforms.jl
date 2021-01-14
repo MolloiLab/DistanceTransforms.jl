@@ -8,7 +8,8 @@ include("./helper.jl")
 include("./metrics.jl")
 
 export find_edges,
-    mean_hausdorff
-    
+    mean_hausdorff,
+    mean_dice
+
 
 end
