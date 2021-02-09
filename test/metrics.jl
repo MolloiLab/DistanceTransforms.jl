@@ -1,11 +1,13 @@
 using DistanceTransforms
 using Test
+using Distances
+using Distances: Euclidean
 
 @testset ExtendedTestSet "mean_hausdorff" begin
     @testset ExtendedTestSet "mean_hausdorff" begin
     x = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     y = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
-    @test mean_hausdorff(x, y) ≈ 0
+    @test mean_hausdorff(x, y, Euclidean()) ≈ 0
     end
 end
 
