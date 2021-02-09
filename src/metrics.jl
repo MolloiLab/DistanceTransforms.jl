@@ -8,7 +8,6 @@ Both arrays u and v are required to be the same size and they must be binary or 
 function mean_hausdorff(u, v)
     d = Euclidean()
 
-    # Find the coordinates of the pixels that are edges in the images
     edges_1 = find_edges(u)
     edges_2 = find_edges(v)
 

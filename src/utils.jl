@@ -22,4 +22,4 @@ function find_edges(A)
     edge = (transpose ∘ reshape)(reinterpret(Int, edge), 2, :)
 end
 
-function detect_edges
+## TODO function detect_edges(A) using ImageEdgeDection.jl
