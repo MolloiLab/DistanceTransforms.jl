@@ -12,15 +12,15 @@ function mean_hausdorff(u, v)
     edges_1 = find_edges(u)
     edges_2 = find_edges(v)
 
-	sz_1 = size(edges_1, 1)
-	sz_2 = size(edges_2, 1)
-	
+    sz_1 = size(edges_1, 1)
+    sz_2 = size(edges_2, 1)
+
     # Loop through every edge point on `edge_1` and find its corresponding closest point to `edge_2`
-	min_u = minimum.([map(x -> evaluate(d, edges_1[i, :], edges_2[x, :]), 1:sz_2) for i in 1:sz_1])
-	
+    min_u = minimum.([map(x -> evaluate(d, edges_1[i, :], edges_2[x, :]), 1:sz_2) for i in 1:sz_1])
+
     # Loop through every edge point on `edge_2` and find its corresponding closest point to `edge_1`
-	min_v = minimum.([map(x -> evaluate(d, edges_2[i, :], edges_1[x, :]), 1:sz_1) for i in 1:sz_2])
-	
+    min_v = minimum.([map(x -> evaluate(d, edges_2[i, :], edges_1[x, :]), 1:sz_1) for i in 1:sz_2])
+
     # Take the average of each of these points to return the average Hausdorff distance 
     return mean([mean(min_u), mean(min_v)])
 end
