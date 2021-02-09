@@ -1,18 +1,16 @@
+"
+    mean_hausdorff
+
+Extract the edges of two images and then find the average Hausdorff distance along those edges.
+Both arrays u and v are required to be the same size and they must be binary or boolean images.
+"
+
 function mean_hausdorff(u, v)
-    "
-    This function extracts the edges of two images and then finds the average Hausdorff distance
-    Both arrays u and v are required to be the same size and they must be binary or boolean images.
-    "
     d = Euclidean()
 
     # Find the coordinates of the pixels that are edges in the images
     edges_1 = find_edges(u)
     edges_2 = find_edges(v)
-
-    # Turn the array of CartesianIndices into an array of integers corresponding to the CartesianIndices
-    edges_1 = (transpose ∘ reshape)(reinterpret(Int, edges_1), 2, :)
-    edges_2 = (transpose ∘ reshape)(reinterpret(Int, edges_2), 2, :)
-
 
     min_euc_list_u = []
     min_euc_list_v = []
