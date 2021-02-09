@@ -1,5 +1,6 @@
 module DistanceTransforms
 
+using ImageEdgeDetection
 using Images
 using Distances
 using Statistics

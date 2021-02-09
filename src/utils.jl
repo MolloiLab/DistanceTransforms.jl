@@ -21,3 +21,5 @@ function find_edges(A)
     # Turn the array of CartesianIndices into an array of integers corresponding to the CartesianIndice
     edge = (transpose ∘ reshape)(reinterpret(Int, edge), 2, :)
 end
+
+function detect_edges
