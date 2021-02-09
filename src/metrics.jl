@@ -12,31 +12,17 @@ function mean_hausdorff(u, v)
     edges_1 = find_edges(u)
     edges_2 = find_edges(v)
 
-    min_euc_list_u = []
-    min_euc_list_v = []
-
+	sz_1 = size(edges_1, 1)
+	sz_2 = size(edges_2, 1)
+	
     # Loop through every edge point on `edge_1` and find its corresponding closest point to `edge_2`
-    for i in 1:size(edges_1, 1)
-        euc_list_1 = []
-        for j in 1:size(edges_2, 1)
-            euc = evaluate(d, edges_1[i, :], edges_2[j, :])
-            append!(euc_list_1 , euc)
-        end
-        append!(min_euc_list_u, minimum(euc_list_1))
-    end
-
+	min_u = minimum.([map(x -> evaluate(d, edges_1[i, :], edges_2[x, :]), 1:sz_2) for i in 1:sz_1])
+	
     # Loop through every edge point on `edge_2` and find its corresponding closest point to `edge_1`
-    for i in 1:size(edges_2, 1)
-        euc_list_1 = []
-        for j in 1:size(edges_1, 1)
-            euc = evaluate(d, edges_2[i, :], edges_1[j, :])
-            append!(euc_list_1 , euc)
-        end
-        append!(min_euc_list_v, minimum(euc_list_1))
-    end
-
+	min_v = minimum.([map(x -> evaluate(d, edges_2[i, :], edges_1[x, :]), 1:sz_1) for i in 1:sz_2])
+	
     # Take the average of each of these points to return the average Hausdorff distance 
-    return mean([mean(min_euc_list_u), mean(min_euc_list_v)])
+    return mean([mean(min_u), mean(min_v)])
 end
 
 function mean_dice(score, target)
@@ -47,4 +33,3 @@ function mean_dice(score, target)
     metric = (2 * intersect + smooth) / (z_sum + y_sum + smooth)
     return metric
 end
-

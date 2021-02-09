@@ -7,6 +7,12 @@ using Test
     y = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     @test mean_hausdorff(x, y) ≈ 0
     end
+
+    # @testset ExtendedTestSet "mean_hausdorff" begin
+    #     x = reshape(0:26, (3, 3, 3))
+    #     y = reshape(0:26, (3, 3, 3))
+    #     @test mean_hausdorff(x, y) ≈ 0
+    # end
 end
 
 @testset ExtendedTestSet "mean_dice" begin
