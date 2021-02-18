@@ -4,6 +4,7 @@
 Modifies `detect_edges` to work with 3D images.
 "
 
+<<<<<<< HEAD
 function detect_edges_3D(img, f)
 	container = Array{Int64}(undef, size(img))
 	for k in 1:(size(img)[3])
