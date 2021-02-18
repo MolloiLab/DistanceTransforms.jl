@@ -26,13 +26,6 @@ function mean_hausdorff_2D(u, v, d, f)
     return mean([mean(min_u), mean(min_v)])
 end
 
-## TODO implement mean_hausdorff that works with n-dimensional images
-
-function mean_dice(score, target)
-    smooth = 1e-5
-    intersect = sum(score .* target)
-    y_sum = sum(target .* target)
-    z_sum = sum(score .* score)
-    metric = (2 * intersect + smooth) / (z_sum + y_sum + smooth)
-    return metric
-end
+## TODO implement mean_hausdorff_ND
+## TODO implement dice metric
+## TODO implement mean_dice metric

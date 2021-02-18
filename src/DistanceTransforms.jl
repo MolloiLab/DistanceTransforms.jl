@@ -5,12 +5,13 @@ using Images
 using Distances
 using Statistics
 
+include("./losses.jl")
 include("./metrics.jl")
 include("./utils.jl")
 
 export 
     detect_edges_3D,
     mean_hausdorff_2D,
-    mean_dice
+    dice_loss
 
 end
