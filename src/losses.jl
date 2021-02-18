@@ -1,9 +1,24 @@
-function dice_loss(score, target)
-    smooth = 1e-5
-    intersect = sum(score .* target)
-    y_sum = sum(target .* target)
-    z_sum = sum(score .* score)
-    loss = (2 * intersect + smooth) / (z_sum + y_sum + smooth)
+function dice_loss(ŷ, y)
+    ϵ = 1e-5
+    intersect = sum(ŷ .* y)
+    y_sum = sum(y .* y)
+    z_sum = sum(ŷ .* ŷ)
+    loss = (2 * intersect + ϵ) / (z_sum + y_sum + ϵ)
     loss = 1 - loss
     return loss
+end
+
+
+function hd_loss(ŷ, y)
+    ŷ_dtm = compute_dtm(ŷ)
+    y_dtm = compute_dtm(y)
+
+    ŷ_dtm = ŷ_dtm .^ 2
+    y_dtm = y_dtm .^ 2
+
+    Δŷ = (ŷ .- y) .^ 2
+    dtm = ŷ_dtm + y_dtm
+    @tullio multipled[x, y, z] := Δŷ[x, y, z] + dtm[x, y, z]
+    hd_loss = mean(multipled)
+    return hd_loss
 end

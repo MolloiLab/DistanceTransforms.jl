@@ -4,14 +4,24 @@ using ImageEdgeDetection
 using Images
 using Distances
 using Statistics
+using Tullio
 
 include("./losses.jl")
 include("./metrics.jl")
 include("./utils.jl")
 
 export 
-    detect_edges_3D,
+    # Export losses.jl functions
+    dice_loss,
+    hd_loss,
+
+
+    # Export metrics.jl functions
     mean_hausdorff_2D,
-    dice_loss
+
+    # Export utils.jl functions
+    detect_edges_3D,
+    compute_dtm,
+    
 
 end
