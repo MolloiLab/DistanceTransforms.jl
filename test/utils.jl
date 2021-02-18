@@ -1,9 +1,17 @@
 using DistanceTransforms
 using Test
 
-# @testset ExtendedTestSet "find_edges" begin
-#     @testset ExtendedTestSet "find_edges" begin
-#     x = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
-#     @test find_edges(x, y) ≈ 0
-#     end
-# end
+@testset ExtendedTestSet "detect_edges_3D" begin
+    @testset ExtendedTestSet "detect_edges_3D" begin
+        x1 = [1 1 1 0; 1 1 1 0]
+        x2 = [1 1 1 0; 1 1 1 0]
+        x3 = [1 1 1 0; 1 1 1 0]
+        x = cat(x1, x2, x3, dims=3)
+
+        e1 = [0 0 1 0; 0 0 1 0]
+        e2 = [0 0 1 0; 0 0 1 0]
+        e3 = [0 0 1 0; 0 0 1 0]
+        edge = cat(e1, e2, e3, dims=3)
+    @test detect_edges_3D(x, Canny()) ≈ edge
+    end
+end

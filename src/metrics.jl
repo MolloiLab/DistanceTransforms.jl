@@ -1,16 +1,17 @@
 "
-    mean_hausdorff
+    mean_hausdorff_2D(u, v, d, f)
 
 Extract the edges of two images and then find the average Hausdorff distance along those edges.
 Both arrays u and v are required to be the same size and they must be binary or boolean images.
 The argument d corresponds to the distance metric used for computing. Typically, Euclidean() is
 a common metric for use in Hausdorff distance computation. More options can be found in
-Distance.jl
+Distances.jl. The argument `f` is the algorithm used for edge detection.  More options can be 
+found in ImageEdgeDetection.jl. 
 "
 
-function mean_hausdorff(u, v, d)
-    edges_1 = find_edges(u)
-    edges_2 = find_edges(v)
+function mean_hausdorff_2D(u, v, d, f)
+    edges_1 = detect_edges(u, f)
+    edges_2 = detect_edges(v, f)
 
     sz_1 = size(edges_1, 1)
     sz_2 = size(edges_2, 1)

@@ -8,7 +8,9 @@ using Statistics
 include("./metrics.jl")
 include("./utils.jl")
 
-export find_edges,
-    mean_hausdorff,
+export 
+    detect_edges_3D,
+    mean_hausdorff_2D,
     mean_dice
+
 end
