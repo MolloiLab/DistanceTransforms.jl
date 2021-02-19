@@ -15,13 +15,11 @@ export
     dice_loss,
     hd_loss,
 
-
     # Export metrics.jl functions
     mean_hausdorff_2D,
 
     # Export utils.jl functions
     detect_edges_3D,
     compute_dtm,
-    
 
 end
