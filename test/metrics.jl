@@ -1,8 +1,4 @@
-using DistanceTransforms
-using Test
-using Distances
-using Distances: Euclidean
-using ImageEdgeDetection
+include("./imports.jl")
 
 @testset ExtendedTestSet "mean_hausdorff_2D" begin
     @testset ExtendedTestSet "mean_hausdorff_2D" begin

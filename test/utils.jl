@@ -1,5 +1,4 @@
-using DistanceTransforms
-using Test
+include("./imports.jl")
 
 @testset ExtendedTestSet "detect_edges_3D" begin
     @testset ExtendedTestSet "detect_edges_3D" begin
