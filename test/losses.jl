@@ -2,16 +2,32 @@ include("./imports.jl")
 
 @testset ExtendedTestSet "dice_loss" begin
     @testset ExtendedTestSet "dice_loss" begin
-    x = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    ŷ = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     y = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
-    @test dice_loss(x, y) ≈ 0
+    @test dice_loss(ŷ, y) == 0.0
+    end
+
+    @testset ExtendedTestSet "dice_loss" begin
+        y1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+        y2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+        y = cat(y1, y2, dims=3)
+        
+        ŷ1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+        ŷ2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+        ŷ = cat(ŷ1, ŷ2, dims=3)
+        @test dice_loss(ŷ, y) == 0.0
     end
 end
 
 @testset ExtendedTestSet "hd_loss" begin
     @testset ExtendedTestSet "hd_loss" begin
-    x = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
-    y = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
-    @test dice_loss(x, y) ≈ 0.0
+    y1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    y2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    y = cat(y1, y2, dims=3)
+    
+    ŷ1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    ŷ2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    ŷ = cat(ŷ1, ŷ2, dims=3)
+    @test hd_loss(ŷ, y) == 0.0
     end
 end

@@ -1,10 +1,10 @@
 module DistanceTransforms
 
 using ImageEdgeDetection
-using Images
-using Distances
-using Statistics
+using ImageMorphology: feature_transform, distance_transform
 using Tullio
+using Statistics
+using Distances
 
 include("./losses.jl")
 include("./metrics.jl")
@@ -20,6 +20,6 @@ export
 
     # Export utils.jl functions
     detect_edges_3D,
-    compute_dtm,
+    compute_dtm
 
 end
