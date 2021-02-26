@@ -10,18 +10,23 @@ function dice_loss(ŷ, y)
 end
 
 
-function hd_loss(ŷ, y)
-    ŷ_dtm = compute_dtm(ŷ)
-    y_dtm = compute_dtm(y)
-
+function hd_loss(ŷ, y, ŷ_dtm, y_dtm)
     ŷ_dtm = ŷ_dtm .^ 2
     y_dtm = y_dtm .^ 2
 
     Δ = (ŷ .- y) .^ 2
     dtm = ŷ_dtm + y_dtm
 
-    @tullio multipled[x, y, z] := Δ[x, y, z] * dtm[x, y, z]
-    hd_loss = mean(multipled)
+    @tullio M[x, y, z] := Δ[x, y, z] * dtm[x, y, z]
+    hd_loss = mean(M)
 end
 
 ## -- Parallel loss functions --##
+
+function hd_lossP(ŷ, y, ŷ_dtm, y_dtm)
+    @tullio Δ[i,j,k] := (ŷ[i,j,k] - y[i,j,k]) .^ 2
+    @tullio dtm[i,j,k] := (ŷ_dtm[i,j,k] .^ 2) + (y_dtm[i,j,k] .^ 2)
+
+    @tullio M[x, y, z] := Δ[x, y, z] * dtm[x, y, z]
+    hd_loss = mean(M)
+end
