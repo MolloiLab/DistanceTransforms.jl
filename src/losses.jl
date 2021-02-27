@@ -24,5 +24,5 @@ function hd_lossP(ŷ, y, ŷ_dtm, y_dtm)
     @tullio Δ[i,j,k] := (ŷ[i,j,k] - y[i,j,k]) .^ 2
     @tullio dtm[i,j,k] := (ŷ_dtm[i,j,k] .^ 2) + (y_dtm[i,j,k] .^ 2)
     @tullio M[i,j,k] := Δ[i,j,k] * dtm[i,j,k]
-    hd_loss = mean(M)
+    return mean(M)
 end
