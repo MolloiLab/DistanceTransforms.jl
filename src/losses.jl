@@ -11,14 +11,11 @@ end
 
 
 function hd_loss(ŷ, y, ŷ_dtm, y_dtm)
-    ŷ_dtm = ŷ_dtm .^ 2
-    y_dtm = y_dtm .^ 2
-
     Δ = (ŷ .- y) .^ 2
-    dtm = ŷ_dtm + y_dtm
+    dtm = (ŷ_dtm .^ 2) + (y_dtm .^ 2)
 
     @tullio M[i,j,k] := Δ[i,j,k] * dtm[i,j,k]
-    hd_loss = mean(M)
+    return mean(M)
 end
 
 ## -- Parallel loss functions --##
