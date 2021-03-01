@@ -14,6 +14,7 @@ export
     # Export losses.jl functions
     dice_loss,
     hd_loss,
+    dice_lossP,
     hd_lossP,
 
     # Export metrics.jl functions

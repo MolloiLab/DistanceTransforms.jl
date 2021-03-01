@@ -52,3 +52,17 @@ end
     @test hd_lossP(ŷ, y, ŷ_dtm, y_dtm) == hd_loss(ŷ, y, ŷ_dtm, y_dtm)
     end
 end
+
+@testset ExtendedTestSet "dice_lossP" begin
+    @testset ExtendedTestSet "dice_lossP" begin
+    y1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    y2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    y = cat(y1, y2, dims=3)
+    
+    ŷ1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    ŷ2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    ŷ = cat(ŷ1, ŷ2, dims=3)
+
+    @test dice_lossP(ŷ, y) == dice_loss(ŷ, y)
+    end
+end
