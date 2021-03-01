@@ -11,18 +11,13 @@ end
 
 
 function hd_loss(ŷ, y, ŷ_dtm, y_dtm)
-    Δ = (ŷ .- y) .^ 2
-    dtm = (ŷ_dtm .^ 2) + (y_dtm .^ 2)
-
-    @tullio M[i,j,k] := Δ[i,j,k] * dtm[i,j,k]
-    return mean(M)
+    M = (ŷ .- y).^2 .* (ŷ_dtm .^ 2 .+ y_dtm .^ 2)  # allocates just one array
+    mean(M)
 end
 
 ## -- Parallel loss functions --##
 
 function hd_lossP(ŷ, y, ŷ_dtm, y_dtm)
-    @tullio Δ[i,j,k] := (ŷ[i,j,k] - y[i,j,k]) .^ 2
-    @tullio dtm[i,j,k] := (ŷ_dtm[i,j,k] .^ 2) + (y_dtm[i,j,k] .^ 2)
-    @tullio M[i,j,k] := Δ[i,j,k] * dtm[i,j,k]
-    return mean(M)
+    @tullio tot := (ŷ[i,j,k] .- y[i,j,k])^2 * (ŷ_dtm[i,j,k] ^ 2 + y_dtm[i,j,k] ^ 2)
+    hd_loss = tot / length(y)
 end
