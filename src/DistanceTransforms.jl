@@ -18,6 +18,7 @@ export
     hd_lossP,
 
     # Export metrics.jl functions
+    dice_metric,
     mean_hausdorff_2D,
 
     # Export utils.jl functions

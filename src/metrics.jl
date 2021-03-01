@@ -1,3 +1,7 @@
+function dice_metric(ŷ, y)
+    dice = 2 * sum((ŷ .& y)) / (sum(ŷ) + sum(y))
+end
+
 """
 
     mean_hausdorff_2D(u, v, d, f)
