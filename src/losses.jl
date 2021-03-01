@@ -6,7 +6,7 @@ function dice_loss(ŷ, y)
 end
 
 function hd_loss(ŷ, y, ŷ_dtm, y_dtm)
-    M = (ŷ .- y).^2 .* (ŷ_dtm .^ 2 .+ y_dtm .^ 2)  # allocates just one array
+    M = (ŷ .- y).^2 .* (ŷ_dtm .^ 2 .+ y_dtm .^ 2)
     mean(M)
 end
 
