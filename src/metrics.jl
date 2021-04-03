@@ -2,19 +2,20 @@ function dice_metric(ŷ, y)
     dice = 2 * sum((ŷ .& y)) / (sum(ŷ) + sum(y))
 end
 
-function mean_hausdorff(u, v)
-	
-    # Find the coordinates of the pixels that are edges in the images
-    edges_1 = find_edges(u)
-    edges_2 = find_edges(v)
 
+"""
+    mean_hausdorff(set1, set2)
+
+Given a to sets of points, compute the mean Hausdorff between the two sets
+"""
+function mean_hausdorff(set1, set2)
     min_euc_list_u = []
     min_euc_list_v = []
 
     # Loop through every edge point on `edge_1` and find its corresponding closest point to `edge_2`
-    for points1 in edges_1
+    for points1 in set1
         euc_list_1 = []
-        for points2 in edges_2
+        for points2 in set2
             euclidean_dist = euc(points1, points2)
             append!(euc_list_1 , euclidean_dist)
         end
@@ -22,9 +23,9 @@ function mean_hausdorff(u, v)
     end
 
     # Loop through every edge point on `edge_2` and find its corresponding closest point to `edge_1`
-    for points1 in edges_2
+    for points1 in set2
         euc_list_1 = []
-        for points2 in edges_1
+        for points2 in set1
             euclidean_dist = euc(points1, points2)
             append!(euc_list_1 , euclidean_dist)
         end
