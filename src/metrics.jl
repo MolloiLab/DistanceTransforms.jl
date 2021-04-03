@@ -2,6 +2,39 @@ function dice_metric(ŷ, y)
     dice = 2 * sum((ŷ .& y)) / (sum(ŷ) + sum(y))
 end
 
+function mean_hausdorff(u, v)
+	
+    # Find the coordinates of the pixels that are edges in the images
+    edges_1 = find_edges(u)
+    edges_2 = find_edges(v)
+
+    min_euc_list_u = []
+    min_euc_list_v = []
+
+    # Loop through every edge point on `edge_1` and find its corresponding closest point to `edge_2`
+    for points1 in edges_1
+        euc_list_1 = []
+        for points2 in edges_2
+            euclidean_dist = euc(points1, points2)
+            append!(euc_list_1 , euclidean_dist)
+        end
+        append!(min_euc_list_u, minimum(euc_list_1))
+    end
+
+    # Loop through every edge point on `edge_2` and find its corresponding closest point to `edge_1`
+    for points1 in edges_2
+        euc_list_1 = []
+        for points2 in edges_1
+            euclidean_dist = euc(points1, points2)
+            append!(euc_list_1 , euclidean_dist)
+        end
+        append!(min_euc_list_v, minimum(euc_list_1))
+    end
+
+    # Take the average of each of these points to return the average Hausdorff distance 
+    return Statistics.mean([Statistics.mean(min_euc_list_u), Statistics.mean(min_euc_list_v)])
+end
+
 """
 
     mean_hausdorff_2D(u, v, d, f)

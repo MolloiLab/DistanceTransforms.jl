@@ -14,6 +14,15 @@ include("./imports.jl")
     end
 end
 
+@testset ExtendedTestSet "mean_hausdorff" begin
+    @testset ExtendedTestSet "mean_hausdorff" begin
+    y1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    y2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
+    y = cat(y1, y2, dims=3)
+    @test mean_hausdorff(y, y) ≈ 0
+    end
+end
+
 @testset ExtendedTestSet "mean_hausdorff_2D" begin
     @testset ExtendedTestSet "mean_hausdorff_2D" begin
     x = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
