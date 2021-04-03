@@ -63,7 +63,3 @@ function mean_hausdorff_2D(u, v, d, f)
     # Take the average of each of these points to return the average Hausdorff distance 
     return mean([mean(min_u), mean(min_v)])
 end
-
-## TODO implement mean_hausdorff_ND
-## TODO implement dice metric
-## TODO implement mean_dice metric
