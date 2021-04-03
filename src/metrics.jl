@@ -6,7 +6,7 @@ end
 """
     mean_hausdorff(set1, set2)
 
-Given a to sets of points, compute the mean Hausdorff between the two sets
+Given two sets of points `set1` & `set2`, compute the mean Hausdorff between the two sets
 """
 function mean_hausdorff(set1, set2)
     min_euc_list_u = []
