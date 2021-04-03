@@ -4,6 +4,7 @@ using ImageEdgeDetection
 using ImageMorphology
 using Tullio
 using Statistics
+using StatsBase
 using Distances
 
 include("./losses.jl")
@@ -20,6 +21,7 @@ export
     # Export metrics.jl functions
     dice_metric,
     mean_hausdorff,
+    percentile_hausdorff
     mean_hausdorff_2D,
 
     # Export utils.jl functions

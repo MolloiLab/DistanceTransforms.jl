@@ -37,6 +37,40 @@ function mean_hausdorff(set1, set2)
 end
 
 """
+    percentile_hausdorff(set1, set2, p)
+
+Given two sets of points `set1` & `set2`, compute the percentile `p` of the Hausdorff between the two sets.
+Returns a tuple for the percentile of each set
+"""
+function percentile_hausdorff(set1, set2, p)
+    min_euc_list_u = []
+    min_euc_list_v = []
+
+    # Loop through every edge point on `edge_1` and find its corresponding closest point to `edge_2`
+    for points1 in set1
+        euc_list_1 = []
+        for points2 in set2
+            euclidean_dist = euc(points1, points2)
+            append!(euc_list_1 , euclidean_dist)
+        end
+        append!(min_euc_list_u, minimum(euc_list_1))
+    end
+
+    # Loop through every edge point on `edge_2` and find its corresponding closest point to `edge_1`
+    for points1 in set2
+        euc_list_1 = []
+        for points2 in set1
+            euclidean_dist = euc(points1, points2)
+            append!(euc_list_1 , euclidean_dist)
+        end
+        append!(min_euc_list_v, minimum(euc_list_1))
+    end
+
+    # Take the average of each of these points to return the average Hausdorff distance 
+    return (StatsBase.percentile(min_euc_list_u, p), StatsBase.percentile(min_euc_list_v, p))
+end
+
+"""
 
     mean_hausdorff_2D(u, v, d, f)
 Extract the edges of two images and then find the average Hausdorff distance along those edges.
