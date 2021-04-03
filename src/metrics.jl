@@ -12,7 +12,7 @@ function mean_hausdorff(set1, set2)
     min_euc_list_u = []
     min_euc_list_v = []
 
-    # Loop through every edge point on `edge_1` and find its corresponding closest point to `edge_2`
+    # Loop through every point in `set1` and find its corresponding closest point to `set2`
     for points1 in set1
         euc_list_1 = []
         for points2 in set2
@@ -22,7 +22,7 @@ function mean_hausdorff(set1, set2)
         append!(min_euc_list_u, minimum(euc_list_1))
     end
 
-    # Loop through every edge point on `edge_2` and find its corresponding closest point to `edge_1`
+    # Loop through every point in `set2` and find its corresponding closest point to `set1`
     for points1 in set2
         euc_list_1 = []
         for points2 in set1
@@ -32,7 +32,7 @@ function mean_hausdorff(set1, set2)
         append!(min_euc_list_v, minimum(euc_list_1))
     end
 
-    # Take the average of each of these points to return the average Hausdorff distance 
+    # Take the mean of each of these points to return the mean Hausdorff distance 
     return Statistics.mean([Statistics.mean(min_euc_list_u), Statistics.mean(min_euc_list_v)])
 end
 
@@ -46,7 +46,7 @@ function percentile_hausdorff(set1, set2, p)
     min_euc_list_u = []
     min_euc_list_v = []
 
-    # Loop through every edge point on `edge_1` and find its corresponding closest point to `edge_2`
+    # Loop through every point in `set1` and find its corresponding closest point to `set2`
     for points1 in set1
         euc_list_1 = []
         for points2 in set2
@@ -56,7 +56,7 @@ function percentile_hausdorff(set1, set2, p)
         append!(min_euc_list_u, minimum(euc_list_1))
     end
 
-    # Loop through every edge point on `edge_2` and find its corresponding closest point to `edge_1`
+    # Loop through every point in `set2` and find its corresponding closest point to `set1`
     for points1 in set2
         euc_list_1 = []
         for points2 in set1
@@ -65,8 +65,7 @@ function percentile_hausdorff(set1, set2, p)
         end
         append!(min_euc_list_v, minimum(euc_list_1))
     end
-
-    # Take the average of each of these points to return the average Hausdorff distance 
+    
     return (StatsBase.percentile(min_euc_list_u, p), StatsBase.percentile(min_euc_list_v, p))
 end
 
