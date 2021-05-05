@@ -15,16 +15,13 @@ Tullio = "bc48ee85-29a4-5162-ae0b-a64e1601d4bc"
 
 [compat]
 julia = "1.6"
-Distances = "0.10.3"
-ImageEdgeDetection = "0.1.3"
-ImageMorphology = "0.2.12"
-Images = "0.17.3-0.24.1"
-StatsBase = "0.33.8"
-TestSetExtensions = "2.0.0"
-Tullio = "0.2.14"
+Distances = "0.10"
+ImageEdgeDetection = "0.1"
+ImageMorphology = "0.2"
+Images = "0.24"
+StatsBase = "0.33"
+TestSetExtensions = "2.0"
+Tullio = "0.2"
 
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]
+[publish]
+title = DistanceTransforms.jl
