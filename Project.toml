@@ -20,7 +20,7 @@ ImageEdgeDetection = "0.1.3"
 ImageMorphology = "0.2.12"
 Images = "0.24.1"
 StatsBase = "0.33.8"
-TestSetExtensions = "1.1.1"
+TestSetExtensions = "2.0.0"
 Tullio = "0.2.14"
 
 [extras]
