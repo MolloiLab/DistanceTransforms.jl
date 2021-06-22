@@ -14,10 +14,10 @@ end
 
 function dice_lossP(ŷ, y) 
     ϵ = 1e-5
-    @tullio loss := 1 - ((2 * sum(ŷ[i,j,k] .* y[i,j,k]) + ϵ) / (sum(ŷ[i,j,k] .* ŷ[i,j,k]) + sum(y[i,j,k] .* y[i,j,k]) + ϵ))
+    @tullio loss := 1 - ((2 * sum(ŷ[i,j,k,c,b] .* y[i,j,k,c,b]) + ϵ) / (sum(ŷ[i,j,k,c,b] .* ŷ[i,j,k,c,b]) + sum(y[i,j,k,c,b] .* y[i,j,k,c,b]) + ϵ))
 end
 
 function hd_lossP(ŷ, y, ŷ_dtm, y_dtm)
-    @tullio tot := (ŷ[i,j,k] .- y[i,j,k])^2 * (ŷ_dtm[i,j,k] ^ 2 + y_dtm[i,j,k] ^ 2)
+    @tullio tot := (ŷ[i,j,k,c,b] .- y[i,j,k,c,b])^2 * (ŷ_dtm[i,j,k,c,b]^ 2 + y_dtm[i,j,k,c,b]^ 2)
     loss = tot / length(y)
 end

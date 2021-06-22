@@ -41,10 +41,14 @@ end
     y1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     y2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     y = cat(y1, y2, dims=3)
+    y = cat(y, y, dims=4)
+    y = cat(y, y, dims=5)
     
     ŷ1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     ŷ2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     ŷ = cat(ŷ1, ŷ2, dims=3)
+    ŷ = cat(ŷ, ŷ, dims=4)
+    ŷ = cat(ŷ, ŷ, dims=5)
     
     ŷ_dtm = compute_dtm(ŷ)
     y_dtm = compute_dtm(y)
@@ -58,10 +62,14 @@ end
     y1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     y2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     y = cat(y1, y2, dims=3)
+    y = cat(y, y, dims=4)
+    y = cat(y, y, dims=5)
     
     ŷ1 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     ŷ2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
     ŷ = cat(ŷ1, ŷ2, dims=3)
+    ŷ = cat(ŷ, ŷ, dims=4)
+    ŷ = cat(ŷ, ŷ, dims=5)
 
     @test dice_lossP(ŷ, y) == dice_loss(ŷ, y)
     end
