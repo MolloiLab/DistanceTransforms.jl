@@ -3,7 +3,9 @@
 
 Compute the euclidean distance given two 3 dimensional CartesianIndex arrays
 """
-euc(u::CartesianIndex{3}, v::CartesianIndex{3}) = √((u[1] - v[1])^2 + (u[2] - v[2])^2 + (u[3] - v[3])^2)
+function euc(u::CartesianIndex{3}, v::CartesianIndex{3})
+    return √((u[1] - v[1])^2 + (u[2] - v[2])^2 + (u[3] - v[3])^2)
+end
 
 """
 	find_edges(A)
@@ -23,10 +25,10 @@ function find_edges(A)
     A = ImageMorphology.distance_transform(A)
 
     # Return the indeces where the distance is equal to 1 as this means this pixel is adjacent to a background pixel
-    return (findall(x->x==1, A))
-	
-	# return (transpose ∘ reshape)(reinterpret(Int, A), 2, :)
-end 
+    return (findall(x -> x == 1, A))
+
+    # return (transpose ∘ reshape)(reinterpret(Int, A), 2, :)
+end
 
 """
     detect_edges_3D(img, f)
@@ -35,14 +37,14 @@ Modifies `detect_edges` to work with 3D images.
 """
 
 function detect_edges_3D(img, f)
-	container = Array{Int64}(undef, size(img))
-	for k in 1:(size(img)[3])
-		container[:, :, k] = detect_edges(img[:, :, k], f)
-	end
-	return container
+    container = Array{Int64}(undef, size(img))
+    for k in 1:(size(img)[3])
+        container[:, :, k] = detect_edges(img[:, :, k], f)
+    end
+    return container
 end
 
 function compute_dtm(img)
     f = ImageMorphology.feature_transform(.!(Bool.(img)))
-    foreground_dtm = ImageMorphology.distance_transform(f)
+    return foreground_dtm = ImageMorphology.distance_transform(f)
 end

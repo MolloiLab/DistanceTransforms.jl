@@ -1,7 +1,6 @@
 function dice_metric(ŷ, y)
-    dice = 2 * sum((ŷ .& y)) / (sum(ŷ) + sum(y))
+    return dice = 2 * sum((ŷ .& y)) / (sum(ŷ) + sum(y))
 end
-
 
 """
     mean_hausdorff(set1, set2)
@@ -17,7 +16,7 @@ function mean_hausdorff(set1, set2)
         euc_list_1 = []
         for points2 in set2
             euclidean_dist = euc(points1, points2)
-            append!(euc_list_1 , euclidean_dist)
+            append!(euc_list_1, euclidean_dist)
         end
         append!(min_euc_list_u, minimum(euc_list_1))
     end
@@ -27,13 +26,15 @@ function mean_hausdorff(set1, set2)
         euc_list_1 = []
         for points2 in set1
             euclidean_dist = euc(points1, points2)
-            append!(euc_list_1 , euclidean_dist)
+            append!(euc_list_1, euclidean_dist)
         end
         append!(min_euc_list_v, minimum(euc_list_1))
     end
 
     # Take the mean of each of these points to return the mean Hausdorff distance 
-    return Statistics.mean([Statistics.mean(min_euc_list_u), Statistics.mean(min_euc_list_v)])
+    return Statistics.mean([
+        Statistics.mean(min_euc_list_u), Statistics.mean(min_euc_list_v)
+    ])
 end
 
 """
@@ -51,7 +52,7 @@ function percentile_hausdorff(set1, set2, p)
         euc_list_1 = []
         for points2 in set2
             euclidean_dist = euc(points1, points2)
-            append!(euc_list_1 , euclidean_dist)
+            append!(euc_list_1, euclidean_dist)
         end
         append!(min_euc_list_u, minimum(euc_list_1))
     end
@@ -61,12 +62,14 @@ function percentile_hausdorff(set1, set2, p)
         euc_list_1 = []
         for points2 in set1
             euclidean_dist = euc(points1, points2)
-            append!(euc_list_1 , euclidean_dist)
+            append!(euc_list_1, euclidean_dist)
         end
         append!(min_euc_list_v, minimum(euc_list_1))
     end
-    
-    return (StatsBase.percentile(min_euc_list_u, p), StatsBase.percentile(min_euc_list_v, p))
+
+    return (
+        StatsBase.percentile(min_euc_list_u, p), StatsBase.percentile(min_euc_list_v, p)
+    )
 end
 
 """
@@ -88,10 +91,16 @@ function mean_hausdorff_2D(u, v, d, f)
     sz_2 = size(edges_2, 1)
 
     # Loop through every point on `edge_1` and find its corresponding closest point to `edge_2`
-    min_u = minimum.([map(x -> evaluate(d, edges_1[i, :], edges_2[x, :]), 1:sz_2) for i in 1:sz_1])
+    min_u =
+        minimum.([
+            map(x -> evaluate(d, edges_1[i, :], edges_2[x, :]), 1:sz_2) for i in 1:sz_1
+        ])
 
     # Loop through every point on `edge_2` and find its corresponding closest point to `edge_1`
-    min_v = minimum.([map(x -> evaluate(d, edges_2[i, :], edges_1[x, :]), 1:sz_1) for i in 1:sz_2])
+    min_v =
+        minimum.([
+            map(x -> evaluate(d, edges_2[i, :], edges_1[x, :]), 1:sz_1) for i in 1:sz_2
+        ])
 
     # Take the average of each of these points to return the average Hausdorff distance 
     return mean([mean(min_u), mean(min_v)])
