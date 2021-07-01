@@ -21,7 +21,7 @@ ImageMorphology = "0.2"
 Images = "0.24"
 StatsBase = "0.33"
 TestSetExtensions = "2.0"
-Tullio = "0.2"
+Tullio = "0.2, 0.3"
 julia = "1.6"
 
 [publish]
