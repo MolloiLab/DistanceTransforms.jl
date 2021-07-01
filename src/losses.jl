@@ -10,6 +10,7 @@ function hd_loss(ŷ, y, ŷ_dtm, y_dtm)
     return loss = mean(M)
 end
 
+# TODO: not useful on the GPU
 ## -- Parallel loss functions --##
 
 function dice_lossP(ŷ, y)
