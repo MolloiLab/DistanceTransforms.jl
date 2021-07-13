@@ -33,8 +33,8 @@ export
     percentile_hausdorff,
     mean_hausdorff_2D,
 
-# Export utils.jl functions
-euc,
-find_edges,
-detect_edges_3D
+    # Export utils.jl functions
+    euc,
+    find_edges,
+    detect_edges_3D
 end
