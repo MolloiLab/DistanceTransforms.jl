@@ -11,13 +11,10 @@ array elements.
     to the nearest background (0) pixel
 
 # Citation
-Gunilla Borgefors,
-Distance transformations in digital images,
+'Distance transformations in digital images,
 Computer Vision, Graphics, and Image Processing,
-Volume 34, Issue 3,
-1986,
-Pages 344-371,
-ISSN 0734-189X,
+Volume 34, Issue 3, 1986, Pages 344-371' 
+[Gunilla Borgefors] (DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
 """
 function chamfer_distance_transform(img::Array{T,2}) where {T}
     w, h = size(img)

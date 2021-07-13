@@ -1,5 +1,6 @@
 module DistanceTransforms
 
+using Tullio: include
 using Tullio
 using ImageEdgeDetection
 using ImageMorphology
@@ -12,6 +13,7 @@ include("./chamfer_distance_transform.jl")
 include("./euclidean_distance_transform.jl")
 include("./losses.jl")
 include("./metrics.jl")
+include("./squared_euclidean_distance_transform.jl")
 include("./utils.jl")
 
 export
@@ -32,6 +34,9 @@ export
     mean_hausdorff,
     percentile_hausdorff,
     mean_hausdorff_2D,
+
+    # Export squared_euclidean_distance_transform.jl functions
+    squared_euclidean_distance_transform,
 
     # Export utils.jl functions
     euc,
