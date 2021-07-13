@@ -13,5 +13,4 @@ using DistanceTransforms:
     mean_hausdorff_2D,
     euc,
     find_edges,
-    detect_edges_3D,
-    compute_dtm
+    detect_edges_3D

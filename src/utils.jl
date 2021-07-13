@@ -43,8 +43,3 @@ function detect_edges_3D(img, f)
     end
     return container
 end
-
-function compute_dtm(img)
-    f = ImageMorphology.feature_transform(.!(Bool.(img)))
-    return foreground_dtm = ImageMorphology.distance_transform(f)
-end

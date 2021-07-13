@@ -29,8 +29,8 @@ end
         ŷ2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
         ŷ = cat(ŷ1, ŷ2; dims=3)
 
-        ŷ_dtm = compute_dtm(ŷ)
-        y_dtm = compute_dtm(y)
+        ŷ_dtm = euclidean_distance_transform(ŷ)
+        y_dtm = euclidean_distance_transform(y)
 
         @test hd_loss(ŷ, y, ŷ_dtm, y_dtm) == 0.0
     end
@@ -65,8 +65,8 @@ end
         ŷ = cat(ŷ, ŷ; dims=4)
         ŷ = cat(ŷ, ŷ; dims=5)
 
-        ŷ_dtm = compute_dtm(ŷ)
-        y_dtm = compute_dtm(y)
+        ŷ_dtm = euclidean_distance_transform(ŷ)
+        y_dtm = euclidean_distance_transform(y)
 
         @test hd_lossP(ŷ, y, ŷ_dtm, y_dtm) == hd_loss(ŷ, y, ŷ_dtm, y_dtm)
     end
