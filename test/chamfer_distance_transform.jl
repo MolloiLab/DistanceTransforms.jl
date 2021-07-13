@@ -1,7 +1,7 @@
 include("./imports.jl")
 
-@testset ExtendedTestSet "chamfer_distance" begin
-    @testset ExtendedTestSet "chamfer_distance" begin
+@testset ExtendedTestSet "chamfer_distance_transform" begin
+    @testset ExtendedTestSet "chamfer_distance_transform" begin
         x = [
             1 1 0 0
             0 1 1 0
@@ -14,10 +14,10 @@ include("./imports.jl")
             3 0 3 0
             3 0 3 3
         ]
-        @test chamfer_distance(x) == answer
+        @test chamfer_distance_transform(x) == answer
     end
 
-    @testset ExtendedTestSet "chamfer_distance" begin
+    @testset ExtendedTestSet "chamfer_distance_transform" begin
         x = [
             1 1 0 0
             0 1 0 0
@@ -30,12 +30,12 @@ include("./imports.jl")
             3 0 3 6
             3 0 3 6
         ]
-        @test chamfer_distance(x) == answer
+        @test chamfer_distance_transform(x) == answer
     end
 end
 
-@testset ExtendedTestSet "chamfer_distance3D" begin
-    @testset ExtendedTestSet "chamfer_distance3D" begin
+@testset ExtendedTestSet "chamfer_distance_transform3D" begin
+    @testset ExtendedTestSet "chamfer_distance_transform3D" begin
         x1 = [
             1 1 0 0
             0 1 0 0
@@ -63,6 +63,6 @@ end
             3 0 3 6
         ]
         answer = cat(a1, a2; dims=3)
-        @test chamfer_distance3D(x3D) == answer
+        @test chamfer_distance_transform3D(x3D) == answer
     end
 end

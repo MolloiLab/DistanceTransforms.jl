@@ -8,15 +8,15 @@ using Statistics
 using StatsBase
 using Distances
 
-include("./chamfer_distance.jl")
+include("./chamfer_distance_transform.jl")
 include("./losses.jl")
 include("./metrics.jl")
 include("./utils.jl")
 
 export
-    # Export chamfer_distance.jl functions
-    chamfer_distance,
-    chamfer_distance3D,
+    # Export chamfer_distance_transform.jl functions
+    chamfer_distance_transform,
+    chamfer_distance_transform3D,
 
     # Export losses.jl functions
     dice_loss,
