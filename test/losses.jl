@@ -44,8 +44,8 @@ end
         ŷ2 = [1 1 1 0; 1 1 1 0; 1 1 1 0; 1 1 1 0]
         ŷ = cat(ŷ1, ŷ2; dims=3)
 
-        ŷ_dtm = chamfer_distance_transform3D(ŷ)
-        y_dtm = chamfer_distance_transform3D(y)
+        ŷ_dtm = chamfer_distance_transform(ŷ)
+        y_dtm = chamfer_distance_transform(y)
 
         @test hd_loss(ŷ, y, ŷ_dtm, y_dtm) == 0.0
     end

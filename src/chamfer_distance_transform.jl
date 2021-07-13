@@ -1,4 +1,6 @@
-function chamfer_distance_transform(img)
+
+
+function chamfer_distance_transform(img::Array{T, 2}) where T
     w, h = size(img)
     dt = zeros(Int32, (w, h))
     # Forward pass
@@ -64,10 +66,10 @@ function chamfer_distance_transform(img)
     return dt
 end
 
-function chamfer_distance_transform3D(x)
-    dt = zeros(Int32, size(x))
-    for z in 1:size(x)[3]
-        dt[:, :, z] = chamfer_distance_transform(x[:, :, z])
+function chamfer_distance_transform(img::Array{T, 3}) where T
+    dt = zeros(Int32, size(img))
+    for z in 1:size(img)[3]
+        dt[:, :, z] = chamfer_distance_transform(img[:, :, z])
     end
     return dt
 end
