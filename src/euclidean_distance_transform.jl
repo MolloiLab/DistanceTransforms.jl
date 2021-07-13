@@ -2,8 +2,9 @@
     euclidean_distance_transform(img)
 
 Wrapper function for `ImageMorphology.feature_transform` and
-`ImageMorphology.distance_transform`. Returns a true Euclidean
-distance transform.
+`ImageMorphology.distance_transform`. Applies a true Euclidean 
+distance transform to the array elements and returns an array 
+with spatial information embedded in the elements.
 
 # Arguments
 - img: N-dimensional array to be transformed based on location

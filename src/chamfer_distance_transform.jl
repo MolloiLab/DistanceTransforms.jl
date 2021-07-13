@@ -1,4 +1,18 @@
+"""
+    chamfer_distance_transform(img::Array{T,2})
+    chamfer_distance_transform(img::Array{T,3})
 
+Applies a 3-4 chamfer distance transform to an input image.
+Returns an array with spatial information embedded in the
+array elements.
+
+# Arguments
+- img: 2D or 3D array to be transformed based on location 
+    to the nearest background (0) pixel
+
+# Citation
+
+"""
 function chamfer_distance_transform(img::Array{T,2}) where {T}
     w, h = size(img)
     dt = zeros(Int32, (w, h))
