@@ -12,8 +12,10 @@ elements.
     to the nearest background (0) pixel
 - dt: Empty array that is the size of `f` or `img`. Will be filled
     with the distance transform values of each element in `f` or `img`
-- v: `ones(Int64, length(f))` or `ones(Int64, size(img))`
-- z: `zeros(Float32, length(f) + 1)` or `zeros(Float32, size(img) + 1)`
+- v: `ones(Int64, length(f))` or 
+    `ones(Int64, size(img))`
+- z: `zeros(Float32, length(f) + 1)` or 
+    `zeros(Float32, size(img) + 1)`
 - threads: The number of threads on the computer `Threads.nthreads()`. 
     Allows you to use a parallelized `squared_euclidean_distance_transform`
     function if you have access to multiple threads.
@@ -22,7 +24,7 @@ elements.
 'Distance Transforms of Sampled Functions' [Felzenszwalb and
 Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 """
-function squared_euclidean_distance_transform(f::Array{T,1}, dt, v, z) where {T}
+function squared_euclidean_distance_transform(f::AbstractArray{T,1}, dt, v, z) where {T}
 	n = length(f)
 	k = 1
 	z[1] = -1.0f12
@@ -68,8 +70,8 @@ function squared_euclidean_distance_transform(img::AbstractArray{T,2}, dt, v, z)
     return dt
 end
 
-function squared_euclidean_distance_transform(img::AbstractArray{T,2}, dt, v, z, threads) where {T}
-    if threads ≤ 1
+function squared_euclidean_distance_transform(img::AbstractArray{T,2}, dt, v, z, nthreads) where {T}
+    if nthreads ≤ 1
         squared_euclidean_distance_transform(img, dt, v, z)
     else
         rows, columns = size(img)
