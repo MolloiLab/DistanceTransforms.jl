@@ -41,5 +41,6 @@ export
     # Export utils.jl functions
     euc,
     find_edges,
-    detect_edges_3D
+    detect_edges_3D,
+    boolean_indicator
 end
