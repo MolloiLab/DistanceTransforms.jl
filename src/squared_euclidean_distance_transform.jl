@@ -1,6 +1,7 @@
 """
-    squared_euclidean_distance_transform(img::Array{T,1}, is_indicator=true)
-    squared_euclidean_distance_transform(img::Array{T,2}, is_indicator=true)
+    squared_euclidean_distance_transform(img::Array{T,1})
+    squared_euclidean_distance_transform(img::Array{T,2})
+    squared_euclidean_distance_transform(img::AbstractArray{T,2}, threads)
 
 Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
@@ -9,9 +10,9 @@ elements.
 # Arguments
 - img: 1D, 2D, or 3D to be transformed based on location 
     to the nearest background (0) pixel
-- is_indicator: whether or not the `img` is a binary array
-    that needs to be transformed based on the foreground (1)
-    pixels
+- threads: Usually the number of threads on the computer `Threads.nthreads()` 
+    Allows you to use a parallelized `squared_euclidean_distance_transform`
+    function if you have access to multiple threads.
 
 # Citation
 'Distance Transforms of Sampled Functions' [Felzenszwalb and
@@ -65,4 +66,21 @@ function squared_euclidean_distance_transform(img::AbstractArray{T,2}) where {T}
     end
 
     return dt
+end
+
+function squared_euclidean_distance_transform(img::AbstractArray{T,2}, threads) where {T}
+    if threads ≤ 1
+        squared_euclidean_distance_transform(img)
+    else
+        rows, columns = size(img)
+        dt = zeros(Float64, (rows, columns))
+        Threads.@threads for x in 1:rows
+            dt[x, :] = squared_euclidean_distance_transform(img[x, :])
+        end
+    
+        Threads.@threads for y in 1:columns
+            dt[:, y] = squared_euclidean_distance_transform(img[:, y])
+        end
+        return dt
+    end
 end
