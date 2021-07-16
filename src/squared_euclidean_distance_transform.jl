@@ -17,7 +17,7 @@ elements.
 'Distance Transforms of Sampled Functions' [Felzenszwalb and
 Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 """
-function squared_euclidean_distance_transform(f::Array{T,1}) where {T}
+function squared_euclidean_distance_transform(f::AbstractArray{T,1}) where {T}
 	n = length(f)
 	k = 1
 	v = ones(Int64, length(f))
@@ -53,7 +53,7 @@ function squared_euclidean_distance_transform(f::Array{T,1}) where {T}
     return dt
 end
 
-function squared_euclidean_distance_transform(img::Array{T,2}) where {T}
+function squared_euclidean_distance_transform(img::AbstractArray{T,2}) where {T}
     rows, columns = size(img)
     dt = zeros(Float64, (rows, columns))
     for x in 1:rows
