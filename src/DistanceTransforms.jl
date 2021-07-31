@@ -1,13 +1,15 @@
 module DistanceTransforms
 
-using Tullio: include
-using Tullio
+abstract type DistanceTransform end
+
 using ImageEdgeDetection
 using ImageMorphology
-using Tullio
 using Statistics
 using StatsBase
 using Distances
+using CUDA
+using FoldsCUDA
+using FLoops
 
 include("./chamfer_distance_transform.jl")
 include("./euclidean_distance_transform.jl")
@@ -18,7 +20,8 @@ include("./utils.jl")
 
 export
     # Export chamfer_distance_transform.jl functions
-    chamfer_distance_transform,
+    Chamfer,
+    transform,
 
     # Export euclidean_distance_transform.jl functions
     euclidean_distance_transform,
@@ -26,8 +29,8 @@ export
     # Export losses.jl functions
     dice_loss,
     hd_loss,
-    dice_lossP,
-    hd_lossP,
+    # dice_lossP,
+    # hd_lossP,
 
     # Export metrics.jl functions
     dice_metric,

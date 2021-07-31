@@ -1,7 +1,8 @@
 """
     squared_euclidean_distance_transform(f::Array{T,1}, dt, v, z)
     squared_euclidean_distance_transform(img::Array{T,2}, dt)
-    squared_euclidean_distance_transform(img::AbstractArray{T,2}, dt, threads)
+    squared_euclidean_distance_transform(img::AbstractArray{T,2}, dt, nthreads)
+    squared_euclidean_distance_transform(img::CuArray{T,2}, dt, v, z)
 
 Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
@@ -16,7 +17,7 @@ elements.
     `ones(Int64, size(img))`
 - z: `zeros(Float32, length(f) + 1)` or 
     `zeros(Float32, size(img) + 1)`
-- threads: The number of threads on the computer `Threads.nthreads()`. 
+- nthreads: The number of threads on the computer `Threads.nthreads()`. 
     Allows you to use a parallelized `squared_euclidean_distance_transform`
     function if you have access to multiple threads.
 
@@ -27,8 +28,8 @@ Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 function squared_euclidean_distance_transform(f::AbstractArray{T,1}, dt, v, z) where {T}
 	n = length(f)
 	k = 1
-	z[1] = -1.0f12
-	z[2] = 1.0f12
+	z[1] = -Inf32
+	z[2] = Inf32
 	
 	# Lower envelope operation
 	for q in 2:n
@@ -40,7 +41,7 @@ function squared_euclidean_distance_transform(f::AbstractArray{T,1}, dt, v, z) w
 				k += 1
 				v[k] = q
 				z[k] = s
-				z[k + 1] = 1.0f12
+				z[k + 1] = Inf32
 				break
 			end
 		end
@@ -84,4 +85,16 @@ function squared_euclidean_distance_transform(img::AbstractArray{T,2}, dt, v, z,
         end
         return dt
     end
+end
+
+function squared_euclidean_distance_transform(img::CuArray{T,2}, dt, v, z) where {T}
+    rows, columns = size(img)
+    @floop CUDAEx() for x in 1:rows
+        @views squared_euclidean_distance_transform(img[x, :], dt[x, :], v[x, :], z[x, :])
+    end
+
+    @floop CUDAEx() for y in 1:columns
+        @views squared_euclidean_distance_transform(img[:, y], dt[:, y], v[:, y], z[:, y])
+    end
+    return dt
 end

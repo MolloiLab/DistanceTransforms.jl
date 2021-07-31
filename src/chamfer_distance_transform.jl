@@ -1,6 +1,6 @@
 """
-    chamfer_distance_transform(img::Array{T,2})
-    chamfer_distance_transform(img::Array{T,3})
+    transform(img::Array{T,2}, tfm::Chamfer)
+    transform(img::Array{T,3}, tfm::Chamfer)
 
 Applies a 3-4 chamfer distance transform to an input image.
 Returns an array with spatial information embedded in the
@@ -9,6 +9,7 @@ array elements.
 # Arguments
 - img: 2D or 3D array to be transformed based on location 
     to the nearest background (0) pixel
+- tfm::Chamfer
 
 # Citation
 'Distance transformations in digital images,
@@ -16,9 +17,15 @@ Computer Vision, Graphics, and Image Processing,
 Volume 34, Issue 3, 1986, Pages 344-371' 
 [Gunilla Borgefors] (DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
 """
-function chamfer_distance_transform(img::Array{T,2}) where {T}
-    w, h = size(img)
-    dt = zeros(Int32, (w, h))
+struct Chamfer{T} <: DistanceTransform 
+    dt
+end
+
+Chamfer(img, dt=zeros(eltype(img), size(img))) = Chamfer{eltype(dt)}(dt)
+
+function transform(img::Array{T,2} ,tfm::Chamfer) where {T}
+	dt = tfm.dt
+	w, h = size(img)
     # Forward pass
     x = 1
     y = 1
@@ -82,10 +89,10 @@ function chamfer_distance_transform(img::Array{T,2}) where {T}
     return dt
 end
 
-function chamfer_distance_transform(img::Array{T,3}) where {T}
-    dt = zeros(Int32, size(img))
+function transform(img::Array{T,3}, tfm::Chamfer) where {T}
+    dt = tfm.dt
     for z in 1:size(img)[3]
-        dt[:, :, z] = chamfer_distance_transform(img[:, :, z])
+        dt[:, :, z] = transform(img[:,:,z], Chamfer(img[:,:,z]))
     end
     return dt
 end
