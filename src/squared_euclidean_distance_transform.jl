@@ -1,16 +1,17 @@
 """
-    squared_euclidean_distance_transform(f::Array{T,1}, dt, v, z)
-    squared_euclidean_distance_transform(img::Array{T,2}, dt)
-    squared_euclidean_distance_transform(img::AbstractArray{T,2}, dt, nthreads)
-    squared_euclidean_distance_transform(img::CuArray{T,2}, dt, v, z)
+    transform(f::Vector{T}, tfm::SquaredEuclidean)
+    transform(f, tfm::SquaredEuclidean, dt, v, z)
+    transform(img::Matrix{T}, tfm::SquaredEuclidean)
+    transform!(img::Matrix{T}, tfm::SquaredEuclidean, nthreads)
 
 Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements.
 
 # Arguments
-- img: 1D, 2D, or 3D to be transformed based on location 
+- f/img: 1D, 2D, or 3D to be transformed based on location 
     to the nearest background (0) pixel
+- tfm: `SquaredEuclidean` type
 - dt: Empty array that is the size of `f` or `img`. Will be filled
     with the distance transform values of each element in `f` or `img`
 - v: `ones(Int64, length(f))` or 
@@ -18,7 +19,7 @@ elements.
 - z: `zeros(Float32, length(f) + 1)` or 
     `zeros(Float32, size(img) .+ 1)`
 - nthreads: The number of threads on the computer `Threads.nthreads()`. 
-    Allows you to use a parallelized `squared_euclidean_distance_transform`
+    Allows you to use a parallelized `transform`
     function if you have access to multiple threads.
 
 # Citation
@@ -30,16 +31,6 @@ struct SquaredEuclidean{T1 <: AbstractArray, T2 <: AbstractArray} <: DistanceTra
 	v::T2
 	z::T1
 end
-
-# 	function SquaredEuclidean(
-# 			f::Vector{<: Real}, 
-# 			dt = zeros(Float32, length(f)),
-# 			v = ones(Int64, length(f)),
-# 			z = zeros(Float32, length(f) + 1)
-# 		)
-
-# 		SquaredEuclidean(dt, v, z)
-# 	end
 
 function SquaredEuclidean(
 		f::AbstractArray, 
