@@ -18,6 +18,7 @@ TestSetExtensions = "98d24dd4-01ad-11ea-1b02-c9a08f80db04"
 
 [compat]
 Distances = "0.10"
+FLoops = "0.1"
 ImageEdgeDetection = "0.1"
 ImageMorphology = "0.2"
 Images = "0.24"
