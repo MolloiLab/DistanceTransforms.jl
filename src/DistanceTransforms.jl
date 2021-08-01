@@ -39,7 +39,9 @@ export
     mean_hausdorff_2D,
 
     # Export squared_euclidean_distance_transform.jl functions
-    squared_euclidean_distance_transform,
+    # transform,
+    transform!
+    SquaredEuclidean,
 
     # Export utils.jl functions
     euc,

@@ -21,9 +21,9 @@ struct Chamfer{T} <: DistanceTransform
     dt
 end
 
-Chamfer(img, dt=zeros(eltype(img), size(img))) = Chamfer{eltype(dt)}(dt)
+Chamfer(img, dt=zeros(eltype(img), size(img))) = Chamfer{typeof(dt)}(dt)
 
-function transform(img::Array{T,2} ,tfm::Chamfer) where {T}
+function transform(img::Matrix{T} ,tfm::Chamfer) where {T}
 	dt = tfm.dt
 	w, h = size(img)
     # Forward pass
