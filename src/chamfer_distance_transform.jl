@@ -21,7 +21,7 @@ struct Chamfer{T} <: DistanceTransform
     dt
 end
 
-Chamfer(img, dt=zeros(eltype(img), size(img))) = Chamfer{typeof(dt)}(dt)
+Chamfer(img, dt=zeros(Float32, size(img))) = Chamfer{typeof(dt)}(dt)
 
 function transform(img::Matrix{T} ,tfm::Chamfer) where {T}
 	dt = tfm.dt
