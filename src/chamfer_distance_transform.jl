@@ -23,7 +23,7 @@ end
 
 Chamfer(img, dt=zeros(Float32, size(img))) = Chamfer{typeof(dt)}(dt)
 
-function transform(img::Matrix{T} ,tfm::Chamfer) where {T}
+function transform(img::Matrix{T}, tfm::Chamfer) where {T}
 	dt = tfm.dt
 	w, h = size(img)
     # Forward pass

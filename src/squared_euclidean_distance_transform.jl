@@ -78,7 +78,7 @@ function transform(f::Vector{T}, tfm::SquaredEuclidean) where {T}
     return dt
 end
 
-# This is called to for multi-dimensional transforms
+# This function is called to for multi-dimensional transforms
 function transform(f, tfm::SquaredEuclidean, dt, v, z) where {T}
 	n = length(f)
 	k = 1
@@ -147,14 +147,17 @@ function transform!(img::Matrix{T}, tfm::SquaredEuclidean, nthreads) where {T}
     end
 end
 
-# function squared_euclidean_distance_transform(img::CuArray{T,2}, dt, v, z) where {T}
-#     rows, columns = size(img)
-#     @floop CUDAEx() for x in 1:rows
-#         @views squared_euclidean_distance_transform(img[x, :], dt[x, :], v[x, :], z[x, :])
-#     end
+function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean) where {T}
+	dt = tfm.dt
+	v = tfm.v
+	z = tfm.z
+    rows, columns = size(img)
+    @floop CUDAEx() for x in 1:rows
+        @views transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
+    end
 
-#     @floop CUDAEx() for y in 1:columns
-#         @views squared_euclidean_distance_transform(img[:, y], dt[:, y], v[:, y], z[:, y])
-#     end
-#     return dt
-# end
+    @floop CUDAEx() for y in 1:columns
+        @views transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
+    end
+    return dt
+end

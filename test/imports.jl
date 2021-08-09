@@ -1,6 +1,7 @@
 using DistanceTransforms
 using Test
 using TestSetExtensions
+using CUDA
 
 using DistanceTransforms:
     dice_loss,
