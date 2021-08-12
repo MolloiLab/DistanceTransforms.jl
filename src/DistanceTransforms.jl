@@ -1,13 +1,13 @@
 module DistanceTransforms
 
-# using Tullio: include
-# using Tullio
 using ImageEdgeDetection
 using ImageMorphology
-# using Tullio
 using Statistics
 using StatsBase
 using Distances
+using CUDA
+using FLoops
+using FoldsCUDA
 
 include("./chamfer.jl")
 include("./euclidean_distance_transform.jl")

@@ -3,6 +3,7 @@ using Test
 using TestSetExtensions
 
 using DistanceTransforms:
+    # SquaredEuclidean
     dice_loss,
     hd_loss,
     dice_metric,
@@ -11,4 +12,6 @@ using DistanceTransforms:
     mean_hausdorff_2D,
     euc,
     find_edges,
-    detect_edges_3D
+    detect_edges_3D,
+    boolean_indicator,
+    SquaredEuclidean

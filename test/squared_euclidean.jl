@@ -54,7 +54,7 @@ include("./imports.jl")
         @test transform!(x, tfm, Threads.nthreads()) == answer
     end
 
-    # # TODO: Figure out how to import CUDA, FLoops, and FoldsCUDA only for testing
+    # # TODO: Figure out how to test only when on GPU
     # @testset ExtendedTestSet "squared_euclidean" begin
     #     x = CUDA.CuArray(boolean_indicator([
     #         0 1 1 1 0
