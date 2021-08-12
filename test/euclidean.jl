@@ -1,7 +1,7 @@
 include("./imports.jl")
 
-@testset ExtendedTestSet "euclidean_distance_transform" begin
-    @testset ExtendedTestSet "euclidean_distance_transform" begin
+@testset ExtendedTestSet "euclidean" begin
+    @testset ExtendedTestSet "euclidean" begin
         x = [
             1 1 0 0
             0 1 1 0
@@ -14,10 +14,10 @@ include("./imports.jl")
             0.0 1.0 0.0 1.0
             0.0 1.0 0.0 0.0
         ]
-        @test euclidean_distance_transform(x) == answer
+        @test euclidean(x) == answer
     end
 
-    @testset ExtendedTestSet "euclidean_distance_transform" begin
+    @testset ExtendedTestSet "euclidean" begin
         x = [
             1 1 1 0
             0 1 1 1
@@ -30,6 +30,6 @@ include("./imports.jl")
             0.0 1.0 2.0 2.0
             0.0 1.0 2.0 3.0
         ]
-        @test euclidean_distance_transform(x) ≈ answer
+        @test euclidean(x) ≈ answer
     end
 end

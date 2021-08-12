@@ -6,7 +6,7 @@ using FLoops
 using FoldsCUDA
 
 include("./chamfer.jl")
-include("./euclidean_distance_transform.jl")
+include("./euclidean.jl")
 include("./squared_euclidean.jl")
 include("./utils.jl")
 
@@ -15,11 +15,11 @@ export
     Chamfer,
     transform,
 
-    # Export euclidean_distance_transform.jl functions
-    euclidean_distance_transform,
+    # Export euclidean.jl functions
+    euclidean,
 
     # Export squared_euclidean.jl functions
-    transform,
+    # transform,
     transform!
     SquaredEuclidean,
 
