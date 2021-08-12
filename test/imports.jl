@@ -3,8 +3,6 @@ using Test
 using TestSetExtensions
 
 using DistanceTransforms:
-    dice_loss,
-    hd_loss,
     dice_metric,
     mean_hausdorff,
     percentile_hausdorff,
