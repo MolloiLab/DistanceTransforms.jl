@@ -18,7 +18,8 @@ include("./utils.jl")
 
 export
     # Export chamfer.jl functions
-    chamfer,
+    Chamfer,
+    transform,
 
     # Export euclidean_distance_transform.jl functions
     euclidean_distance_transform,
@@ -35,9 +36,10 @@ export
     percentile_hausdorff,
     mean_hausdorff_2D,
 
-    # Export squared_euclidean_distance_transform.jl functions
-    squared_euclidean,
-    squared_euclidean!,
+    # Export squared_euclidean.jl functions
+    transform,
+    transform!
+    SquaredEuclidean,
 
     # Export utils.jl functions
     euc,

@@ -1,6 +1,25 @@
 """
-    chamfer(img::Array{T,2})
-    chamfer(img::Array{T,3})
+    Chamfer(img, dt=zeros(Float32, size(img))) = Chamfer{typeof(dt)}(dt)
+
+Prepares an array to be `transform`ed using the 3-4 chamfer algorithm
+laid out in 'Distance transformations in digital images,
+Computer Vision, Graphics, and Image Processing'
+[Gunilla Borgefors](DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
+
+# Arguments
+- img: 2D or 3D array to be transformed based on location 
+    to the nearest background (0) pixel
+- tfm: `zeros(Float32, size(img))`
+"""
+struct Chamfer{T} <: DistanceTransform 
+    dt
+end
+
+Chamfer(img, dt=zeros(Float32, size(img))) = Chamfer{typeof(dt)}(dt)
+
+"""
+    transform(img::AbstractMatrix{T}, tfm::Chamfer)
+    transform(img::AbstractArray{T,3}, tfm::Chamfer)
 
 Applies a 3-4 chamfer distance transform to an input image.
 Returns an array with spatial information embedded in the
@@ -12,12 +31,12 @@ array elements.
 
 # Citation
 'Distance transformations in digital images,
-Computer Vision, Graphics, and Image Processing,
-Volume 34, Issue 3, 1986, Pages 344-371' 
-[Gunilla Borgefors] (DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
+Computer Vision, Graphics, and Image Processing'
+[Gunilla Borgefors](DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
 """
-function chamfer(img::Array{T,2}, dt=zeros(Int32, size(img)[1], size(img)[2])) where {T}
-    w, h = size(img)
+function transform(img::AbstractMatrix{T}, tfm::Chamfer) where {T}
+	dt = tfm.dt
+	w, h = size(img)
     # Forward pass
     x = 1
     y = 1
@@ -81,7 +100,8 @@ function chamfer(img::Array{T,2}, dt=zeros(Int32, size(img)[1], size(img)[2])) w
     return dt
 end
 
-function chamfer(img::Array{T,3}, dt=zeros(Int32, size(img))) where {T}
+function transform(img::AbstractArray{T,3}, tfm::Chamfer) where {T}
+    dt = tfm.dt
     for z in 1:size(img)[3]
         dt[:, :, z] = chamfer(img[:, :, z])
     end
