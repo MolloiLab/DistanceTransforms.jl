@@ -1,10 +1,6 @@
 module DistanceTransforms
 
-using ImageEdgeDetection
 using ImageMorphology
-using Statistics
-using StatsBase
-using Distances
 using CUDA
 using FLoops
 using FoldsCUDA

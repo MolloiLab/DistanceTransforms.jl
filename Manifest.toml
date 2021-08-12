@@ -315,12 +315,6 @@ git-tree-sha1 = "6378c34a3c3a216235210d19b9f495ecfff2f85f"
 uuid = "51556ac3-7006-55f5-8cb3-34580c88182d"
 version = "0.2.13"
 
-[[ImageEdgeDetection]]
-deps = ["ColorVectorSpace", "DataStructures", "ImageCore", "ImageFiltering", "Interpolations", "Parameters", "Setfield", "StaticArrays", "StatsBase", "UnPack"]
-git-tree-sha1 = "0699b885b6b94969d4d805356a057b629a0e2511"
-uuid = "2b14c160-480b-11ea-1b58-656063328ff7"
-version = "0.1.3"
-
 [[ImageFiltering]]
 deps = ["CatIndices", "ColorVectorSpace", "ComputationalResources", "DataStructures", "FFTViews", "FFTW", "ImageCore", "LinearAlgebra", "OffsetArrays", "Requires", "SparseArrays", "StaticArrays", "Statistics", "TiledIteration"]
 git-tree-sha1 = "bf96839133212d3eff4a1c3a80c57abc7cfbf0ce"
