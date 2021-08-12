@@ -3,7 +3,6 @@ using Test
 using TestSetExtensions
 
 using DistanceTransforms:
-    # SquaredEuclidean
     dice_loss,
     hd_loss,
     dice_metric,
