@@ -1,6 +1,6 @@
 """
-    chamfer_distance_transform(img::Array{T,2})
-    chamfer_distance_transform(img::Array{T,3})
+    chamfer(img::Array{T,2})
+    chamfer(img::Array{T,3})
 
 Applies a 3-4 chamfer distance transform to an input image.
 Returns an array with spatial information embedded in the
@@ -16,9 +16,8 @@ Computer Vision, Graphics, and Image Processing,
 Volume 34, Issue 3, 1986, Pages 344-371' 
 [Gunilla Borgefors] (DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
 """
-function chamfer_distance_transform(img::Array{T,2}) where {T}
+function chamfer(img::Array{T,2}, dt=zeros(Int32, size(img)[1], size(img)[2])) where {T}
     w, h = size(img)
-    dt = zeros(Int32, (w, h))
     # Forward pass
     x = 1
     y = 1
@@ -82,10 +81,9 @@ function chamfer_distance_transform(img::Array{T,2}) where {T}
     return dt
 end
 
-function chamfer_distance_transform(img::Array{T,3}) where {T}
-    dt = zeros(Int32, size(img))
+function chamfer(img::Array{T,3}, dt=zeros(Int32, size(img))) where {T}
     for z in 1:size(img)[3]
-        dt[:, :, z] = chamfer_distance_transform(img[:, :, z])
+        dt[:, :, z] = chamfer(img[:, :, z])
     end
     return dt
 end
