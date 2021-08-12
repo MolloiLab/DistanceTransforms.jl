@@ -1,30 +1,24 @@
 """
-    transform(f::Vector{T}, tfm::SquaredEuclidean)
-    transform(f, tfm::SquaredEuclidean, dt, v, z)
-    transform(img::Matrix{T}, tfm::SquaredEuclidean)
-    transform!(img::Matrix{T}, tfm::SquaredEuclidean, nthreads)
+	SquaredEuclidean(
+		f::AbstractArray, 
+		dt = zeros(Float32, size(f)),
+		v = ones(Int64, size(f)),
+		z = zeros(Float32, size(f) .+ 1)
+	)
 
-Applies a squared euclidean distance transform to an input image.
-Returns an array with spatial information embedded in the array 
-elements.
+Prepares an array to be `transform`ed using the squared euclidean algorithm
+laid out in 'Distance Transforms of Sampled Functions' [Felzenszwalb and
+Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 
 # Arguments
 - f/img: 1D, 2D, or 3D to be transformed based on location 
     to the nearest background (0) pixel
-- tfm: `SquaredEuclidean` type
 - dt: Empty array that is the size of `f` or `img`. Will be filled
     with the distance transform values of each element in `f` or `img`
 - v: `ones(Int64, length(f))` or 
     `ones(Int64, size(img))`
 - z: `zeros(Float32, length(f) + 1)` or 
     `zeros(Float32, size(img) .+ 1)`
-- nthreads: The number of threads on the computer `Threads.nthreads()`. 
-    Allows you to use a parallelized `transform`
-    function if you have access to multiple threads.
-
-# Citation
-'Distance Transforms of Sampled Functions' [Felzenszwalb and
-Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 """
 struct SquaredEuclidean{T1 <: AbstractArray, T2 <: AbstractArray} <: DistanceTransform 
 	dt::T1
@@ -42,7 +36,29 @@ function SquaredEuclidean(
 	SquaredEuclidean(dt, v, z)
 end
 
-function transform(f::Vector{T}, tfm::SquaredEuclidean) where {T}
+"""
+	transform(f::AbstractVector{T}, tfm::SquaredEuclidean)
+    transform(img::AbstractMatrix{T}, tfm::SquaredEuclidean)
+    transform!(img::AbstractMatrix{T}, tfm::SquaredEuclidean, nthreads)
+	transform!(img::CuArray{T,2}, tfm::SquaredEuclidean)
+
+Applies a squared euclidean distance transform to an input image.
+Returns an array with spatial information embedded in the array 
+elements.
+
+# Arguments
+- f/img: 1D, 2D, or 3D to be transformed based on location 
+    to the nearest background (0) pixel
+- tfm: `SquaredEuclidean` type
+- nthreads: The number of threads on the computer `Threads.nthreads()`. 
+    Allows you to use a parallelized `transform`
+    function if you have access to multiple threads.
+
+# Citation
+'Distance Transforms of Sampled Functions' [Felzenszwalb and
+Huttenlocher](DOI: 10.4086/toc.2012.v008a019)
+"""
+function transform(f::AbstractVector{T}, tfm::SquaredEuclidean) where {T}
 	dt = tfm.dt
 	v = tfm.v
 	z = tfm.z
@@ -79,7 +95,7 @@ function transform(f::Vector{T}, tfm::SquaredEuclidean) where {T}
 end
 
 # This function is called to for multi-dimensional transforms
-function transform(f, tfm::SquaredEuclidean, dt, v, z) where {T}
+function _transform(f, tfm::SquaredEuclidean, dt, v, z) where {T}
 	n = length(f)
 	k = 1
 	z[1] = -Inf32
@@ -112,39 +128,35 @@ function transform(f, tfm::SquaredEuclidean, dt, v, z) where {T}
     return dt
 end
 
-function transform(img::Matrix{T}, tfm::SquaredEuclidean) where {T}
+function transform(img::AbstractMatrix{T}, tfm::SquaredEuclidean) where {T}
     rows, columns = size(img)
 	dt = tfm.dt
 	v = tfm.v
 	z = tfm.z
     for x in 1:rows
-        dt[x, :] = transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
+        dt[x, :] = _transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
     end
 
     for y in 1:columns
-        dt[:, y] = transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
+        dt[:, y] = _transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
     end
 
     return dt
 end
 
-function transform!(img::Matrix{T}, tfm::SquaredEuclidean, nthreads) where {T}
-    if nthreads ≤ 1
-        transform(img, tfm)
-    else
-		dt = tfm.dt
-		v = tfm.v
-		z = tfm.z
-        rows, columns = size(img)
-        Threads.@threads for x in 1:rows
-            @views transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
-        end
-    
-        Threads.@threads for y in 1:columns
-            @views transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
-        end
-        return dt
+function transform!(img::AbstractMatrix{T}, tfm::SquaredEuclidean, nthreads) where {T}
+	@assert nthreads > 1
+	dt = tfm.dt
+	v = tfm.v
+	z = tfm.z
+    rows, columns = size(img)
+    Threads.@threads for x in 1:rows
+        @views _transform(img[x, :], tfm, dt[x, :], fill!(v[x, :], 1), fill!(z[x, :], 0))
     end
+	Threads.@threads for y in 1:columns
+		@views _transform(img[:, y], tfm, dt[:, y], fill!(v[:, y], 1), fill!(z[:, y], 0))
+	end
+    return dt
 end
 
 function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean) where {T}
@@ -153,11 +165,11 @@ function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean) where {T}
 	z = tfm.z
     rows, columns = size(img)
     @floop CUDAEx() for x in 1:rows
-        @views transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
+        @views _transform(img[x, :], tfm, dt[x, :], fill!(v[x, :], 1), fill!(z[x, :], 0))
     end
 
     @floop CUDAEx() for y in 1:columns
-        @views transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
+        @views _transform(img[:, y], tfm, dt[:, y], fill!(v[:, y], 1), fill!(z[:, y], 0))
     end
     return dt
 end

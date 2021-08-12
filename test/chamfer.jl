@@ -1,7 +1,7 @@
 include("./imports.jl")
 
-@testset ExtendedTestSet "chamfer_distance_transform" begin
-    @testset ExtendedTestSet "chamfer_distance_transform" begin
+@testset ExtendedTestSet "chamfer" begin
+    @testset ExtendedTestSet "chamfer" begin
         x = [
             1 1 0 0
             0 1 1 0
@@ -18,7 +18,7 @@ include("./imports.jl")
         @test transform(x, tfm) == answer
     end
 
-    @testset ExtendedTestSet "chamfer_distance_transform" begin
+    @testset ExtendedTestSet "chamfer" begin
         x = [
             1 1 0 0
             0 1 0 0
@@ -35,7 +35,7 @@ include("./imports.jl")
         @test transform(x, tfm) == answer
     end
 
-    @testset ExtendedTestSet "chamfer_distance_transform" begin
+    @testset ExtendedTestSet "chamfer" begin
         x1 = [
             1 1 0 0
             0 1 0 0

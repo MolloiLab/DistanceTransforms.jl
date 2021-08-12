@@ -11,15 +11,15 @@ using CUDA
 using FoldsCUDA
 using FLoops
 
-include("./chamfer_distance_transform.jl")
+include("./chamfer.jl")
 include("./euclidean_distance_transform.jl")
 include("./losses.jl")
 include("./metrics.jl")
-include("./squared_euclidean_distance_transform.jl")
+include("./squared_euclidean.jl")
 include("./utils.jl")
 
 export
-    # Export chamfer_distance_transform.jl functions
+    # Export chamfer.jl functions
     Chamfer,
     transform,
 
@@ -38,7 +38,7 @@ export
     percentile_hausdorff,
     mean_hausdorff_2D,
 
-    # Export squared_euclidean_distance_transform.jl functions
+    # Export squared_euclidean.jl functions
     # transform,
     transform!
     SquaredEuclidean,
