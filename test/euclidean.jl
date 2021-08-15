@@ -32,4 +32,20 @@ include("./imports.jl")
         ]
         @test euclidean(x) ≈ answer
     end
+
+    @testset ExtendedTestSet "euclidean" begin
+        x = Bool.([
+            1 1 0 0
+            0 1 1 0
+            0 1 0 1
+            0 1 0 0
+        ])
+        answer = [
+            1.0 1.0 0.0 0.0
+            0.0 1.0 1.0 0.0
+            0.0 1.0 0.0 1.0
+            0.0 1.0 0.0 0.0
+        ]
+        @test euclidean(x) == answer
+    end
 end
