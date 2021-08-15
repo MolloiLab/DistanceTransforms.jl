@@ -15,7 +15,4 @@ with spatial information embedded in the elements.
 Transforms of Binary Images in Arbitrary Dimensions' [Maurer et al.,
 2003] (DOI: 10.1109/TPAMI.2003.1177156)
 """
-function euclidean(img)
-    f = ImageMorphology.feature_transform(.!(Bool.(img)))
-    return foreground_dtm = ImageMorphology.distance_transform(f)
-end
+euclidean(img) = distance_transform(feature_transform(.!(Bool.(img))))
