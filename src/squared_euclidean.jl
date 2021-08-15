@@ -128,6 +128,40 @@ function _transform(f, tfm::SquaredEuclidean, dt, v, z) where {T}
     return dt
 end
 
+# This function is called for the GPU version
+function _transform(f::AbstractArray{T, 1}, dt, v, z) where {T}
+    n = length(f)
+    k = 1
+    z[1] = -1.0f12
+    z[2] = 1.0f12
+
+    # Lower envelope operation
+    for q in 2:n
+        while true
+            s = ((f[q] + q^2) - (f[v[k]] + v[k]^2)) / (2 * q - 2 * v[k])
+            if s ≤ z[k]
+                k -= 1
+            else
+                k += 1
+                v[k] = q
+                z[k] = s
+                z[k + 1] = 1.0f12
+                break
+            end
+        end
+    end
+
+    # Distance transform operation
+    k = 1
+    for q in 1:n
+        while z[k + 1] < q
+            k = k + 1
+        end
+        dt[q] = (q - v[k])^2 + f[v[k]]
+    end
+    return dt
+end
+
 function transform(img::AbstractMatrix{T}, tfm::SquaredEuclidean) where {T}
     rows, columns = size(img)
 	dt = tfm.dt
@@ -165,11 +199,11 @@ function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean) where {T}
 	z = tfm.z
     rows, columns = size(img)
     @floop CUDAEx() for x in 1:rows
-        @views _transform(img[x, :], tfm, dt[x, :], fill!(v[x, :], 1), fill!(z[x, :], 0))
+        @views _transform(img[x, :], dt[x, :], fill!(v[x, :], 1), fill!(z[x, :], 0))
     end
 
     @floop CUDAEx() for y in 1:columns
-        @views _transform(img[:, y], tfm, dt[:, y], fill!(v[:, y], 1), fill!(z[:, y], 0))
+        @views _transform(img[:, y], dt[:, y], fill!(v[:, y], 1), fill!(z[:, y], 0))
     end
     return dt
 end
