@@ -1,5 +1,3 @@
-include("./imports.jl")
-
 @testset ExtendedTestSet "squared_euclidean" begin
     @testset ExtendedTestSet "squared_euclidean" begin
         x = boolean_indicator([0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0])
