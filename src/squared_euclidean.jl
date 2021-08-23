@@ -20,20 +20,19 @@ Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 - z: `zeros(Float32, length(f) + 1)` or 
     `zeros(Float32, size(img) .+ 1)`
 """
-struct SquaredEuclidean{T1 <: AbstractArray, T2 <: AbstractArray} <: DistanceTransform 
-	dt::T1
-	v::T2
-	z::T1
+struct SquaredEuclidean{T1<:AbstractArray,T2<:AbstractArray} <: DistanceTransform
+    dt::T1
+    v::T2
+    z::T1
 end
 
 function SquaredEuclidean(
-		f::AbstractArray, 
-		dt = zeros(Float32, size(f)),
-		v = ones(Int64, size(f)),
-		z = zeros(Float32, size(f) .+ 1)
-	)
-
-	SquaredEuclidean(dt, v, z)
+    f::AbstractArray,
+    dt=zeros(Float32, size(f)),
+    v=ones(Int64, size(f)),
+    z=zeros(Float32, size(f) .+ 1),
+)
+    return SquaredEuclidean(dt, v, z)
 end
 
 """
@@ -59,29 +58,29 @@ elements.
 Huttenlocher](DOI: 10.4086/toc.2012.v008a019)
 """
 function transform(f::AbstractVector{T}, tfm::SquaredEuclidean) where {T}
-	dt = tfm.dt
-	v = tfm.v
-	z = tfm.z
-	n = length(f)
-	k = 1
-	z[1] = -Inf32
-	z[2] = Inf32
-	
-	# Lower envelope operation
-	for q in 2:n
-		while true
-			s = ((f[q] + q^2) - (f[v[k]] + v[k]^2)) / (2 * q - 2 * v[k])
-			if s ≤ z[k]
-				k -= 1
-			else
-				k += 1
-				v[k] = q
-				z[k] = s
-				z[k + 1] = Inf32
-				break
-			end
-		end
-	end
+    dt = tfm.dt
+    v = tfm.v
+    z = tfm.z
+    n = length(f)
+    k = 1
+    z[1] = -Inf32
+    z[2] = Inf32
+
+    # Lower envelope operation
+    for q in 2:n
+        while true
+            s = ((f[q] + q^2) - (f[v[k]] + v[k]^2)) / (2 * q - 2 * v[k])
+            if s ≤ z[k]
+                k -= 1
+            else
+                k += 1
+                v[k] = q
+                z[k] = s
+                z[k + 1] = Inf32
+                break
+            end
+        end
+    end
 
     # Distance transform operation
     k = 1
@@ -96,26 +95,26 @@ end
 
 # This function is called to for multi-dimensional transforms
 function _transform(f, tfm::SquaredEuclidean, dt, v, z) where {T}
-	n = length(f)
-	k = 1
-	z[1] = -Inf32
-	z[2] = Inf32
-	
-	# Lower envelope operation
-	for q in 2:n
-		while true
-			s = ((f[q] + q^2) - (f[v[k]] + v[k]^2)) / (2 * q - 2 * v[k])
-			if s ≤ z[k]
-				k -= 1
-			else
-				k += 1
-				v[k] = q
-				z[k] = s
-				z[k + 1] = Inf32
-				break
-			end
-		end
-	end
+    n = length(f)
+    k = 1
+    z[1] = -Inf32
+    z[2] = Inf32
+
+    # Lower envelope operation
+    for q in 2:n
+        while true
+            s = ((f[q] + q^2) - (f[v[k]] + v[k]^2)) / (2 * q - 2 * v[k])
+            if s ≤ z[k]
+                k -= 1
+            else
+                k += 1
+                v[k] = q
+                z[k] = s
+                z[k + 1] = Inf32
+                break
+            end
+        end
+    end
 
     # Distance transform operation
     k = 1
@@ -129,7 +128,7 @@ function _transform(f, tfm::SquaredEuclidean, dt, v, z) where {T}
 end
 
 # This function is called for the GPU version
-function _transform(f::AbstractArray{T, 1}, dt, v, z) where {T}
+function _transform(f::AbstractArray{T,1}, dt, v, z) where {T}
     n = length(f)
     k = 1
     z[1] = -1.0f12
@@ -164,9 +163,9 @@ end
 
 function transform(img::AbstractMatrix{T}, tfm::SquaredEuclidean) where {T}
     rows, columns = size(img)
-	dt = tfm.dt
-	v = tfm.v
-	z = tfm.z
+    dt = tfm.dt
+    v = tfm.v
+    z = tfm.z
     for x in 1:rows
         dt[x, :] = _transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
     end
@@ -179,24 +178,24 @@ function transform(img::AbstractMatrix{T}, tfm::SquaredEuclidean) where {T}
 end
 
 function transform!(img::AbstractMatrix{T}, tfm::SquaredEuclidean, nthreads) where {T}
-	@assert nthreads > 1
-	dt = tfm.dt
-	v = tfm.v
-	z = tfm.z
+    @assert nthreads > 1
+    dt = tfm.dt
+    v = tfm.v
+    z = tfm.z
     rows, columns = size(img)
     Threads.@threads for x in 1:rows
         @views _transform(img[x, :], tfm, dt[x, :], fill!(v[x, :], 1), fill!(z[x, :], 0))
     end
-	Threads.@threads for y in 1:columns
-		@views _transform(img[:, y], tfm, dt[:, y], fill!(v[:, y], 1), fill!(z[:, y], 0))
-	end
+    Threads.@threads for y in 1:columns
+        @views _transform(img[:, y], tfm, dt[:, y], fill!(v[:, y], 1), fill!(z[:, y], 0))
+    end
     return dt
 end
 
 function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean) where {T}
-	dt = tfm.dt
-	v = tfm.v
-	z = tfm.z
+    dt = tfm.dt
+    v = tfm.v
+    z = tfm.z
     rows, columns = size(img)
     @floop CUDAEx() for x in 1:rows
         @views _transform(img[x, :], dt[x, :], fill!(v[x, :], 1), fill!(z[x, :], 0))

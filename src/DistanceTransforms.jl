@@ -10,13 +10,11 @@ include("./euclidean.jl")
 include("./squared_euclidean.jl")
 include("./utils.jl")
 
-export
-    transform,
+export transform,
     transform!,
 
     # Export chamfer.jl functions
     Chamfer,
-    
 
     # Export euclidean.jl functions
     euclidean,
