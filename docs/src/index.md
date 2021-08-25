@@ -7,6 +7,7 @@ CurrentModule = DistanceTransforms
 ```@index
 ```
 
+## Function documentation
 ```docs
 transform
 ```
