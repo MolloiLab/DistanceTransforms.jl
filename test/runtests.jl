@@ -7,8 +7,8 @@ include("utils.jl")
 
 @testset "CUDA" begin
     if CUDA.functional()
-      include("cuda/runtests.jl")
+        include("cuda/runtests.jl")
     else
-      @warn "CUDA unavailable, not testing GPU support"
+        @warn "CUDA unavailable, not testing GPU support"
     end
 end
