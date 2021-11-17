@@ -1,5 +1,6 @@
 """
     euclidean(img)
+    euclidean(img::BitArray)
 
 Wrapper function for `ImageMorphology.feature_transform` and
 `ImageMorphology.distance_transform`. Applies a true Euclidean 

@@ -37,8 +37,8 @@ Computer Vision, Graphics, and Image Processing'
 [Gunilla Borgefors](DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
 """
 function transform(img::AbstractMatrix{T}, tfm::Chamfer) where {T}
-	dt = tfm.dt
-	w, h = size(img)
+    dt = tfm.dt
+    w, h = size(img)
     # Forward pass
     x = 1
     y = 1
@@ -104,7 +104,7 @@ end
 
 # Helper function for nd arrays
 function _transform(img::AbstractMatrix{T}, tfm::Chamfer, dt) where {T}
-	w, h = size(img)
+    w, h = size(img)
     # Forward pass
     x = 1
     y = 1

@@ -1,3 +1,6 @@
+# using Pkg
+# pkg"activate .."
+
 using DistanceTransforms
 using Documenter
 
