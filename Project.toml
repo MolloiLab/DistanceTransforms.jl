@@ -4,9 +4,12 @@ authors = ["Dale <djblack@uci.edu> and contributors"]
 version = "0.1.0"
 
 [deps]
-Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+FLoops = "cc61a311-1640-44b5-9fba-1b764f453329"
+FoldsCUDA = "6cd66ae4-5932-4b96-926d-e73e578e42cc"
+ImageMorphology = "787d08f9-d448-5407-9aad-5290dd7ab264"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
-Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestSetExtensions = "98d24dd4-01ad-11ea-1b02-c9a08f80db04"
 
 [compat]
@@ -15,6 +18,10 @@ julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+ImageMorphology = "0.2, 0.3"
+Images = "0.24"
+TestSetExtensions = "2.0"
+julia = "1.6"
 
-[targets]
-test = ["Test"]
+[publish]
+title = "DistanceTransforms.jl"

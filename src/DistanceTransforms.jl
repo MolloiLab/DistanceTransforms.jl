@@ -1,15 +1,27 @@
 module DistanceTransforms
 
-using Images
-using Distances
-using Statistics
+using ImageMorphology
+using CUDA
+using FLoops
+using FoldsCUDA
 
-include("./helper.jl")
-include("./metrics.jl")
+include("./chamfer.jl")
+include("./euclidean.jl")
+include("./squared_euclidean.jl")
+include("./utils.jl")
 
-export find_edges,
-    mean_hausdorff,
-    mean_dice
+export transform,
+    transform!,
 
+    # Export chamfer.jl functions
+    Chamfer,
 
+    # Export euclidean.jl functions
+    euclidean,
+
+    # Export squared_euclidean.jl functions
+    SquaredEuclidean,
+
+    # Export utils.jl functions
+    boolean_indicator
 end
