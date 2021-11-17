@@ -1,6 +1,6 @@
 # DistanceTransforms
 
-Repository for various distance transforms in Julia
+Repository for various distance transforms in Julia.
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://Dale-Black.github.io/DistanceTransforms.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://Dale-Black.github.io/DistanceTransforms.jl/dev)
