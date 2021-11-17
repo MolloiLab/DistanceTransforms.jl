@@ -1,3 +1,9 @@
+struct SquaredEuclidean{T1<:AbstractArray,T2<:AbstractArray} <: DistanceTransform
+    dt::T1
+    v::T2
+    z::T1
+end
+
 """
 	SquaredEuclidean(
 		f::AbstractArray, 
@@ -20,12 +26,6 @@ Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 - z: `zeros(Float32, length(f) + 1)` or 
     `zeros(Float32, size(img) .+ 1)`
 """
-struct SquaredEuclidean{T1<:AbstractArray,T2<:AbstractArray} <: DistanceTransform
-    dt::T1
-    v::T2
-    z::T1
-end
-
 function SquaredEuclidean(
     f::AbstractArray,
     dt=zeros(Float32, size(f)),
