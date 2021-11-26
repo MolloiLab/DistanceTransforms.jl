@@ -7,7 +7,7 @@ makedocs(;
     modules=[PracticePackage],
     authors="Dale-Black <djblack@uci.edu> and contributors",
     repo="https://github.com/Dale-Black/DistanceTransforms.jl/blob/{commit}{path}#{line}",
-    sitename="PracticePackage.jl",
+    sitename="DistanceTransforms.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://Dale-Black.github.io/DistanceTransforms.jl",
