@@ -56,9 +56,9 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using PracticePackage
-            DocMeta.setdocmeta!(PracticePackage, :DocTestSetup, :(using PracticePackage); recursive=true)
-            doctest(PracticePackage)'
+            using DistanceTransforms
+            DocMeta.setdocmeta!(DistanceTransforms, :DocTestSetup, :(using DistanceTransforms); recursive=true)
+            doctest(DistanceTransforms)'
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
