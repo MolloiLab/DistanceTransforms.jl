@@ -1,22 +1,23 @@
-# using Pkg
-# pkg"activate .."
-
 using DistanceTransforms
 using Documenter
 
+DocMeta.setdocmeta!(DistanceTransforms, :DocTestSetup, :(using DistanceTransforms); recursive=true)
+
 makedocs(;
-    modules=[DistanceTransforms],
-    authors="Dale <djblack@uci.edu> and contributors",
-    repo="https://github.com/Dale-Black/DistanceTransforms.jl/blob/{commit}{path}#L{line}",
-    sitename="DistanceTransforms.jl",
+    modules=[PracticePackage],
+    authors="Dale-Black <djblack@uci.edu> and contributors",
+    repo="https://github.com/Dale-Black/DistanceTransforms.jl/blob/{commit}{path}#{line}",
+    sitename="PracticePackage.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://Dale-Black.github.io/DistanceTransforms.jl",
         assets=String[],
     ),
     pages=[
-        "Home" => "index.md"
-        ],
+        "Home" => "index.md",
+    ],
 )
 
-deploydocs(; repo="github.com/Dale-Black/DistanceTransforms.jl")
+deploydocs(;
+    repo="github.com/Dale-Black/DistanceTransforms.jl",
+)
