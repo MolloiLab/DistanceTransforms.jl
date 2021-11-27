@@ -12,7 +12,7 @@ begin
 		Pkg.Registry.update()
 		Pkg.add("PlutoUI")
 		Pkg.add("CairoMakie")
-		Pkg.add("BenchmarkTools.jl")
+		Pkg.add("BenchmarkTools")
 		Pkg.add(url="https://github.com/Dale-Black/DistanceTransforms.jl")
 	end
 	
