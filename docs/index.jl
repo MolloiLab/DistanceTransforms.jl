@@ -12,7 +12,7 @@ begin
 		Pkg.Registry.update()
 		Pkg.add("PlutoUI")
 		Pkg.add("CairoMakie")
-		Pkg.add("BenchmarkTools.jl")
+		Pkg.add("BenchmarkTools")
 		Pkg.add(url="https://github.com/Dale-Black/DistanceTransforms.jl")
 	end
 	
@@ -59,13 +59,16 @@ euclidean(array1)
 
 # ╔═╡ 0ad7423a-f2ff-417a-bfd1-e400a994e88c
 md"""
-As you can see, each element in the array is either a zero, which remains zero, or is one that then gets replaced by the Euclidean distance to the nearest zero. 
+As you can see, each element in the array is either zero, which remains zero, or is one that then gets replaced by the Euclidean distance to the nearest zero. 
 
 We can see this easily using Makie.jl.
 """
 
 # ╔═╡ fde6da34-cd4d-4d97-aeb5-5a745cdffa13
+heatmap(array1, colormap=:grays)
 
+# ╔═╡ f629fb0b-530e-4a06-bfb0-81c27ae12301
+heatmap(euclidean(array1); colormap=:grays)
 
 # ╔═╡ Cell order:
 # ╟─0095c4d9-e9d0-4769-83ff-fd7f4346be8f
@@ -76,3 +79,4 @@ We can see this easily using Makie.jl.
 # ╠═cc17f05a-6e29-4a81-a45f-2dcfdedf2e88
 # ╟─0ad7423a-f2ff-417a-bfd1-e400a994e88c
 # ╠═fde6da34-cd4d-4d97-aeb5-5a745cdffa13
+# ╠═f629fb0b-530e-4a06-bfb0-81c27ae12301
