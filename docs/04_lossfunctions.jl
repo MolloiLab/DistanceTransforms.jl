@@ -119,6 +119,40 @@ end
 # ╔═╡ 90467d7a-785d-44d3-92bc-9d05bcb5f5b4
 hausdorff(ŷ3, y3, ŷ3_dtm, y3_dtm)
 
+# ╔═╡ 43e694a4-bbd5-4072-a4de-0ea65b16c906
+md"""
+If we were to be running an actual training loop it might look something like this...
+
+```julia
+# Begin training loop
+for epoch in 1:max_epochs
+	step = 0
+	@show epoch
+	
+	# Loop through training data
+	for (xs, ys) in train_loader
+		step += 1
+		@show step
+
+		# Send data to GPU
+		xs, ys = xs |> gpu, ys |> gpu		
+		gs = Flux.gradient(ps) do
+			ŷs = model(xs)
+
+			# Apply distance transform using GPU compatible `SquaredEuclidean`
+			# Data will usually be 4D or 5D [x, y, (z), channel, batch]
+			ŷs, ys = boolean_indicator(ŷs), boolean_indicator(ys)
+			tfm1, tfm2 = SquaredEuclidean(ŷs), SquaredEuclidean(ys)
+			ŷs_dtm, ys_dtm = transform!(ŷs_dtm), transform!(ys_dtm)
+			loss = hausdorff(ŷs, ys, ŷs_dtm, ys_dtm)
+			return loss
+		end
+		Flux.update!(optimizer, ps, gs)
+	end
+end
+```
+"""
+
 # ╔═╡ Cell order:
 # ╟─5398d829-ad81-4971-94b5-f87eeaaa381e
 # ╠═d9f9bd70-508d-11ec-1d5d-b3592d653992
@@ -140,3 +174,4 @@ hausdorff(ŷ3, y3, ŷ3_dtm, y3_dtm)
 # ╠═dde2505d-1a69-4201-a75a-e29a62197163
 # ╠═d2a987a3-f44c-4239-9e96-d83ae16c265e
 # ╠═90467d7a-785d-44d3-92bc-9d05bcb5f5b4
+# ╟─43e694a4-bbd5-4072-a4de-0ea65b16c906
