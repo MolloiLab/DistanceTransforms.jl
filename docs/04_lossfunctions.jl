@@ -11,15 +11,11 @@ begin
 		Pkg.activate(mktempdir())
 		Pkg.Registry.update()
 		Pkg.add("PlutoUI")
-		# Pkg.add("CairoMakie")
-		# Pkg.add("BenchmarkTools")
 		Pkg.add(url="https://github.com/Dale-Black/DistanceTransforms.jl")
 		Pkg.add(url="https://github.com/Dale-Black/Losers.jl")
 	end
 	
 	using PlutoUI
-	# using CairoMakie
-	# using BenchmarkTools
 	using DistanceTransforms
 	using Losers
 end
