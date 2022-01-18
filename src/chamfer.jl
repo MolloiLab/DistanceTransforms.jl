@@ -1,22 +1,22 @@
 abstract type DistanceTransform end
 
+struct Chamfer{T} <: DistanceTransform
+    dt
+end
+
 """
-    Chamfer(img, dt=zeros(Float32, size(img))) = Chamfer{typeof(dt)}(dt)
+    Chamfer(img, dt=zeros(Float32, size(img)))
 
 Prepares an array to be `transform`ed using the 3-4 chamfer algorithm
 laid out in 'Distance transformations in digital images,
 Computer Vision, Graphics, and Image Processing'
-[Gunilla Borgefors](DOI: https://doi.org/10.1016/S0734-189X(86)80047-0.)
+[Gunilla Borgefors](https://studentportalen.uu.se/uusp-filearea-tool/download.action?nodeId=214320&toolAttachmentId=64777)
 
 # Arguments
 - img: 2D or 3D array to be transformed based on location 
     to the nearest background (0) pixel
 - tfm: `zeros(Float32, size(img))`
 """
-struct Chamfer{T} <: DistanceTransforms.DistanceTransform
-    dt
-end
-
 Chamfer(img, dt=zeros(Float32, size(img))) = Chamfer{typeof(dt)}(dt)
 
 """

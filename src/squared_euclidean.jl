@@ -1,3 +1,9 @@
+struct SquaredEuclidean{T1<:AbstractArray,T2<:AbstractArray} <: DistanceTransform
+    dt::T1
+    v::T2
+    z::T1
+end
+
 """
 	SquaredEuclidean(
 		f::AbstractArray, 
@@ -20,12 +26,6 @@ Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 - z: `zeros(Float32, length(f) + 1)` or 
     `zeros(Float32, size(img) .+ 1)`
 """
-struct SquaredEuclidean{T1<:AbstractArray,T2<:AbstractArray} <: DistanceTransform
-    dt::T1
-    v::T2
-    z::T1
-end
-
 function SquaredEuclidean(
     f::AbstractArray,
     dt=zeros(Float32, size(f)),
@@ -174,6 +174,37 @@ function transform(img::AbstractMatrix{T}, tfm::SquaredEuclidean) where {T}
         dt[:, y] = _transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
     end
 
+    return dt
+end
+
+function _transform(img::AbstractMatrix{T}, tfm, dt, v, z) where {T}
+    rows, columns = size(img)
+    for x in 1:rows
+        dt[x, :] = _transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
+    end
+
+    for y in 1:columns
+        dt[:, y] = _transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
+    end
+
+    return dt
+end
+
+function transform(img::AbstractArray{T, 3}, tfm::SquaredEuclidean) where {T}
+    rows, columns, depth = size(img)
+    dt = tfm.dt
+    v = tfm.v
+    z = tfm.z
+
+    for d in 1:depth
+        for x in 1:rows
+            dt[x, :, d] = _transform(img[x, :, d], tfm, dt[x, :, d], v[x, :, d], z[x, :, d])
+        end
+    
+        for y in 1:columns
+            dt[:, y, d] = _transform(img[:, y, d], tfm, dt[:, y, d], v[:, y, d], z[:, y, d])
+        end
+    end
     return dt
 end
 
