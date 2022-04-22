@@ -177,6 +177,37 @@ function transform(img::AbstractMatrix{T}, tfm::SquaredEuclidean) where {T}
     return dt
 end
 
+function _transform(img::AbstractMatrix{T}, tfm, dt, v, z) where {T}
+    rows, columns = size(img)
+    for x in 1:rows
+        dt[x, :] = _transform(img[x, :], tfm, dt[x, :], v[x, :], z[x, :])
+    end
+
+    for y in 1:columns
+        dt[:, y] = _transform(img[:, y], tfm, dt[:, y], v[:, y], z[:, y])
+    end
+
+    return dt
+end
+
+function transform(img::AbstractArray{T, 3}, tfm::SquaredEuclidean) where {T}
+    rows, columns, depth = size(img)
+    dt = tfm.dt
+    v = tfm.v
+    z = tfm.z
+
+    for d in 1:depth
+        for x in 1:rows
+            dt[x, :, d] = _transform(img[x, :, d], tfm, dt[x, :, d], v[x, :, d], z[x, :, d])
+        end
+    
+        for y in 1:columns
+            dt[:, y, d] = _transform(img[:, y, d], tfm, dt[:, y, d], v[:, y, d], z[:, y, d])
+        end
+    end
+    return dt
+end
+
 function transform!(img::AbstractMatrix{T}, tfm::SquaredEuclidean, nthreads) where {T}
     @assert nthreads > 1
     dt = tfm.dt
