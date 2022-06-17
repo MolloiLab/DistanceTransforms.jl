@@ -237,3 +237,24 @@ function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean) where {T}
     end
     return dt
 end
+
+function transform!(img::CuArray{T,3}, tfm::SquaredEuclidean) where {T}
+    dt = tfm.dt
+    v = tfm.v
+    z = tfm.z
+    rows, columns, slices = size(img)
+    @floop CUDAEx() for x in 1:rows
+        @views _transform(img[x, :, :], dt[x, :, :], fill!(v[x, :, :], 1), fill!(z[x, :, :], 0))
+    end
+
+    @floop CUDAEx() for y in 1:columns
+        @views _transform(img[:, y, :], dt[:, y, :], fill!(v[:, y, :], 1), fill!(z[:, y, :], 0))
+    end
+
+    @floop CUDAEx() for s in 1:slices
+        @views _transform(img[:, :, s], dt[:, :, s], fill!(v[:, :, s], 1), fill!(z[:, :, s], 0))
+    end
+    return dt
+end
+
+

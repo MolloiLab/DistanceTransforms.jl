@@ -274,6 +274,12 @@ git-tree-sha1 = "2c7c032f2940f45ab44df765a7333026927afa00"
 uuid = "61eb1bfa-7361-4325-ad38-22787b887f55"
 version = "0.13.5"
 
+[[Ghostscript_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "78e2c69783c9753a91cdae88a8d432be85a2ab5e"
+uuid = "61579ee1-b43e-5ca0-a5da-69d92c66a64b"
+version = "9.55.0+0"
+
 [[Graphics]]
 deps = ["Colors", "LinearAlgebra", "NaNMath"]
 git-tree-sha1 = "1c5a84319923bea76fa145d49e93aa4394c73fc2"
@@ -334,10 +340,10 @@ uuid = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 version = "1.2.1"
 
 [[ImageMagick_jll]]
-deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pkg", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "ea2b6fd947cdfc43c6b8c15cff982533ec1f72cd"
+deps = ["Artifacts", "Ghostscript_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pkg", "Zlib_jll", "libpng_jll"]
+git-tree-sha1 = "f025b79883f361fa1bd80ad132773161d231fd9f"
 uuid = "c73af94c-d91f-53ed-93a7-00f77d67a9d7"
-version = "6.9.12+0"
+version = "6.9.12+2"
 
 [[ImageMetadata]]
 deps = ["AxisArrays", "ColorVectorSpace", "ImageAxes", "ImageCore", "IndirectArrays"]
@@ -451,6 +457,12 @@ git-tree-sha1 = "49fb3cb53362ddadb4415e9b73926d6b40709e70"
 uuid = "b14d175d-62b4-44ba-8fb7-3064adc8c3ec"
 version = "0.2.4"
 
+[[LERC_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "bf36f528eec6634efc60d7ec062008f171071434"
+uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
+version = "3.0.0+1"
+
 [[LLVM]]
 deps = ["CEnum", "LLVMExtra_jll", "Libdl", "Printf", "Unicode"]
 git-tree-sha1 = "46092047ca4edc10720ecab437c42283cd7c44f3"
@@ -487,13 +499,13 @@ uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libtiff_jll]]
-deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "340e257aada13f95f98ee352d316c3bed37c8ab9"
+deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
+git-tree-sha1 = "c9551dd26e31ab17b86cbd00c2ede019c08758eb"
 uuid = "89763e89-9b03-5906-acba-b20f662cd828"
-version = "4.3.0+0"
+version = "4.3.0+1"
 
 [[LinearAlgebra]]
-deps = ["Libdl"]
+deps = ["Libdl", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[LogExpFunctions]]
@@ -585,6 +597,10 @@ git-tree-sha1 = "c0e9e582987d36d5a61e650e6e543b9e44d9914b"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 version = "1.10.7"
 
+[[OpenBLAS_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
+uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+
 [[OpenEXR]]
 deps = ["Colors", "FileIO", "OpenEXR_jll"]
 git-tree-sha1 = "327f53360fdb54df7ecd01e96ef1983536d1e633"
@@ -666,7 +682,7 @@ deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[Random]]
-deps = ["Serialization"]
+deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[Random123]]
@@ -888,6 +904,10 @@ deps = ["MacroTools"]
 git-tree-sha1 = "8c1a8e4dfacb1fd631745552c8db35d0deb09ea0"
 uuid = "700de1a5-db45-46bc-99cf-38207098b444"
 version = "0.2.2"
+
+[[libblastrampoline_jll]]
+deps = ["Artifacts", "Libdl", "OpenBLAS_jll"]
+uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
 
 [[libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
