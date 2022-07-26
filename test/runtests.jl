@@ -4,6 +4,7 @@ include("chamfer.jl")
 include("euclidean.jl")
 include("squared_euclidean.jl")
 include("utils.jl")
+include("wenbo.jl")
 
 @testset "CUDA" begin
     if CUDA.functional()

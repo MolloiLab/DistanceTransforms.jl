@@ -9,6 +9,7 @@ include("./chamfer.jl")
 include("./euclidean.jl")
 include("./squared_euclidean.jl")
 include("./utils.jl")
+include("./wenbo.jl")
 
 export transform,
     transform!,
@@ -19,9 +20,12 @@ export transform,
     # Export euclidean.jl functions
     euclidean,
 
-    # Export squared_euclidean.jl functions
-    SquaredEuclidean,
+    # # Export squared_euclidean.jl functions
+    # SquaredEuclidean,
 
     # Export utils.jl functions
-    boolean_indicator
+    boolean_indicator,
+
+    # Export utils.jl functions
+    Wenbo
 end
