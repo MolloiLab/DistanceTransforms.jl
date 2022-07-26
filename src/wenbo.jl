@@ -73,21 +73,22 @@ function _DT1(output, i, j)
 end
 
 """
-    transform(img::AbstractMatrix, tfm::Wenbo; D=zeros(size(img)), pointerA=1, pointerB=1)
+    transform(img::AbstractMatrix, tfm::Wenbo; output=zeros(size(img)), pointerA=1, pointerB=1)
 
 2-D Wenbo Distance Transform.
 """
-function transform(img::AbstractMatrix, tfm::Wenbo; D=zeros(size(img)), pointerA=1, pointerB=1)
+function transform(img::AbstractMatrix, tfm::Wenbo; output=zeros(size(img)), pointerA=1, pointerB=1)
 	# This is a worst case = O(n^3) implementation
 	for i in axes(img, 1)
-	    D[i, :] = transform(img[i, :], Wenbo(); output=D[i, :], pointerA=pointerA, pointerB=pointerB) 
+	    output[i, :] = transform(img[i, :], Wenbo(); output=output[i, :], pointerA=pointerA, pointerB=pointerB) 
 	end
 
 	for j in axes(img, 2)
-	    D[:, j] = _DT2(D[:, j]; output=D[:, j], pointerA=pointerA) 
+	    output[:, j] = _DT2(output[:, j]; output=output[:, j], pointerA=pointerA) 
 	end
-	return D
+	return output
 end
+
 
 """
     _DT2(f; output=zeros(length(f)), pointerA=1)
@@ -149,14 +150,14 @@ end
 
 3-D Wenbo Distance Transform.
 """
-function transform(f::AbstractArray, tfm::Wenbo; D=zeros(size(f)), pointerA=1, pointerB=1)
+function transform(f::AbstractArray, tfm::Wenbo; output=zeros(size(f)), pointerA=1, pointerB=1)
 	for i in axes(f, 3)
-	    D[:, :, i] = transform(f[:, :, i], Wenbo(); D=D[:, :, i], pointerA=pointerA, pointerB=pointerB)
+	    output[:, :, i] = transform(f[:, :, i], Wenbo(); output=output[:, :, i], pointerA=pointerA, pointerB=pointerB)
 	end
 	for i in axes(f, 1)
 		for j in axes(f, 2)
-	    	D[i, j, :] = _DT2(D[i, j, :]; output=D[i, j, :], pointerA=pointerA)
+	    	output[i, j, :] = _DT2(output[i, j, :]; output=output[i, j, :], pointerA=pointerA)
 		end
 	end
-	return D
+	return output
 end
