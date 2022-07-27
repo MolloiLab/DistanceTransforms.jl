@@ -20,8 +20,8 @@ export transform,
     # Export euclidean.jl functions
     euclidean,
 
-    # # Export squared_euclidean.jl functions
-    # SquaredEuclidean,
+    # Export squared_euclidean.jl functions
+    SquaredEuclidean,
 
     # Export utils.jl functions
     boolean_indicator,
