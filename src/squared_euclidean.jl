@@ -99,15 +99,15 @@ function transform!(img::AbstractMatrix, tfm::SquaredEuclidean, nthreads; output
 	return output
 end
 
-function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean; output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1))
-	@floop CUDAEx() for i in axes(img, 1)
-		@views transform(img[i, :], tfm; output=output[i,:], v=fill!(v[i,:], 1), z=fill!(z[i,:], 1))
-	end
-	@floop CUDAEx() for j in axes(img, 2)
-		@views transform(output[:, j], tfm; output=output[:,j], v=fill!(v[:,j], 1), z=fill!(z[:,j], 1))
-	end
-	return output
-end
+# function transform!(img::CuArray{T,2}, tfm::SquaredEuclidean; output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1))
+# 	@floop CUDAEx() for i in axes(img, 1)
+# 		@views transform(img[i, :], tfm; output=output[i,:], v=fill!(v[i,:], 1), z=fill!(z[i,:], 1))
+# 	end
+# 	@floop CUDAEx() for j in axes(img, 2)
+# 		@views transform(output[:, j], tfm; output=output[:,j], v=fill!(v[:,j], 1), z=fill!(z[:,j], 1))
+# 	end
+# 	return output
+# end
 
 ## 3D
 function transform!(vol::AbstractArray, tfm::SquaredEuclidean; output=zeros(size(vol)), v=ones(Int32, size(vol)), z=ones(size(vol) .+ 1))
@@ -134,14 +134,14 @@ function transform!(vol::AbstractArray, tfm::SquaredEuclidean, nthreads; output=
     return output
 end
 
-function transform!(vol::CuArray{T,3}, tfm::SquaredEuclidean; output=CUDA.zeros(size(vol)), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1))
-    @floop CUDAEx() for k in axes(vol, 3)
-        @views transform!(vol[:, :, k], tfm; output=output[:, :, k], v=fill!(v[:, :, k], 1), z=fill!(z[:, :, k], 1))
-    end
-    @floop CUDAEx() for i in axes(vol, 1)
-        @floop CUDAEx() for j in axes(vol, 2)
-            @views transform(output[i, j, :], tfm; output=output[i, j, :], v=fill!(v[i, j, :], 1), z=fill!(z[i, j, :], 1))
-        end
-    end
-    return output
-end
+# function transform!(vol::CuArray{T,3}, tfm::SquaredEuclidean; output=CUDA.zeros(size(vol)), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1))
+#     @floop CUDAEx() for k in axes(vol, 3)
+#         @views transform!(vol[:, :, k], tfm; output=output[:, :, k], v=fill!(v[:, :, k], 1), z=fill!(z[:, :, k], 1))
+#     end
+#     @floop CUDAEx() for i in axes(vol, 1)
+#         @floop CUDAEx() for j in axes(vol, 2)
+#             @views transform(output[i, j, :], tfm; output=output[i, j, :], v=fill!(v[i, j, :], 1), z=fill!(z[i, j, :], 1))
+#         end
+#     end
+#     return output
+# end
