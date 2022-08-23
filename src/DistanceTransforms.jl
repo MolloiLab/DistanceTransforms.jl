@@ -26,6 +26,6 @@ export transform,
     # Export utils.jl functions
     boolean_indicator,
 
-    # Export utils.jl functions
+    # Export wenbo.jl functions
     Wenbo
 end
