@@ -34,11 +34,6 @@ end
 ```
 
 Prepares an array to be `transform`ed using the 3-4 chamfer algorithm laid out in 'Distance transformations in digital images, Computer Vision, Graphics, and Image Processing' [Gunilla Borgefors](https://studentportalen.uu.se/uusp-filearea-tool/download.action?nodeId=214320&toolAttachmentId=64777)
-
-Arguments:
-- img: 2D or 3D array to be transformed based on location 
-    to the nearest background (0) pixel
-- tfm: `zeros(Float32, size(img))`
 """
 
 # ╔═╡ aafc9419-3105-45ff-905e-610843528e04
@@ -137,7 +132,7 @@ end
 # ╠═fe947108-2f07-425d-8ded-5a2d8322a0a7
 # ╠═32dcf5b9-fb91-4891-8be0-a578947aa484
 # ╠═ec56a36e-72b3-42d2-9f8f-6a332401b9b9
-# ╠═f6dd7123-0069-4154-a3c3-b9f95c49d21d
+# ╟─f6dd7123-0069-4154-a3c3-b9f95c49d21d
 # ╠═aafc9419-3105-45ff-905e-610843528e04
 # ╟─e68e45ae-fbc1-403e-bc45-9d4f227a933f
 # ╟─e9afda48-bdbf-4e6b-8fb8-94324a76a7e7
