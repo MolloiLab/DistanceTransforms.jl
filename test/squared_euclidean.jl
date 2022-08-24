@@ -70,7 +70,7 @@ md"""
 """
 
 # ╔═╡ eafcd9e8-d691-4ae5-9e71-e999f8b6702c
-@testset "squared_euclidean 2D" begin
+@testset "squared euclidean 2D" begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -96,7 +96,7 @@ md"""
 end;
 
 # ╔═╡ 2f5755cb-e575-4ca9-a8b3-f2fd7846c068
-@testset "squared_euclidean 2D" begin
+@testset "squared euclidean 2D" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -135,7 +135,7 @@ md"""
 """
 
 # ╔═╡ afc433aa-ecc9-443a-bbd4-55bd48730937
-@testset "squared_euclidean 3D" begin
+@testset "squared euclidean 3D" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -181,7 +181,7 @@ md"""
 """
 
 # ╔═╡ fcab8ebd-6799-4ef8-90f8-959af5bfb375
-@testset "squared_euclidean 2D in-place" begin
+@testset "squared euclidean 2D in-place" begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -207,7 +207,7 @@ md"""
 end;
 
 # ╔═╡ bb7361e0-5a20-4454-87bf-a3cbf568a94b
-@testset "squared_euclidean 2D in-place" begin
+@testset "squared euclidean 2D in-place" begin
 	img = rand([0, 1], 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
 	tfm = SquaredEuclidean()
@@ -222,7 +222,7 @@ md"""
 """
 
 # ╔═╡ 4c066e7c-4f1d-4795-bfb7-525b999e2a53
-@testset "squared_euclidean 3D in-place" begin
+@testset "squared euclidean 3D in-place" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -258,7 +258,7 @@ md"""
 end;
 
 # ╔═╡ ddfaf97d-052f-40b5-8e02-9cbaa0f3a801
-@testset "squared_euclidean 3D in-place" begin
+@testset "squared euclidean 3D in-place" begin
 	img = rand([0, 1], 10, 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
 	tfm = SquaredEuclidean()
@@ -278,7 +278,7 @@ md"""
 """
 
 # ╔═╡ bf7df452-38b7-4937-a981-70cdd820622a
-@testset "squared_euclidean 2D multi-threaded" begin
+@testset "squared euclidean 2D multi-threaded" begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -305,7 +305,7 @@ md"""
 end;
 
 # ╔═╡ 91c1a3a4-d2cd-4bd3-8994-2efb501aa3e8
-@testset "squared_euclidean 2D multi-threaded" begin
+@testset "squared euclidean 2D multi-threaded" begin
 	img = rand([0, 1], 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
 	tfm = SquaredEuclidean()
@@ -321,7 +321,7 @@ md"""
 """
 
 # ╔═╡ 0ccd566f-18b7-4f99-93db-8df1379e3cd1
-@testset "squared_euclidean 3D multi-threaded" begin
+@testset "squared euclidean 3D multi-threaded" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -358,7 +358,7 @@ md"""
 end;
 
 # ╔═╡ ad76fe0e-c7f4-4e5e-9a5f-11f597274411
-@testset "squared_euclidean 3D multi-threaded" begin
+@testset "squared euclidean 3D multi-threaded" begin
 	img = rand([0, 1], 10, 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
 	tfm = SquaredEuclidean()
@@ -380,7 +380,7 @@ md"""
 
 # ╔═╡ e7b6805a-6362-49a6-8124-4baa09e44937
 if CUDA.functional()
-	@testset "squared_euclidean 2D GPU" begin
+	@testset "squared euclidean 2D GPU" begin
 		img = [
 			0 1 1 1 0 0 0 1 1
 			1 1 1 1 1 0 0 0 1
