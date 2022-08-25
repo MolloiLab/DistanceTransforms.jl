@@ -245,7 +245,7 @@ md"""
 """
 
 # ╔═╡ b8a0a7a0-887f-4c87-80ad-41a28aa8bf1c
-function transform!(img::CuArray{2}, tfm::SquaredEuclidean; output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1))
+function transform!(img::CuArray, tfm::SquaredEuclidean; output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1))
 	@floop CUDAEx() for i in axes(img, 1)
 		@views transform(img[i, :], tfm; output=output[i,:], v=fill!(v[i,:], 1), z=fill!(z[i,:], 1))
 	end
@@ -261,16 +261,14 @@ md"""
 """
 
 # ╔═╡ 4333808c-d4b5-479c-b659-78fc0c17bf51
-function transform!(vol::CuArray{3}, tfm::SquaredEuclidean; output=CUDA.zeros(size(vol)), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1)) where T
+function transform!(vol::CuArray{T, 3}, tfm::SquaredEuclidean; output=CUDA.zeros(size(vol)), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1)) where T
     @floop CUDAEx() for k in axes(vol, 3)
         @views transform!(vol[:, :, k], tfm; output=output[:, :, k], v=fill!(v[:, :, k], 1), z=fill!(z[:, :, k], 1))
     end
-    @floop CUDAEx() for i in axes(vol, 1)
-        # @floop CUDAEx() for j in axes(vol, 2)
-        #     @views transform(output[i, j, :], tfm; output=output[i, j, :], v=fill!(v[i, j, :], 1), z=fill!(z[i, j, :], 1))
-        # end
+	@floop CUDAEx() for (i, j) in (axes(vol, 1), axes(vol, 2))
+		@views transform(output[i, j, :], tfm; output=output[i, j, :], v=v[i, j, :], z=z[i, j, :])
     end
-    # return output
+    return output
 end
 
 # ╔═╡ Cell order:
