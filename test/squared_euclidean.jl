@@ -379,7 +379,7 @@ md"""
 """
 
 # ╔═╡ e7b6805a-6362-49a6-8124-4baa09e44937
-if CUDA.functional()
+if CUDA.has_cuda_gpu()
 	@testset "squared euclidean 2D GPU" begin
 		img = [
 			0 1 1 1 0 0 0 1 1
@@ -409,7 +409,7 @@ else
 end;
 
 # ╔═╡ ab075b7b-4634-491d-b68b-9e3399dd814e
-if CUDA.functional()
+if CUDA.has_cuda_gpu()
 	@testset "squared euclidean 2D gpu" begin
 		img = rand([0, 1], 10, 10)
 		img2 = copy(img)
@@ -431,44 +431,61 @@ md"""
 """
 
 # ╔═╡ 223acdc8-b5de-4eb1-9c80-19c3281e0dfd
-# if CUDA.functional()
-# 	@testset "squared euclidean 3D multi-threaded" begin
-# 		img = [
-# 			0 0 0 0 0 0 0 0 0 0 0
-# 			0 0 0 0 0 0 0 0 0 0 0
-# 			0 0 0 0 0 0 0 0	0 0 0
-# 			0 0 0 1 1 1 0 0 0 0 0
-# 			0 0 1 0 0 1 0 0 0 0 0
-# 			0 0 1 0 0 1 1 1 0 0 0
-# 			0 0 1 0 0 0 0 1 0 0 0
-# 			0 0 1 0 0 0 0 1 0 0 0
-# 			0 0 0 1 1 1 1 0 0 0 0	
-# 			0 0 0 0 0 0 0 0 0 0 0	
-# 			0 0 0 0 0 0 0 0 0 0 0
-# 		]
-# 		img_inv = @. ifelse(img == 0, 1, 0)
-# 		vol = cat(img, img_inv, dims=3)
-# 		container2 = []
-# 		for i in 1:10
-# 			push!(container2, vol)
-# 		end
-# 		vol_inv = CuArray(cat(container2..., dims=3))
-# 		output, v, z = CUDA.zeros(size(vol_inv)), CUDA.ones(Int32, size(vol_inv)), CUDA.ones(size(vol_inv) .+ 1)
-# 		tfm = SquaredEuclidean()
-# 		test = transform_gpu3!(boolean_indicator(vol_inv), tfm; output=output, v=v, z=z)
-# 		a1 = img_inv
-# 		a2 = img
-# 		ans = cat(a1, a2, dims=3)
-# 		container_a = []
-# 		for i in 1:10
-# 			push!(container_a, ans)
-# 		end
-# 		answer = cat(container_a..., dims=3)
-# 		@test test == CuArray(answer)
-# 	end
-# else
-# 	@warn "CUDA"
-# end;
+if CUDA.has_cuda_gpu()
+	@testset "squared euclidean 3D multi-threaded" begin
+		img = [
+			0 0 0 0 0 0 0 0 0 0 0
+			0 0 0 0 0 0 0 0 0 0 0
+			0 0 0 0 0 0 0 0	0 0 0
+			0 0 0 1 1 1 0 0 0 0 0
+			0 0 1 0 0 1 0 0 0 0 0
+			0 0 1 0 0 1 1 1 0 0 0
+			0 0 1 0 0 0 0 1 0 0 0
+			0 0 1 0 0 0 0 1 0 0 0
+			0 0 0 1 1 1 1 0 0 0 0	
+			0 0 0 0 0 0 0 0 0 0 0	
+			0 0 0 0 0 0 0 0 0 0 0
+		]
+		img_inv = @. ifelse(img == 0, 1, 0)
+		vol = cat(img, img_inv, dims=3)
+		container2 = []
+		for i in 1:10
+			push!(container2, vol)
+		end
+		vol_inv = CuArray(cat(container2..., dims=3))
+		output, v, z = CUDA.zeros(size(vol_inv)), CUDA.ones(Int32, size(vol_inv)), CUDA.ones(size(vol_inv) .+ 1)
+		tfm = SquaredEuclidean()
+		test = transform!(boolean_indicator(vol_inv), tfm; output=output, v=v, z=z)
+		a1 = img_inv
+		a2 = img
+		ans = cat(a1, a2, dims=3)
+		container_a = []
+		for i in 1:10
+			push!(container_a, ans)
+		end
+		answer = cat(container_a..., dims=3)
+		@test test == CuArray(answer)
+	end
+else
+	@warn "CUDA"
+end;
+
+# ╔═╡ 8998856b-dc41-4774-8e04-972caf278e10
+if CUDA.has_cuda_gpu()
+	@testset "squared euclidean 3D gpu" begin
+		img = rand([0, 1], 10, 10, 10)
+		img2 = copy(img)
+		output, v, z = CUDA.zeros(size(img)), CUDA.ones(Int32, size(img)), CUDA.ones(size(img) .+ 1)
+		output2, v2, z2 = zeros(size(img2)), ones(Int32, size(img2)), ones(size(img2) .+ 1)
+		tfm = SquaredEuclidean()
+		test = transform!(CUDA.CuArray(boolean_indicator(img)), tfm; output=output, v=v, z=z)
+		answer = transform(boolean_indicator(img2), tfm; output=output2, v=v2, z=z2)
+		@test test == CuArray(answer)
+	end
+else
+	@warn "CUDA unavailable, not testing GPU support"
+
+end;
 
 # ╔═╡ Cell order:
 # ╠═cd8bf944-2329-11ed-208f-1b2e91673a5e
@@ -504,3 +521,4 @@ md"""
 # ╠═ab075b7b-4634-491d-b68b-9e3399dd814e
 # ╟─b5ba030e-9d5e-4ce5-b138-f3be7fea0e23
 # ╠═223acdc8-b5de-4eb1-9c80-19c3281e0dfd
+# ╠═8998856b-dc41-4774-8e04-972caf278e10
