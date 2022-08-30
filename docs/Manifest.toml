@@ -2,7 +2,7 @@
 
 julia_version = "1.8.0"
 manifest_format = "2.0"
-project_hash = "d4ac9e5b570ad2c7345709076758031206a9f778"
+project_hash = "c626f814a4750e30f06b2831d67bb6ed63e38c7b"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -837,6 +837,12 @@ deps = ["ArrayInterface", "ArrayInterfaceCore", "ArrayInterfaceOffsetArrays", "A
 git-tree-sha1 = "60613258cc56b6c7c909f3e960e8b3b4e86dc2f2"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
 version = "0.12.124"
+
+[[deps.Losers]]
+deps = ["Statistics", "TestSetExtensions"]
+path = "/Users/daleblack/Google Drive/dev/julia/Losers"
+uuid = "1785af8d-d312-496e-9b53-daf6ddaba92c"
+version = "0.1.0"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
