@@ -5,6 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 1594a983-3c6b-45c1-94c6-21d6ebbc918e
+# ╠═╡ show_logs = false
 begin
 	using Pkg
 	Pkg.activate("..")
