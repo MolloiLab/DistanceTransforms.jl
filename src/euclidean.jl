@@ -38,10 +38,10 @@ Citation
 """
 
 # ╔═╡ 5db2a6bd-8cf5-41ed-8cfd-bc96b6563d24
-euclidean(img) = distance_transform(feature_transform(.!(Bool.(img))))
+euclidean(img) = distance_transform(feature_transform(Bool.(img)))
 
 # ╔═╡ 44e7843c-fc9b-4368-b455-7ffded09ffcc
-euclidean(img::BitArray) = distance_transform(feature_transform(.!(img)))
+euclidean(img::BitArray) = distance_transform(feature_transform(img))
 
 # ╔═╡ Cell order:
 # ╠═d25a627e-23ee-11ed-1688-ef6ca75e19e4
