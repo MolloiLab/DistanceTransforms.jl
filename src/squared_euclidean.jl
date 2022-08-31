@@ -16,7 +16,6 @@ begin
 	using FLoops
 	using CUDA
 	using FoldsThreads
-	using Transducers
 end
 
 # ╔═╡ 87dd183b-a462-4744-a800-3936791aea43
