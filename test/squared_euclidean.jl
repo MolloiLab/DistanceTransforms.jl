@@ -14,6 +14,7 @@ begin
 	using Test
 	using CUDA
 	using DistanceTransforms
+	using FoldsThreads
 end
 
 # ╔═╡ 373a8802-bbac-4ab5-abe4-420ccbb61ea0
@@ -467,7 +468,7 @@ if CUDA.has_cuda_gpu()
 		@test test == CuArray(answer)
 	end
 else
-	@warn "CUDA"
+	@warn "CUDA unavailable, not testing GPU support"
 end;
 
 # ╔═╡ 8998856b-dc41-4774-8e04-972caf278e10
@@ -485,6 +486,279 @@ if CUDA.has_cuda_gpu()
 else
 	@warn "CUDA unavailable, not testing GPU support"
 
+end;
+
+# ╔═╡ 3e96bc74-9519-4547-b5d0-62e767a28b94
+md"""
+## Various Multi-Threading
+"""
+
+# ╔═╡ 7db96dd6-cddd-4cb6-8851-b682b64b6fb2
+md"""
+### 2D!
+"""
+
+# ╔═╡ e24c93b2-795a-45ab-a40d-215cbee22660
+@testset "squared euclidean 2D FoldsThreads " begin
+	img = [
+		0 1 1 1 0 0 0 1 1
+		1 1 1 1 1 0 0 0 1
+		1 0 0 0 1 0 0 1 1
+		1 0 0 0 1 0 1 1 0
+		1 0 0 0 1 1 0 1 0
+		1 1 1 1 1 0 0 1 0
+		0 1 1 1 0 0 0 0 1
+	]
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = DepthFirstEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = [
+		 1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
+		 0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
+		 0.0  1.0  1.0  1.0  0.0  1.0  1.0  0.0  0.0
+		 0.0  1.0  4.0  1.0  0.0  1.0  0.0  0.0  1.0
+		 0.0  1.0  1.0  1.0  0.0  0.0  1.0  0.0  1.0
+		 0.0  0.0  0.0  0.0  0.0  1.0  1.0  0.0  1.0
+		 1.0  0.0  0.0  0.0  1.0  2.0  2.0  1.0  0.0
+	]
+	@test test == answer
+end;
+
+# ╔═╡ f44983e3-af78-4dc6-8447-2888806af34d
+@testset "squared euclidean 2D FoldsThreads " begin
+	img = rand([0, 1], 10, 10)
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = DepthFirstEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = transform(boolean_indicator(img), tfm)
+	@test test == answer
+end;
+
+# ╔═╡ 7cdb1f83-1323-4237-bf3c-eac5b849a514
+@testset "squared euclidean 2D FoldsThreads " begin
+	img = [
+		0 1 1 1 0 0 0 1 1
+		1 1 1 1 1 0 0 0 1
+		1 0 0 0 1 0 0 1 1
+		1 0 0 0 1 0 1 1 0
+		1 0 0 0 1 1 0 1 0
+		1 1 1 1 1 0 0 1 0
+		0 1 1 1 0 0 0 0 1
+	]
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = NonThreadedEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = [
+		 1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
+		 0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
+		 0.0  1.0  1.0  1.0  0.0  1.0  1.0  0.0  0.0
+		 0.0  1.0  4.0  1.0  0.0  1.0  0.0  0.0  1.0
+		 0.0  1.0  1.0  1.0  0.0  0.0  1.0  0.0  1.0
+		 0.0  0.0  0.0  0.0  0.0  1.0  1.0  0.0  1.0
+		 1.0  0.0  0.0  0.0  1.0  2.0  2.0  1.0  0.0
+	]
+	@test test == answer
+end;
+
+# ╔═╡ 17ee7bbf-8220-4549-8458-1723e5a3e30d
+@testset "squared euclidean 2D FoldsThreads " begin
+	img = rand([0, 1], 10, 10)
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = NonThreadedEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = transform(boolean_indicator(img), tfm)
+	@test test == answer
+end;
+
+# ╔═╡ 74e9c7b1-ad17-4759-895d-550133b09788
+@testset "squared euclidean 2D FoldsThreads " begin
+	img = [
+		0 1 1 1 0 0 0 1 1
+		1 1 1 1 1 0 0 0 1
+		1 0 0 0 1 0 0 1 1
+		1 0 0 0 1 0 1 1 0
+		1 0 0 0 1 1 0 1 0
+		1 1 1 1 1 0 0 1 0
+		0 1 1 1 0 0 0 0 1
+	]
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = WorkStealingEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = [
+		 1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
+		 0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
+		 0.0  1.0  1.0  1.0  0.0  1.0  1.0  0.0  0.0
+		 0.0  1.0  4.0  1.0  0.0  1.0  0.0  0.0  1.0
+		 0.0  1.0  1.0  1.0  0.0  0.0  1.0  0.0  1.0
+		 0.0  0.0  0.0  0.0  0.0  1.0  1.0  0.0  1.0
+		 1.0  0.0  0.0  0.0  1.0  2.0  2.0  1.0  0.0
+	]
+	@test test == answer
+end;
+
+# ╔═╡ 9f78df21-d298-495f-a656-5325807cb109
+@testset "squared euclidean 2D FoldsThreads" begin
+	img = rand([0, 1], 10, 10)
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = WorkStealingEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = transform(boolean_indicator(img), tfm)
+	@test test == answer
+end;
+
+# ╔═╡ ed548af6-f1b9-4302-b787-b8ad67d4a5b4
+md"""
+### 3D!
+"""
+
+# ╔═╡ e19e8cc6-1f9c-4fa8-9783-e148b6729bb7
+@testset "squared euclidean 3D FoldsThreads" begin
+	img = [
+		0 0 0 0 0 0 0 0 0 0 0
+		0 0 0 0 0 0 0 0 0 0 0
+		0 0 0 0 0 0 0 0	0 0 0
+		0 0 0 1 1 1 0 0 0 0 0
+		0 0 1 0 0 1 0 0 0 0 0
+		0 0 1 0 0 1 1 1 0 0 0
+		0 0 1 0 0 0 0 1 0 0 0
+		0 0 1 0 0 0 0 1 0 0 0
+		0 0 0 1 1 1 1 0 0 0 0	
+		0 0 0 0 0 0 0 0 0 0 0	
+		0 0 0 0 0 0 0 0 0 0 0
+	]
+	img_inv = @. ifelse(img == 0, 1, 0)
+	vol = cat(img, img_inv, dims=3)
+	container2 = []
+	for i in 1:10
+		push!(container2, vol)
+	end
+	vol_inv = cat(container2..., dims=3)
+	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = DepthFirstEx()
+	test = transform!(boolean_indicator(vol_inv), tfm, ex; output=output, v=v, z=z)
+	a1 = img_inv
+	a2 = img
+	ans = cat(a1, a2, dims=3)
+	container_a = []
+	for i in 1:10
+		push!(container_a, ans)
+	end
+	answer = cat(container_a..., dims=3)
+	@test test == answer
+end;
+
+# ╔═╡ 8c570c8b-ffc4-4b2b-845a-a504b179af4e
+@testset "squared euclidean 3D FoldsThreads" begin
+	img = rand([0, 1], 10, 10, 10)
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = WorkStealingEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = transform(boolean_indicator(img), tfm)
+	@test test == answer
+end;
+
+# ╔═╡ a3c842dc-f392-4505-9cf2-3ab54cd80955
+@testset "squared euclidean 3D FoldsThreads" begin
+	img = [
+		0 0 0 0 0 0 0 0 0 0 0
+		0 0 0 0 0 0 0 0 0 0 0
+		0 0 0 0 0 0 0 0	0 0 0
+		0 0 0 1 1 1 0 0 0 0 0
+		0 0 1 0 0 1 0 0 0 0 0
+		0 0 1 0 0 1 1 1 0 0 0
+		0 0 1 0 0 0 0 1 0 0 0
+		0 0 1 0 0 0 0 1 0 0 0
+		0 0 0 1 1 1 1 0 0 0 0	
+		0 0 0 0 0 0 0 0 0 0 0	
+		0 0 0 0 0 0 0 0 0 0 0
+	]
+	img_inv = @. ifelse(img == 0, 1, 0)
+	vol = cat(img, img_inv, dims=3)
+	container2 = []
+	for i in 1:10
+		push!(container2, vol)
+	end
+	vol_inv = cat(container2..., dims=3)
+	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = NonThreadedEx()
+	test = transform!(boolean_indicator(vol_inv), tfm, ex; output=output, v=v, z=z)
+	a1 = img_inv
+	a2 = img
+	ans = cat(a1, a2, dims=3)
+	container_a = []
+	for i in 1:10
+		push!(container_a, ans)
+	end
+	answer = cat(container_a..., dims=3)
+	@test test == answer
+end;
+
+# ╔═╡ 9850ad92-53cb-431d-92c0-04d61c4db391
+@testset "squared euclidean 3D FoldsThreads" begin
+	img = rand([0, 1], 10, 10, 10)
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = NonThreadedEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = transform(boolean_indicator(img), tfm)
+	@test test == answer
+end;
+
+# ╔═╡ 1d7f7eb8-2b7d-4d5c-aa09-bdb324047443
+@testset "squared euclidean 3D FoldsThreads" begin
+	img = [
+		0 0 0 0 0 0 0 0 0 0 0
+		0 0 0 0 0 0 0 0 0 0 0
+		0 0 0 0 0 0 0 0	0 0 0
+		0 0 0 1 1 1 0 0 0 0 0
+		0 0 1 0 0 1 0 0 0 0 0
+		0 0 1 0 0 1 1 1 0 0 0
+		0 0 1 0 0 0 0 1 0 0 0
+		0 0 1 0 0 0 0 1 0 0 0
+		0 0 0 1 1 1 1 0 0 0 0	
+		0 0 0 0 0 0 0 0 0 0 0	
+		0 0 0 0 0 0 0 0 0 0 0
+	]
+	img_inv = @. ifelse(img == 0, 1, 0)
+	vol = cat(img, img_inv, dims=3)
+	container2 = []
+	for i in 1:10
+		push!(container2, vol)
+	end
+	vol_inv = cat(container2..., dims=3)
+	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = WorkStealingEx()
+	test = transform!(boolean_indicator(vol_inv), tfm, ex; output=output, v=v, z=z)
+	a1 = img_inv
+	a2 = img
+	ans = cat(a1, a2, dims=3)
+	container_a = []
+	for i in 1:10
+		push!(container_a, ans)
+	end
+	answer = cat(container_a..., dims=3)
+	@test test == answer
+end;
+
+# ╔═╡ fe5fb42c-9c56-4c27-a2c5-70b8e761d9b8
+@testset "squared euclidean 3D FoldsThreads" begin
+	img = rand([0, 1], 10, 10, 10)
+	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
+	tfm = SquaredEuclidean()
+	ex = WorkStealingEx()
+	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
+	answer = transform(boolean_indicator(img), tfm)
+	@test test == answer
 end;
 
 # ╔═╡ Cell order:
@@ -522,3 +796,18 @@ end;
 # ╟─b5ba030e-9d5e-4ce5-b138-f3be7fea0e23
 # ╠═223acdc8-b5de-4eb1-9c80-19c3281e0dfd
 # ╠═8998856b-dc41-4774-8e04-972caf278e10
+# ╟─3e96bc74-9519-4547-b5d0-62e767a28b94
+# ╟─7db96dd6-cddd-4cb6-8851-b682b64b6fb2
+# ╠═e24c93b2-795a-45ab-a40d-215cbee22660
+# ╠═f44983e3-af78-4dc6-8447-2888806af34d
+# ╠═7cdb1f83-1323-4237-bf3c-eac5b849a514
+# ╠═17ee7bbf-8220-4549-8458-1723e5a3e30d
+# ╠═74e9c7b1-ad17-4759-895d-550133b09788
+# ╠═9f78df21-d298-495f-a656-5325807cb109
+# ╟─ed548af6-f1b9-4302-b787-b8ad67d4a5b4
+# ╠═e19e8cc6-1f9c-4fa8-9783-e148b6729bb7
+# ╠═8c570c8b-ffc4-4b2b-845a-a504b179af4e
+# ╠═a3c842dc-f392-4505-9cf2-3ab54cd80955
+# ╠═9850ad92-53cb-431d-92c0-04d61c4db391
+# ╠═1d7f7eb8-2b7d-4d5c-aa09-bdb324047443
+# ╠═fe5fb42c-9c56-4c27-a2c5-70b8e761d9b8

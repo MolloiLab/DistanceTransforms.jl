@@ -15,6 +15,8 @@ begin
 	using DistanceTransforms
 	using FLoops
 	using CUDA
+	using FoldsThreads
+	using Transducers
 end
 
 # ╔═╡ 87dd183b-a462-4744-a800-3936791aea43
@@ -201,7 +203,7 @@ elements. Multi-Threaded version of `transform!(..., tfm::SquaredEuclidean)`
 """
 
 # ╔═╡ 4f4bd88d-9941-486c-b562-ec3fb9cadba7
-function transform!(img::AbstractMatrix, tfm::SquaredEuclidean, nthreads; output=zeros(size(img)), v=ones(Int32, size(img)), z=ones(size(img) .+ 1))
+function transform!(img::AbstractMatrix, tfm::SquaredEuclidean, nthreads::Number; output=zeros(size(img)), v=ones(Int32, size(img)), z=ones(size(img) .+ 1))
 	Threads.@threads for i in axes(img, 1)
 		@views transform(img[i, :], tfm; output=output[i,:], v=fill!(v[i,:], 1), z=fill!(z[i,:], 1))
 	end
@@ -222,7 +224,7 @@ Applies a squared euclidean distance transform to an input image. Returns an arr
 """
 
 # ╔═╡ e570b1d5-b2ff-48c0-8562-9cf2d350f9e4
-function transform!(vol::AbstractArray, tfm::SquaredEuclidean, nthreads; output=zeros(size(vol)), v=ones(Int32, size(vol)), z=ones(size(vol) .+ 1))
+function transform!(vol::AbstractArray, tfm::SquaredEuclidean, nthreads::Number; output=zeros(size(vol)), v=ones(Int32, size(vol)), z=ones(size(vol) .+ 1))
     Threads.@threads for k in axes(vol, 3)
         @views transform!(vol[:, :, k], tfm; output=output[:, :, k], v=fill!(v[:, :, k], 1), z=fill!(z[:, :, k], 1))
     end
@@ -233,17 +235,6 @@ function transform!(vol::AbstractArray, tfm::SquaredEuclidean, nthreads; output=
     end
     return output
 end
-
-# ╔═╡ e559548d-1234-489a-b59e-db80aaf81798
-# function transform!(vol::AbstractArray, tfm::SquaredEuclidean, nthreads; output=zeros(size(vol)), v=ones(Int32, size(vol)), z=ones(size(vol) .+ 1))
-#     Threads.@threads for k in axes(vol, 3)
-#         @views transform!(vol[:, :, k], tfm; output=output[:, :, k], v=fill!(v[:, :, k], 1), z=fill!(z[:, :, k], 1))
-#     end
-#     Threads.@threads for (i, j) in (axes(vol, 2), axes(vol, 1))
-# 		@views transform(output[i, j, :], tfm; output=output[i, j, :], v=fill!(v[i, j, :], 1), z=fill!(z[i, j, :], 1))
-#     end
-#     return output
-# end
 
 # ╔═╡ a5a497b8-d1c6-4f00-8ab1-75dc9571cc0a
 md"""
@@ -284,6 +275,45 @@ function transform!(vol::CuArray{T, 3}, tfm::SquaredEuclidean; output=CUDA.zeros
     return output
 end
 
+# ╔═╡ 3bb1c028-4f7a-414a-86bd-a4522af64957
+md"""
+## Various Multi-Threading
+"""
+
+# ╔═╡ d470c994-4de2-4d84-950f-4508b11827a2
+md"""
+### 2D!
+"""
+
+# ╔═╡ 0726f423-2044-4d78-8eca-9433e9f1dc95
+function transform!(img::AbstractMatrix, tfm::SquaredEuclidean, ex; output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1)) where T
+	@floop ex for i in axes(img, 1)
+		@views transform(img[i, :], tfm; output=output[i,:], v=v[i,:], z=z[i,:])
+	end
+	@floop ex for j in axes(img, 2)
+		@views transform(output[:, j], tfm; output=output[:,j], v=fill!(v[:,j], 1), z=fill!(z[:,j], 1))
+	end
+	return output
+end
+
+# ╔═╡ f2ceeaa5-988d-4adb-9ac2-67c0ded6198d
+md"""
+### 3D!
+"""
+
+# ╔═╡ 07e9ebfa-a287-45d9-a38a-aab7690992f9
+function transform!(vol::AbstractArray, tfm::SquaredEuclidean, ex; output=zeros(size(vol)), v=ones(size(vol)), z=ones(size(vol) .+ 1)) where T
+    @floop ex for k in axes(vol, 3)
+        @views transform!(vol[:, :, k], tfm; output=output[:, :, k], v=v[:, :, k], z=z[:, :, k])
+    end
+	@floop ex for i in axes(vol, 1)
+		for j in axes(vol, 2)
+			@views transform(output[i, j, :], tfm; output=output[i, j, :], v=fill!(v[i, j, :], 1), z=fill!(z[i, j, :], 1))
+		end
+    end
+    return output
+end
+
 # ╔═╡ Cell order:
 # ╠═c7ef37d8-2330-11ed-006d-a16889a98cd1
 # ╠═87dd183b-a462-4744-a800-3936791aea43
@@ -306,9 +336,13 @@ end
 # ╠═4f4bd88d-9941-486c-b562-ec3fb9cadba7
 # ╟─1df8eb42-e73c-4680-a8ce-c9d648ee8fe4
 # ╠═e570b1d5-b2ff-48c0-8562-9cf2d350f9e4
-# ╠═e559548d-1234-489a-b59e-db80aaf81798
 # ╟─a5a497b8-d1c6-4f00-8ab1-75dc9571cc0a
 # ╟─2ba78c10-a3c2-460c-b30e-d86fc04c581f
 # ╠═b8a0a7a0-887f-4c87-80ad-41a28aa8bf1c
 # ╟─c5d95fe5-fb5f-441d-9392-1ac9eec06924
 # ╠═4333808c-d4b5-479c-b659-78fc0c17bf51
+# ╟─3bb1c028-4f7a-414a-86bd-a4522af64957
+# ╟─d470c994-4de2-4d84-950f-4508b11827a2
+# ╠═0726f423-2044-4d78-8eca-9433e9f1dc95
+# ╟─f2ceeaa5-988d-4adb-9ac2-67c0ded6198d
+# ╠═07e9ebfa-a287-45d9-a38a-aab7690992f9
