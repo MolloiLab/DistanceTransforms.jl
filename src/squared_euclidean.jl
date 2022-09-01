@@ -240,9 +240,16 @@ md"""
 ## GPU
 """
 
-# ╔═╡ 2ba78c10-a3c2-460c-b30e-d86fc04c581f
+# ╔═╡ 824a5bf4-7956-4582-9019-4fb68717229a
 md"""
 ### 2D!
+```julia
+transform!(img::CuArray{T, 2}, tfm::SquaredEuclidean; output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1)) where T
+```
+
+Applies a squared euclidean distance transform to an input image.
+Returns an array with spatial information embedded in the array 
+elements. GPU version of `transform!(..., tfm::SquaredEuclidean)`
 """
 
 # ╔═╡ b8a0a7a0-887f-4c87-80ad-41a28aa8bf1c
@@ -256,9 +263,16 @@ function transform!(img::CuArray{T, 2}, tfm::SquaredEuclidean; output=CUDA.zeros
 	return output
 end
 
-# ╔═╡ c5d95fe5-fb5f-441d-9392-1ac9eec06924
+# ╔═╡ f5c97a87-04e1-43e2-9b06-249443b3826c
 md"""
 ### 3D!
+```julia
+transform!(vol::CuArray{T, 3}, tfm::SquaredEuclidean; output=CUDA.zeros(size(vol)), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1)) where T
+```
+
+Applies a squared euclidean distance transform to an input image.
+Returns an array with spatial information embedded in the array 
+elements. GPU version of `transform!(..., tfm::SquaredEuclidean)`
 """
 
 # ╔═╡ 4333808c-d4b5-479c-b659-78fc0c17bf51
@@ -279,13 +293,20 @@ md"""
 ## Various Multi-Threading
 """
 
-# ╔═╡ d470c994-4de2-4d84-950f-4508b11827a2
+# ╔═╡ 9d0f0cde-66b0-4fb5-8ff3-c96e561a5ba2
 md"""
 ### 2D!
+```julia
+transform!(img::AbstractMatrix, tfm::SquaredEuclidean, ex; output=zeros(size(img)), v=ones(size(img)), z=ones(size(img) .+ 1))
+```
+
+Applies a squared euclidean distance transform to an input image.
+Returns an array with spatial information embedded in the array 
+elements. Multi-Threaded version of `transform!(..., tfm::SquaredEuclidean)` but utilizes FoldsThreads.jl for different threaded executors. `ex`=(FoldsThreads.DepthFirstEx(), FoldsThreads.NonThreadedEx(), FoldsThreads.WorkStealingEx())
 """
 
 # ╔═╡ 0726f423-2044-4d78-8eca-9433e9f1dc95
-function transform!(img::AbstractMatrix, tfm::SquaredEuclidean, ex; output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1)) where T
+function transform!(img::AbstractMatrix, tfm::SquaredEuclidean, ex; output=zeros(size(img)), v=ones(size(img)), z=ones(size(img) .+ 1))
 	@floop ex for i in axes(img, 1)
 		@views transform(img[i, :], tfm; output=output[i,:], v=v[i,:], z=z[i,:])
 	end
@@ -295,13 +316,20 @@ function transform!(img::AbstractMatrix, tfm::SquaredEuclidean, ex; output=CUDA.
 	return output
 end
 
-# ╔═╡ f2ceeaa5-988d-4adb-9ac2-67c0ded6198d
+# ╔═╡ c18c3ed9-1321-4884-8dad-70f4e24adcc5
 md"""
 ### 3D!
+```julia
+transform!(vol::AbstractArray, tfm::SquaredEuclidean, ex; output=zeros(size(vol)), v=ones(size(vol)), z=ones(size(vol) .+ 1))
+```
+
+Applies a squared euclidean distance transform to an input image.
+Returns an array with spatial information embedded in the array 
+elements. Multi-Threaded version of `transform!(..., tfm::SquaredEuclidean)` but utilizes FoldsThreads.jl for different threaded executors. `ex`=(FoldsThreads.DepthFirstEx(), FoldsThreads.NonThreadedEx(), FoldsThreads.WorkStealingEx())
 """
 
 # ╔═╡ 07e9ebfa-a287-45d9-a38a-aab7690992f9
-function transform!(vol::AbstractArray, tfm::SquaredEuclidean, ex; output=zeros(size(vol)), v=ones(size(vol)), z=ones(size(vol) .+ 1)) where T
+function transform!(vol::AbstractArray, tfm::SquaredEuclidean, ex; output=zeros(size(vol)), v=ones(size(vol)), z=ones(size(vol) .+ 1))
     @floop ex for k in axes(vol, 3)
         @views transform!(vol[:, :, k], tfm; output=output[:, :, k], v=v[:, :, k], z=z[:, :, k])
     end
@@ -336,12 +364,12 @@ end
 # ╟─1df8eb42-e73c-4680-a8ce-c9d648ee8fe4
 # ╠═e570b1d5-b2ff-48c0-8562-9cf2d350f9e4
 # ╟─a5a497b8-d1c6-4f00-8ab1-75dc9571cc0a
-# ╟─2ba78c10-a3c2-460c-b30e-d86fc04c581f
+# ╟─824a5bf4-7956-4582-9019-4fb68717229a
 # ╠═b8a0a7a0-887f-4c87-80ad-41a28aa8bf1c
-# ╟─c5d95fe5-fb5f-441d-9392-1ac9eec06924
+# ╟─f5c97a87-04e1-43e2-9b06-249443b3826c
 # ╠═4333808c-d4b5-479c-b659-78fc0c17bf51
 # ╟─3bb1c028-4f7a-414a-86bd-a4522af64957
-# ╟─d470c994-4de2-4d84-950f-4508b11827a2
+# ╟─9d0f0cde-66b0-4fb5-8ff3-c96e561a5ba2
 # ╠═0726f423-2044-4d78-8eca-9433e9f1dc95
-# ╟─f2ceeaa5-988d-4adb-9ac2-67c0ded6198d
+# ╟─c18c3ed9-1321-4884-8dad-70f4e24adcc5
 # ╠═07e9ebfa-a287-45d9-a38a-aab7690992f9
