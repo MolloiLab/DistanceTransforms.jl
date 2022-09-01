@@ -21,23 +21,29 @@ end
 TableOfContents()
 
 # ╔═╡ ec56a36e-72b3-42d2-9f8f-6a332401b9b9
+"""
+```julia
+abstract type DistanceTransform end
+```
+Main type for all distance transforms
+"""
 abstract type DistanceTransform end
 
 # ╔═╡ f6dd7123-0069-4154-a3c3-b9f95c49d21d
 md"""
 # `Chamfer`
+"""
+
+# ╔═╡ aafc9419-3105-45ff-905e-610843528e04
+"""
 
 ```julia
-struct Chamfer{T} <: DistanceTransforms.DistanceTransform
-    dt
-end
+struct Chamfer{T} <: DistanceTransform end
 ```
 
 Prepares an array to be `transform`ed using the 3-4 chamfer algorithm laid out in 'Distance transformations in digital images, Computer Vision, Graphics, and Image Processing' [Gunilla Borgefors](https://studentportalen.uu.se/uusp-filearea-tool/download.action?nodeId=214320&toolAttachmentId=64777)
 """
-
-# ╔═╡ aafc9419-3105-45ff-905e-610843528e04
-struct Chamfer <: DistanceTransforms.DistanceTransform end
+struct Chamfer <: DistanceTransform end
 
 # ╔═╡ e68e45ae-fbc1-403e-bc45-9d4f227a933f
 md"""
@@ -50,6 +56,13 @@ md"""
 """
 
 # ╔═╡ 408fa845-a280-47ce-aedd-a53ffe3376f7
+"""
+```julia
+transform(img::AbstractMatrix, dt::AbstractMatrix, tfm::Chamfer)
+```
+
+2D chamfer distance transform using the 3-4 chamfer algorithm laid out in 'Distance transformations in digital images, Computer Vision, Graphics, and Image Processing' [Gunilla Borgefors](https://studentportalen.uu.se/uusp-filearea-tool/download.action?nodeId=214320&toolAttachmentId=64777)
+"""
 function transform(img::AbstractMatrix, dt::AbstractMatrix, tfm::Chamfer)
     w, h = size(img)
     # Forward pass
@@ -121,6 +134,13 @@ md"""
 """
 
 # ╔═╡ ab0b89ad-8cf1-4cb0-9666-487e6973e414
+"""
+```julia
+transform(img::AbstractArray, dt::AbstractArray, tfm::Chamfer)
+```
+
+3D chamfer distance transform using the 3-4 chamfer algorithm laid out in 'Distance transformations in digital images, Computer Vision, Graphics, and Image Processing' [Gunilla Borgefors](https://studentportalen.uu.se/uusp-filearea-tool/download.action?nodeId=214320&toolAttachmentId=64777)
+"""
 function transform(img::AbstractArray, dt::AbstractArray, tfm::Chamfer)
     for z in 1:size(img)[3]
         dt[:, :, z] = transform(img[:, :, z], dt[:, :, z], tfm)

@@ -22,15 +22,16 @@ TableOfContents()
 # ╔═╡ 64661943-81d4-40c5-9479-fcc381544185
 md"""
 ## Boolean Indicator
+"""
 
+# ╔═╡ 5f558b4b-d109-45d7-b2f8-fa03c0ff5db6
+"""
 ```julia
 boolean_indicator(f)
 ```
 
 If `f` is a boolean indicator where 0's correspond to background and 1s correspond to foreground then mark background pixels with large number `1e10`
 """
-
-# ╔═╡ 5f558b4b-d109-45d7-b2f8-fa03c0ff5db6
 boolean_indicator(f) = @. ifelse(f == 0, 1.0f10, 0.0f0)
 
 # ╔═╡ Cell order:
