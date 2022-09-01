@@ -11,7 +11,8 @@ include("./squared_euclidean.jl")
 include("./utils.jl")
 include("./wenbo.jl")
 
-export transform,
+export DistanceTransform,
+    transform,
     transform!,
 
     # Export chamfer.jl functions
