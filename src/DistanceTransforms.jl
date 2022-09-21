@@ -5,7 +5,7 @@ using CUDA
 using FLoops
 using FoldsCUDA
 
-include("./chamfer.jl")
+include("./borgefors.jl")
 include("./maurer.jl")
 include("./felzenszwalb.jl")
 include("./utils.jl")
@@ -16,7 +16,7 @@ export DistanceTransform,
     transform!,
 
     # Export chamfer.jl functions
-    Chamfer,
+    Borgefors,
 
     # Export maurer.jl functions
     Maurer,

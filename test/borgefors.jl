@@ -21,7 +21,7 @@ TableOfContents()
 
 # ╔═╡ 5cadc26e-698f-4cbf-8bf5-09b83dbd9447
 md"""
-# `Chamfer`
+# `Borgefors`
 """
 
 # ╔═╡ 38754b7d-d2e7-4e44-a150-7efab14d585b
@@ -35,7 +35,7 @@ md"""
 """
 
 # ╔═╡ 2e8f1750-7fc0-4d21-aa25-d00bc67bc048
-@testset "chamfer 2D" begin
+@testset "Borgefors 2D" begin
 	x = [
 		1 1 0 0
 		0 1 1 0
@@ -43,7 +43,7 @@ md"""
 		0 1 0 0
 	]
 	dt = zeros(Float32, size(x))
-	tfm = Chamfer()
+	tfm = Borgefors()
 	answer = [
 		0 0 3 4
 		3 0 0 3
@@ -54,7 +54,7 @@ md"""
 end;
 
 # ╔═╡ b268d818-90b5-4382-a330-b8bc9e18b914
-@testset "chamfer 2D" begin
+@testset "Borgefors 2D" begin
 	x = [
 		1 1 0 0
 		0 1 0 0
@@ -62,7 +62,7 @@ end;
 		0 1 0 0
 	]
 	dt = zeros(Float32, size(x))
-	tfm = Chamfer()
+	tfm = Borgefors()
 	answer = [
 		0 0 3 6
 		3 0 3 6
@@ -78,7 +78,7 @@ md"""
 """
 
 # ╔═╡ dde0dc70-4422-4698-92bd-803347c04cda
-@testset "chamfer 3D" begin
+@testset "Borgefors 3D" begin
 	x1 = [
 		1 1 0 0
 		0 1 0 0
@@ -87,7 +87,7 @@ md"""
 	]
 	x = cat(x1, x1; dims=3)
 	dt = zeros(Float32, size(x))
-	tfm = Chamfer()
+	tfm = Borgefors()
 	a1 = [
 		0 0 3 6
 		3 0 3 6
