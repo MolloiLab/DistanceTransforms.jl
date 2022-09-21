@@ -1,6 +1,6 @@
 include("imports.jl")
 
-include("chamfer.jl")
-include("euclidean.jl")
-include("squared_euclidean.jl")
+include("borgefors.jl")
+include("maurer.jl")
+include("felzenszwalb.jl")
 include("wenbo.jl")

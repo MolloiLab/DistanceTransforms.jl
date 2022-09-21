@@ -22,7 +22,7 @@ TableOfContents()
 
 # ╔═╡ 4a9d1a91-d2ac-4c30-bc2f-f2dd0e27cc43
 md"""
-# `SquaredEuclidean`
+# `Felzenszwalb`
 """
 
 # ╔═╡ 9f2edcc0-4f04-4881-9e83-25f92bc42119
@@ -36,30 +36,30 @@ md"""
 """
 
 # ╔═╡ d3f4223e-f697-4a31-8825-66b1fae2b4f5
-@testset "squared euclidean 1D" begin
+@testset "Felzenszwalb 1D" begin
 	f = [1, 1, 0, 0, 0, 1, 1]
 	output, v, z = zeros(length(f)), ones(Int32, length(f)), ones(length(f) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform(boolean_indicator(f), tfm; output=output, v=v, z=z)
 	answer = [0.0, 0.0, 1.0, 4.0, 1.0, 0.0, 0.0]
 	@test test == answer
 end;
 
 # ╔═╡ d48cc7be-b769-4a64-970e-5982105fd382
-@testset "squared euclidean 1D" begin
+@testset "Felzenszwalb 1D" begin
 	f = [0, 0, 0, 1]
 	output, v, z = zeros(length(f)), ones(Int32, length(f)), ones(length(f) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform(boolean_indicator(f), tfm; output=output, v=v, z=z)
 	answer = [9.0, 4.0, 1.0, 0.0]
 	@test test == answer
 end;
 
 # ╔═╡ 4ded097b-5e18-47af-bbbb-aa9fb626a9d1
-@testset "squared euclidean 1D" begin
+@testset "Felzenszwalb 1D" begin
 	f = [1, 0, 0, 0]
 	output, v, z = zeros(length(f)), ones(Int32, length(f)), ones(length(f) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform(boolean_indicator(f), tfm; output=output, v=v, z=z)
 	answer = [0, 1, 4, 9]
 	@test test == answer
@@ -71,7 +71,7 @@ md"""
 """
 
 # ╔═╡ eafcd9e8-d691-4ae5-9e71-e999f8b6702c
-@testset "squared euclidean 2D" begin
+@testset "Felzenszwalb 2D" begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -82,7 +82,7 @@ md"""
 		0 1 1 1 0 0 0 0 1
 	]
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform(boolean_indicator(img), tfm; output=output, v=v, z=z)
 	answer = [
 		1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
@@ -97,7 +97,7 @@ md"""
 end;
 
 # ╔═╡ 2f5755cb-e575-4ca9-a8b3-f2fd7846c068
-@testset "squared euclidean 2D" begin
+@testset "Felzenszwalb 2D" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -112,7 +112,7 @@ end;
 		0 0 0 0 0 0 0 0 0 0 0
 	]
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform(boolean_indicator(img), tfm; output=output, v=v, z=z)
 	answer = [
 		18.0  13.0  10.0  9.0  9.0  9.0  10.0  13.0  18.0  25.0  34.0
@@ -136,7 +136,7 @@ md"""
 """
 
 # ╔═╡ afc433aa-ecc9-443a-bbd4-55bd48730937
-@testset "squared euclidean 3D" begin
+@testset "Felzenszwalb 3D" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -158,7 +158,7 @@ md"""
 	end
 	vol_inv = cat(container2..., dims=3)
 	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform(boolean_indicator(vol_inv), tfm; output=output, v=v, z=z)
 	a1 = img_inv
 	a2 = img
@@ -182,7 +182,7 @@ md"""
 """
 
 # ╔═╡ fcab8ebd-6799-4ef8-90f8-959af5bfb375
-@testset "squared euclidean 2D in-place" begin
+@testset "Felzenszwalb 2D in-place" begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -193,7 +193,7 @@ md"""
 		0 1 1 1 0 0 0 0 1
 	]
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform!(boolean_indicator(img), tfm; output=output, v=v, z=z)
 	answer = [
 		1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
@@ -208,10 +208,10 @@ md"""
 end;
 
 # ╔═╡ bb7361e0-5a20-4454-87bf-a3cbf568a94b
-@testset "squared euclidean 2D in-place" begin
+@testset "Felzenszwalb 2D in-place" begin
 	img = rand([0, 1], 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform!(boolean_indicator(img), tfm; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm; output=output, v=v, z=z)
 	@test test == answer
@@ -223,7 +223,7 @@ md"""
 """
 
 # ╔═╡ 4c066e7c-4f1d-4795-bfb7-525b999e2a53
-@testset "squared euclidean 3D in-place" begin
+@testset "Felzenszwalb 3D in-place" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -245,7 +245,7 @@ md"""
 	end
 	vol_inv = cat(container2..., dims=3)
 	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform!(boolean_indicator(vol_inv), tfm; output=output, v=v, z=z)
 	a1 = img_inv
 	a2 = img
@@ -259,10 +259,10 @@ md"""
 end;
 
 # ╔═╡ ddfaf97d-052f-40b5-8e02-9cbaa0f3a801
-@testset "squared euclidean 3D in-place" begin
+@testset "Felzenszwalb 3D in-place" begin
 	img = rand([0, 1], 10, 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	test = transform!(boolean_indicator(img), tfm; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm; output=output, v=v, z=z)
 	@test test == answer
@@ -279,7 +279,7 @@ md"""
 """
 
 # ╔═╡ bf7df452-38b7-4937-a981-70cdd820622a
-@testset "squared euclidean 2D multi-threaded" begin
+@testset "Felzenszwalb 2D multi-threaded" begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -290,7 +290,7 @@ md"""
 		0 1 1 1 0 0 0 0 1
 	]
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	nthreads = Threads.nthreads()
 	test = transform!(boolean_indicator(img), tfm, nthreads; output=output, v=v, z=z)
 	answer = [
@@ -306,10 +306,10 @@ md"""
 end;
 
 # ╔═╡ 91c1a3a4-d2cd-4bd3-8994-2efb501aa3e8
-@testset "squared euclidean 2D multi-threaded" begin
+@testset "Felzenszwalb 2D multi-threaded" begin
 	img = rand([0, 1], 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	nthreads = Threads.nthreads()
 	test = transform!(boolean_indicator(img), tfm, nthreads; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm; output=output, v=v, z=z)
@@ -322,7 +322,7 @@ md"""
 """
 
 # ╔═╡ 0ccd566f-18b7-4f99-93db-8df1379e3cd1
-@testset "squared euclidean 3D multi-threaded" begin
+@testset "Felzenszwalb 3D multi-threaded" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -344,7 +344,7 @@ md"""
 	end
 	vol_inv = cat(container2..., dims=3)
 	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	nthreads = Threads.nthreads()
 	test = transform!(boolean_indicator(vol_inv), tfm, nthreads; output=output, v=v, z=z)
 	a1 = img_inv
@@ -359,10 +359,10 @@ md"""
 end;
 
 # ╔═╡ ad76fe0e-c7f4-4e5e-9a5f-11f597274411
-@testset "squared euclidean 3D multi-threaded" begin
+@testset "Felzenszwalb 3D multi-threaded" begin
 	img = rand([0, 1], 10, 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	nthreads = Threads.nthreads()
 	test = transform!(boolean_indicator(img), tfm, nthreads; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm; output=output, v=v, z=z)
@@ -381,7 +381,7 @@ md"""
 
 # ╔═╡ e7b6805a-6362-49a6-8124-4baa09e44937
 if CUDA.has_cuda_gpu()
-	@testset "squared euclidean 2D GPU" begin
+	@testset "Felzenszwalb 2D GPU" begin
 		img = [
 			0 1 1 1 0 0 0 1 1
 			1 1 1 1 1 0 0 0 1
@@ -392,7 +392,7 @@ if CUDA.has_cuda_gpu()
 			0 1 1 1 0 0 0 0 1
 		]
 		output, v, z = CUDA.zeros(size(img)), CUDA.ones(Int32, size(img)), CUDA.ones(size(img) .+ 1)
-		tfm = SquaredEuclidean()
+		tfm = Felzenszwalb()
 		test = transform!(CUDA.CuArray(boolean_indicator(img)), tfm; output=output, v=v, z=z)
 		answer = CuArray([
 			1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
@@ -411,12 +411,12 @@ end;
 
 # ╔═╡ ab075b7b-4634-491d-b68b-9e3399dd814e
 if CUDA.has_cuda_gpu()
-	@testset "squared euclidean 2D gpu" begin
+	@testset "Felzenszwalb 2D gpu" begin
 		img = rand([0, 1], 10, 10)
 		img2 = copy(img)
 		output, v, z = CUDA.zeros(size(img)), CUDA.ones(Int32, size(img)), CUDA.ones(size(img) .+ 1)
 		output2, v2, z2 = zeros(size(img2)), ones(Int32, size(img2)), ones(size(img2) .+ 1)
-		tfm = SquaredEuclidean()
+		tfm = Felzenszwalb()
 		test = transform!(CUDA.CuArray(boolean_indicator(img)), tfm; output=output, v=v, z=z)
 		answer = transform(boolean_indicator(img2), tfm; output=output2, v=v2, z=z2)
 		@test test == CuArray(answer)
@@ -433,7 +433,7 @@ md"""
 
 # ╔═╡ 223acdc8-b5de-4eb1-9c80-19c3281e0dfd
 if CUDA.has_cuda_gpu()
-	@testset "squared euclidean 3D multi-threaded" begin
+	@testset "Felzenszwalb 3D multi-threaded" begin
 		img = [
 			0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0
@@ -455,7 +455,7 @@ if CUDA.has_cuda_gpu()
 		end
 		vol_inv = CuArray(cat(container2..., dims=3))
 		output, v, z = CUDA.zeros(size(vol_inv)), CUDA.ones(Int32, size(vol_inv)), CUDA.ones(size(vol_inv) .+ 1)
-		tfm = SquaredEuclidean()
+		tfm = Felzenszwalb()
 		test = transform!(boolean_indicator(vol_inv), tfm; output=output, v=v, z=z)
 		a1 = img_inv
 		a2 = img
@@ -473,12 +473,12 @@ end;
 
 # ╔═╡ 8998856b-dc41-4774-8e04-972caf278e10
 if CUDA.has_cuda_gpu()
-	@testset "squared euclidean 3D gpu" begin
+	@testset "Felzenszwalb 3D gpu" begin
 		img = rand([0, 1], 10, 10, 10)
 		img2 = copy(img)
 		output, v, z = CUDA.zeros(size(img)), CUDA.ones(Int32, size(img)), CUDA.ones(size(img) .+ 1)
 		output2, v2, z2 = zeros(size(img2)), ones(Int32, size(img2)), ones(size(img2) .+ 1)
-		tfm = SquaredEuclidean()
+		tfm = Felzenszwalb()
 		test = transform!(CUDA.CuArray(boolean_indicator(img)), tfm; output=output, v=v, z=z)
 		answer = transform(boolean_indicator(img2), tfm; output=output2, v=v2, z=z2)
 		@test test == CuArray(answer)
@@ -499,7 +499,7 @@ md"""
 """
 
 # ╔═╡ e24c93b2-795a-45ab-a40d-215cbee22660
-@testset "squared euclidean 2D FoldsThreads " begin
+@testset "Felzenszwalb 2D FoldsThreads " begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -510,7 +510,7 @@ md"""
 		0 1 1 1 0 0 0 0 1
 	]
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = DepthFirstEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = [
@@ -526,10 +526,10 @@ md"""
 end;
 
 # ╔═╡ f44983e3-af78-4dc6-8447-2888806af34d
-@testset "squared euclidean 2D FoldsThreads " begin
+@testset "Felzenszwalb 2D FoldsThreads " begin
 	img = rand([0, 1], 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = DepthFirstEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm)
@@ -537,7 +537,7 @@ end;
 end;
 
 # ╔═╡ 7cdb1f83-1323-4237-bf3c-eac5b849a514
-@testset "squared euclidean 2D FoldsThreads " begin
+@testset "Felzenszwalb 2D FoldsThreads " begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -548,7 +548,7 @@ end;
 		0 1 1 1 0 0 0 0 1
 	]
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = NonThreadedEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = [
@@ -564,10 +564,10 @@ end;
 end;
 
 # ╔═╡ 17ee7bbf-8220-4549-8458-1723e5a3e30d
-@testset "squared euclidean 2D FoldsThreads " begin
+@testset "Felzenszwalb 2D FoldsThreads " begin
 	img = rand([0, 1], 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = NonThreadedEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm)
@@ -575,7 +575,7 @@ end;
 end;
 
 # ╔═╡ 74e9c7b1-ad17-4759-895d-550133b09788
-@testset "squared euclidean 2D FoldsThreads " begin
+@testset "Felzenszwalb 2D FoldsThreads " begin
 	img = [
 		0 1 1 1 0 0 0 1 1
 		1 1 1 1 1 0 0 0 1
@@ -586,7 +586,7 @@ end;
 		0 1 1 1 0 0 0 0 1
 	]
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = WorkStealingEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = [
@@ -602,10 +602,10 @@ end;
 end;
 
 # ╔═╡ 9f78df21-d298-495f-a656-5325807cb109
-@testset "squared euclidean 2D FoldsThreads" begin
+@testset "Felzenszwalb 2D FoldsThreads" begin
 	img = rand([0, 1], 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = WorkStealingEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm)
@@ -618,7 +618,7 @@ md"""
 """
 
 # ╔═╡ e19e8cc6-1f9c-4fa8-9783-e148b6729bb7
-@testset "squared euclidean 3D FoldsThreads" begin
+@testset "Felzenszwalb 3D FoldsThreads" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -640,7 +640,7 @@ md"""
 	end
 	vol_inv = cat(container2..., dims=3)
 	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = DepthFirstEx()
 	test = transform!(boolean_indicator(vol_inv), tfm, ex; output=output, v=v, z=z)
 	a1 = img_inv
@@ -655,10 +655,10 @@ md"""
 end;
 
 # ╔═╡ 8c570c8b-ffc4-4b2b-845a-a504b179af4e
-@testset "squared euclidean 3D FoldsThreads" begin
+@testset "Felzenszwalb 3D FoldsThreads" begin
 	img = rand([0, 1], 10, 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = WorkStealingEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm)
@@ -666,7 +666,7 @@ end;
 end;
 
 # ╔═╡ a3c842dc-f392-4505-9cf2-3ab54cd80955
-@testset "squared euclidean 3D FoldsThreads" begin
+@testset "Felzenszwalb 3D FoldsThreads" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -688,7 +688,7 @@ end;
 	end
 	vol_inv = cat(container2..., dims=3)
 	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = NonThreadedEx()
 	test = transform!(boolean_indicator(vol_inv), tfm, ex; output=output, v=v, z=z)
 	a1 = img_inv
@@ -703,10 +703,10 @@ end;
 end;
 
 # ╔═╡ 9850ad92-53cb-431d-92c0-04d61c4db391
-@testset "squared euclidean 3D FoldsThreads" begin
+@testset "Felzenszwalb 3D FoldsThreads" begin
 	img = rand([0, 1], 10, 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = NonThreadedEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm)
@@ -714,7 +714,7 @@ end;
 end;
 
 # ╔═╡ 1d7f7eb8-2b7d-4d5c-aa09-bdb324047443
-@testset "squared euclidean 3D FoldsThreads" begin
+@testset "Felzenszwalb 3D FoldsThreads" begin
 	img = [
 		0 0 0 0 0 0 0 0 0 0 0
 		0 0 0 0 0 0 0 0 0 0 0
@@ -736,7 +736,7 @@ end;
 	end
 	vol_inv = cat(container2..., dims=3)
 	output, v, z = zeros(size(vol_inv)), ones(Int32, size(vol_inv)), ones(size(vol_inv) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = WorkStealingEx()
 	test = transform!(boolean_indicator(vol_inv), tfm, ex; output=output, v=v, z=z)
 	a1 = img_inv
@@ -751,10 +751,10 @@ end;
 end;
 
 # ╔═╡ fe5fb42c-9c56-4c27-a2c5-70b8e761d9b8
-@testset "squared euclidean 3D FoldsThreads" begin
+@testset "Felzenszwalb 3D FoldsThreads" begin
 	img = rand([0, 1], 10, 10, 10)
 	output, v, z = zeros(size(img)), ones(Int32, size(img)), ones(size(img) .+ 1)
-	tfm = SquaredEuclidean()
+	tfm = Felzenszwalb()
 	ex = WorkStealingEx()
 	test = transform!(boolean_indicator(img), tfm, ex; output=output, v=v, z=z)
 	answer = transform(boolean_indicator(img), tfm)
