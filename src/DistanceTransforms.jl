@@ -6,8 +6,8 @@ using FLoops
 using FoldsCUDA
 
 include("./chamfer.jl")
-include("./euclidean.jl")
-include("./squared_euclidean.jl")
+include("./maurer.jl")
+include("./felzenszwalb.jl")
 include("./utils.jl")
 include("./wenbo.jl")
 
@@ -18,11 +18,11 @@ export DistanceTransform,
     # Export chamfer.jl functions
     Chamfer,
 
-    # Export euclidean.jl functions
-    euclidean,
+    # Export maurer.jl functions
+    Maurer,
 
-    # Export squared_euclidean.jl functions
-    SquaredEuclidean,
+    # Export felzenszwalb.jl functions
+    Felzenszwalb,
 
     # Export utils.jl functions
     boolean_indicator,
