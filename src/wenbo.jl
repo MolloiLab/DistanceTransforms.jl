@@ -15,6 +15,7 @@ begin
 	using DistanceTransforms
 	using FLoops
 	using CUDA
+	using FoldsThreads
 end
 
 # ╔═╡ 69d06c40-9861-41d5-b1c3-cc7b7ccd1d48
@@ -28,209 +29,354 @@ md"""
 # ╔═╡ 26ee61d8-10ee-411a-9d60-0d2c0b8a6833
 """
 ```julia
-struct Wenbo <: DistanceTransforms.DistanceTransform end
+struct Wenbo <: DistanceTransform end
 ```
-
-Squared euclidean algorithm utilizing dynamic programming approaches to improve upon the speed of [Felzenszwalb and Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
+Prepares an array to be `transform`ed
 """
 struct Wenbo <: DistanceTransform end
 
 # ╔═╡ 86168cdf-7f07-42bf-81ee-6fae7d68cebd
 md"""
-## Regular
+## In-Place
 """
 
 # ╔═╡ fa21c417-6b0e-48a0-8993-f13c995141a6
 md"""
-### 1D
+### 1D!
 """
-
-# ╔═╡ 414a288e-2a79-449d-965e-63102f12bd14
-"""
-```julia
-function _DT1(input, output, i, j)
-```
-
-Helper function for 1-D Wenbo distance transform `transform(f::AbstractVector, tfm::Wenbo)`
-"""
-function _DT1(output, i, j)
-	if (i==-1 && j==-1)
-		i=1
-		while(i<=length(output))
-			output[i]=1f10
-			i=i+1
-		end
-	elseif(i==-1)
-		temp=1
-		while(j>0)
-			output[j]=temp^2
-			j=j-1
-			temp=temp+1
-		end
-	elseif(j==-1)
-		temp=1
-		while(i<=length(output))
-			output[i]=temp^2
-			i=i+1
-			temp=temp+1
-		end
-	else
-		temp=1
-		while(i<=j)
-			output[i]=output[j]=temp^2
-			temp=temp+1
-			i=i+1
-			j=j-1
-		end
-	end
-	return output
-end
 
 # ╔═╡ 167c008e-5a5f-4ba1-b1ff-2ae137b10c98
 """
-
 ```julia
-transform(f, tfm::Wenbo; output=zeros(length(f)), pointerA=1, pointerB=1)
+transform!(f::AbstractVector, tfm::Wenbo)
 ```
 
-Assume length(f)>0. This is a one pass algorithm. Time complexity=O(n). Space complexity=O(1)
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements.
 """
-function transform(f::AbstractVector, tfm::Wenbo; output=zeros(length(f)), pointerA=1, pointerB=1)
-	while (pointerA<=length(f))
-		if(f[pointerA] == 0)
-			output[pointerA]=0
-			pointerA=pointerA+1
-			pointerB=pointerB+1
-		else
-			while(pointerB <= length(f) && f[pointerB]==1f10)
-				pointerB=pointerB+1
-			end
-			if (pointerB > length(f))
-				if (pointerA == 1)
-					output = _DT1(output, -1, -1)
-				else
-					output = _DT1(output, pointerA, -1)
+function transform!(f::AbstractVector, tfm::Wenbo)
+	pointerA = 1
+	l = length(f)
+	while pointerA <= l
+		while pointerA <= l && f[pointerA] == 0
+			pointerA+=1
+		end
+		pointerB = pointerA
+		while pointerB <= l && f[pointerB] == 1f10
+			pointerB+=1
+		end
+		if pointerB > length(f)
+			if pointerA == 1
+				i=length(f) 
+				while i>0
+					f[i]=1f10
+					i-=1
 				end
 			else
-				if (pointerA == 1)
-					output = _DT1(output, -1, pointerB-1)
-				else
-					output = _DT1(output, pointerA, pointerB-1)
+				i = pointerA
+				temp=1
+				l = length(f)
+				while i<=l
+					f[i]=temp^2
+					i+=1
+					temp+=1
 				end
 			end
-			pointerA=pointerB
+		else
+			if pointerA == 1
+				j = pointerB-1
+				temp=1
+				while j>0
+					f[j]=temp^2
+					j-=1
+					temp+=1
+				end
+			else
+				i = pointerA
+				j = pointerB-1
+				temp=1
+				while(i<=j)
+					f[i]=f[j]=temp^2
+					temp+=1
+					i+=1
+					j-=1
+				end
+			end
 		end
+		pointerA=pointerB
 	end
-	return output
+	return f
 end
 
 # ╔═╡ cf740dd8-79bb-4dd8-b40c-7efcf7844256
 md"""
-### 2D
+### 2D!
 """
 
-# ╔═╡ a91599c1-3b94-4d7e-9c65-7c11df0d3aa2
-"""
-```julia
-_DT2(f; output=zeros(length(f)), pointerA=1)
-```
+# ╔═╡ 16991d8b-ec84-49d0-90a9-15a78f1668bb
+function _encode(leftD, rightf)
+	if rightf == 1f10
+		return -leftD
+	end
+	idx = 0
+	while(rightf>1)
+		rightf/=10
+		idx+=1 
+	end
+	return -leftD-idx/10-rightf/10
+end
 
-Helper function for 2-D Wenbo distance transform `transform(f::AbstractVector, tfm::Wenbo)`
-Computes the vertical operation.
-"""
-function _DT2(f; output=zeros(length(f)), pointerA=1)
-	while (pointerA<=length(f))
-		output[pointerA]=f[pointerA]
-		if(f[pointerA] > 1)
-			if (length(f) - pointerA <= pointerA - 1)
-				temp = 1
-				while (output[pointerA]>1 && temp <= length(f) - pointerA)
-					if (f[pointerA+temp]<output[pointerA])
-						output[pointerA]=min(output[pointerA], f[pointerA+temp]+temp^2)
-					end
-					if (f[pointerA-temp]<output[pointerA])
-						output[pointerA]=min(output[pointerA], f[pointerA-temp]+temp^2)
-					end
-					temp = temp + 1
-				end
-				if(f[pointerA] > 1)
-					while (output[pointerA]>1 && temp <= pointerA - 1)
-						if (f[pointerA-temp]<output[pointerA])
-							output[pointerA]=min(output[pointerA], f[pointerA-temp]+temp^2)
-						end
-						temp = temp + 1
-					end
-				end
-			else
-				temp = 1
-				while (output[pointerA]>1 && temp <= pointerA - 1)
-					if (f[pointerA+temp]<output[pointerA])
-						output[pointerA]=min(output[pointerA], f[pointerA+temp]+temp^2)
-					end
-					if (f[pointerA-temp]<output[pointerA])
-						output[pointerA]=min(output[pointerA], f[pointerA-temp]+temp^2)
-					end
-					temp = temp + 1
-				end
-				if(f[pointerA] > 1)
-					while (output[pointerA]>1 && temp <= length(f) - pointerA)
-						if (f[pointerA+temp]<output[pointerA])
-							output[pointerA]=min(output[pointerA], f[pointerA+temp]+temp^2)
-						end
-						temp = temp + 1
-					end
-				end
+# ╔═╡ e7dbc916-c5cb-4f86-8ea1-adbcb0bdf8ea
+function _decode(curr)	
+	curr *= -10   				
+	temp = Int(floor(curr))		
+	curr -= temp 				
+	if curr == 0
+		return 1f10
+	end
+	temp %= 10
+	while temp > 0
+		temp -= 1
+		curr*=10
+	end
+	return round(curr)
+end
+
+# ╔═╡ 32a4bf03-98f8-4ed9-9c12-f45c09b0b0dd
+function _transform!(f)
+	l = length(f)
+	pointerA = 1
+	while pointerA<=l && f[pointerA] <= 1
+		pointerA += 1
+	end
+	p = 0
+	while pointerA<=l
+		curr = f[pointerA]
+		prev = curr
+		temp = min(pointerA-1, p+1)
+		p = 0
+		while (0 < temp)
+			fi = f[pointerA-temp]
+			fi = fi < 0 ? _decode(fi) : fi
+			newDistance = muladd(temp, temp, fi)
+			if newDistance < curr
+				curr = newDistance
+				p = temp
 			end
+			temp -= 1
 		end
-		pointerA=pointerA+1
+		temp = 1
+		templ = length(f) - pointerA
+		while (temp <= templ && muladd(temp, temp, -curr) < 0)
+			curr = min(curr, muladd(temp, temp, f[pointerA+temp]))
+			temp += 1
+		end
+		f[pointerA] = _encode(curr, prev)
+		# end
+		pointerA+=1
+		while pointerA<=l && f[pointerA] <= 1
+			pointerA += 1
+		end
 	end
-	return output
+	i = 0
+	while i<l
+		i+=1
+		f[i] = floor(abs(f[i]))
+	end
 end
 
-# ╔═╡ c45c571d-e0e0-400c-86f0-af7da87cbf6b
+# ╔═╡ 423df2ac-b9a2-4d59-b5fc-8de0e8cc6691
 """
 ```julia
-transform(img::AbstractMatrix, tfm::Wenbo; output=zeros(size(img)), pointerA=1, pointerB=1)
+transform!(f::AbstractMatrix, tfm::Wenbo)
 ```
 
-2-D Wenbo Distance Transform.
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements.
 """
-function transform(img::AbstractMatrix, tfm::Wenbo; output=zeros(size(img)), pointerA=1, pointerB=1)
-	# This is a worst case = O(n^3) implementation
-	for i in axes(img, 1)
-	    output[i, :] = transform(img[i, :], tfm; output=output[i, :], pointerA=pointerA, pointerB=pointerB) 
-	end
-
-	for j in axes(img, 2)
-	    output[:, j] = _DT2(output[:, j]; output=output[:, j], pointerA=pointerA) 
-	end
-	return output
-end
-
-# ╔═╡ 881da22a-5a03-4278-9f38-cd9aa28121ee
-md"""
-### 3D
-"""
-
-# ╔═╡ cb064c9b-ea0e-437f-9a99-8a5a0043a462
-"""
-```julia
-transform(f::AbstractArray, tfm::Wenbo; D=zeros(size(f)), pointerA=1, pointerB=1)
-```
-
-3-D Wenbo Distance Transform.
-"""
-function transform(f::AbstractArray, tfm::Wenbo; output=zeros(size(f)), pointerA=1, pointerB=1)
-	for i in axes(f, 3)
-	    output[:, :, i] = transform(f[:, :, i], Wenbo(); output=output[:, :, i], pointerA=pointerA, pointerB=pointerB)
-	end
+function transform!(f::AbstractMatrix, tfm::Wenbo)
 	for i in axes(f, 1)
-		for j in axes(f, 2)
-	    	output[i, j, :] = _DT2(output[i, j, :]; output=output[i, j, :], pointerA=pointerA)
-		end
+		transform!(@view(f[i, :]), tfm)
 	end
-	return output
+	for j in axes(f, 2)
+		_transform!(@view(f[:, j]))
+	end
+	return f
 end
+
+# ╔═╡ dd8014b7-3960-4a2e-878c-c86bbc5e7303
+md"""
+### 3D!
+"""
+
+# ╔═╡ b2328983-1c71-49b8-9b43-39bb3febf54b
+"""
+```julia
+transform!(f::AbstractArray, tfm::Wenbo)
+```
+
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements.
+"""
+function transform!(f::AbstractArray, tfm::Wenbo)
+	for k in axes(f, 3)
+	    transform!(@view(f[:, :, k]), tfm)
+	end
+	for i in CartesianIndices(f[:,:,1])
+		_transform!(@view(f[i, :]))
+	end
+	return f
+end 
+
+# ╔═╡ 58e1cdff-59b8-44d9-a1b7-ecc14b09556c
+md"""
+## Multi-Threaded
+"""
+
+# ╔═╡ 0f0675ad-899d-4808-9757-deaae19a58a5
+md"""
+### 2D!
+"""
+
+# ╔═╡ 7fecbf6c-59b0-4465-a7c3-c5217b3980c0
+"""
+```julia
+transform!(f::AbstractMatrix, tfm::Wenbo, nthreads::Number)
+```
+
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. Multi-threaded version of `transform!(..., tfm::Wenbo)`
+"""
+function transform!(f::AbstractMatrix, tfm::Wenbo, nthreads::Number)
+	Threads.@threads for i in axes(f, 1)
+		transform!(@view(f[i, :]), tfm)
+	end
+	Threads.@threads for j in axes(f, 2)
+		_transform!(@view(f[:, j]))
+	end
+	return f
+end
+
+# ╔═╡ 37cccaee-053d-4f9c-81ef-58b274ec25b8
+md"""
+### 3D!
+"""
+
+# ╔═╡ f1977b4e-1834-449a-a8c9-f984a55eeca4
+"""
+```julia
+transform!(f::AbstractArray, tfm::Wenbo, nthreads::Number)
+```
+
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. Multi-threaded version of `transform!(..., tfm::Wenbo)`
+"""
+function transform!(f::AbstractArray, tfm::Wenbo, nthreads::Number)
+	Threads.@threads for k in axes(f, 3)
+	    transform!(@view(f[:, :, k]), tfm)
+	end
+	Threads.@threads for i in CartesianIndices(f[:,:,1])
+		_transform!(@view(f[i, :]))
+	end
+	return f
+end 
+
+# ╔═╡ 8da39536-8765-40fe-a158-335c905e99e6
+md"""
+## GPU
+"""
+
+# ╔═╡ c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
+md"""
+### 2D!
+"""
+
+# ╔═╡ 58441e91-b837-496c-b1db-5dd428a6eba7
+"""
+```julia
+transform!(f::CuArray{T, 2}, tfm::Wenbo) where T
+```
+
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform!(..., tfm::Wenbo)`
+"""
+function transform!(f::CuArray{T, 2}, tfm::Wenbo) where T
+	@floop CUDAEx() for i in axes(f, 1)
+		transform!(@view(f[i, :]), tfm)
+	end
+	@floop CUDAEx() for j in axes(f, 2)
+		_transform!(@view(f[:, j]))
+	end
+	return f
+end
+
+# ╔═╡ 01719cd4-f69e-47f5-9d84-36229fc3e73c
+md"""
+### 3D!
+"""
+
+# ╔═╡ 43a06f59-9559-4a56-9eb0-47b8909841f7
+"""
+```julia
+transform!(f::CuArray{T, 3}, tfm::Wenbo) where T
+```
+
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform!(..., tfm::Wenbo)`
+"""
+function transform!(f::CuArray{T, 3}, tfm::Wenbo) where T
+	@floop CUDAEx() for k in axes(f, 3)
+	    transform!(@view(f[:, :, k]), tfm)
+	end
+	@floop CUDAEx() for i in CartesianIndices(f[:,:,1])
+		_transform!(@view(f[i, :]))
+	end
+	return f
+end 
+
+# ╔═╡ ebee3240-63cf-4323-9755-a135834208c8
+md"""
+## Various Multi-Threading
+"""
+
+# ╔═╡ fccb36b9-ee1b-411f-aded-147a88b23872
+md"""
+### 2D!
+"""
+
+# ╔═╡ 88806a34-a025-40b2-810d-b3320a137543
+"""
+```julia
+transform!(f::AbstractMatrix, tfm::Wenbo, ex)
+```
+
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. Multi-threaded version of `transform!(..., tfm::Wenbo)` but utilizes FoldsThreads.jl for different threaded executors. `ex`=(FoldsThreads.DepthFirstEx(), FoldsThreads.NonThreadedEx(), FoldsThreads.WorkStealingEx())
+"""
+function transform!(f::AbstractMatrix, tfm::Wenbo, ex)
+	@floop ex for i in axes(f, 1)
+		transform!(@view(f[i, :]), tfm)
+	end
+	@floop ex for j in axes(f, 2)
+		_transform!(@view(f[:, j]))
+	end
+	return f
+end
+
+# ╔═╡ 91e09975-e7df-4d05-9e77-dbd6c35430f0
+md"""
+### 3D!
+"""
+
+# ╔═╡ da6e01c4-5ef9-4628-a77f-4b43a05aad36
+"""
+```julia
+transform!(f::AbstractArray, tfm::Wenbo, ex)
+```
+
+Applies a squared euclidean distance transform to an input image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. Multi-threaded version of `transform!(..., tfm::Wenbo)` but utilizes FoldsThreads.jl for different threaded executors. `ex`=(FoldsThreads.DepthFirstEx(), FoldsThreads.NonThreadedEx(), FoldsThreads.WorkStealingEx())
+"""
+function transform!(f::AbstractArray, tfm::Wenbo, ex)
+	@floop ex for k in axes(f, 3)
+	    transform!(@view(f[:, :, k]), tfm)
+	end
+	@floop ex for i in CartesianIndices(f[:,:,1])
+		_transform!(@view(f[i, :]))
+	end
+	return f
+end 
 
 # ╔═╡ Cell order:
 # ╠═19f1c4b6-23c4-11ed-02f2-fb3e9263a1a1
@@ -240,9 +386,25 @@ end
 # ╟─86168cdf-7f07-42bf-81ee-6fae7d68cebd
 # ╟─fa21c417-6b0e-48a0-8993-f13c995141a6
 # ╠═167c008e-5a5f-4ba1-b1ff-2ae137b10c98
-# ╠═414a288e-2a79-449d-965e-63102f12bd14
 # ╟─cf740dd8-79bb-4dd8-b40c-7efcf7844256
-# ╠═c45c571d-e0e0-400c-86f0-af7da87cbf6b
-# ╠═a91599c1-3b94-4d7e-9c65-7c11df0d3aa2
-# ╟─881da22a-5a03-4278-9f38-cd9aa28121ee
-# ╠═cb064c9b-ea0e-437f-9a99-8a5a0043a462
+# ╠═16991d8b-ec84-49d0-90a9-15a78f1668bb
+# ╠═e7dbc916-c5cb-4f86-8ea1-adbcb0bdf8ea
+# ╠═32a4bf03-98f8-4ed9-9c12-f45c09b0b0dd
+# ╠═423df2ac-b9a2-4d59-b5fc-8de0e8cc6691
+# ╟─dd8014b7-3960-4a2e-878c-c86bbc5e7303
+# ╠═b2328983-1c71-49b8-9b43-39bb3febf54b
+# ╟─58e1cdff-59b8-44d9-a1b7-ecc14b09556c
+# ╟─0f0675ad-899d-4808-9757-deaae19a58a5
+# ╠═7fecbf6c-59b0-4465-a7c3-c5217b3980c0
+# ╟─37cccaee-053d-4f9c-81ef-58b274ec25b8
+# ╠═f1977b4e-1834-449a-a8c9-f984a55eeca4
+# ╟─8da39536-8765-40fe-a158-335c905e99e6
+# ╟─c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
+# ╠═58441e91-b837-496c-b1db-5dd428a6eba7
+# ╟─01719cd4-f69e-47f5-9d84-36229fc3e73c
+# ╠═43a06f59-9559-4a56-9eb0-47b8909841f7
+# ╟─ebee3240-63cf-4323-9755-a135834208c8
+# ╟─fccb36b9-ee1b-411f-aded-147a88b23872
+# ╠═88806a34-a025-40b2-810d-b3320a137543
+# ╟─91e09975-e7df-4d05-9e77-dbd6c35430f0
+# ╠═da6e01c4-5ef9-4628-a77f-4b43a05aad36
