@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.12
 
 using Markdown
 using InteractiveUtils
@@ -46,7 +46,7 @@ If `f` is a boolean indicator where 0's correspond to background and 1s correspo
 function boolean_indicator(f::BitArray)
 	f_new = similar(f, Float32)
 	@turbo warn_check_args=false for i in CartesianIndices(f_new)
-		   f_new[i] = f[i] ? 0f0 : 1f10
+		   @inbounds f_new[i] = f[i] ? 0f0 : 1f10
 	end
 	return f_new
 end
