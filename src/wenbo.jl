@@ -183,7 +183,7 @@ function _transform2!(f::AbstractVector)
 end
 
 # ╔═╡ 89fed2a6-b09e-47b1-a020-efed76ba57de
-function _transform3!(f::AbstractVector)
+function _transform3!(f)
 	for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
@@ -241,7 +241,7 @@ md"""
 """
 
 # ╔═╡ d663cf13-4a3a-4667-8971-ddb5c455d85c
-function _transform4!(f::AbstractVector)
+function _transform4!(f)
 	Threads.@threads for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
@@ -287,7 +287,7 @@ transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 
 Applies a squared euclidean distance transform to an input 3D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. Multi-threaded version of `transform(..., tfm::Wenbo)`
 """
-function transform!(f::AbstractArray, tfm::Wenbo, nthreads::Number)
+function transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 	f = boolean_indicator(f)
 	Threads.@threads for i in axes(f, 3)
 		@inbounds _transform4!(@view(f[:, :, i]))
@@ -308,8 +308,46 @@ md"""
 ### 2D!
 """
 
+# ╔═╡ ad52080b-7d59-459d-829d-2a77ddf12c5f
+function _kernel_2D_1_1!(out, f, row_l, l)
+	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+	if i > l
+		return
+	end 
+	row = cld(i, row_l)
+	col = i%row_l+1
+	@inbounds if f[row, col] == 1
+		return 
+	end
+	ct = 1
+	curr_l = min(col-1, row_l-col)
+	while ct <= curr_l
+		@inbounds if f[row, col-ct] == 1 || f[row, col+ct] == 1
+			@inbounds out[row, col] = ct*ct
+			return 
+		end
+		ct += 1
+	end
+	while ct < col
+		@inbounds if f[row, col-ct] == 1
+			@inbounds out[row, col] = ct*ct
+			return 
+		end
+		ct += 1    
+	end
+	while col+ct <= row_l
+		@inbounds if f[row, col+ct] == 1
+			@inbounds out[row, col] = ct*ct
+			return 
+		end
+		ct += 1
+	end
+	@inbounds out[row, col] = 1f10
+	return 
+end
+
 # ╔═╡ b5963be3-7794-4ae0-9330-6177a82605ef
-function _kernel_2D_1!(out, f, row_l, l)
+function _kernel_2D_1_2!(out, f, row_l, l)
 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
 	if i > l
 		return
@@ -378,12 +416,32 @@ end
 
 # ╔═╡ 2d7aac0f-00d1-43b8-b667-e3812ad5ecd3
 begin
-	_2D_1! = @cuda launch=false _kernel_2D_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0)
-	config_threads = launch_configuration(_2D_1!.fun).threads;
+	_2D_1_1! = @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0)
+	config_threads = launch_configuration(_2D_1_1!.fun).threads;
+	_2D_1_2! = @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0)
 	_2D_2! = @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0)
 end
 
 # ╔═╡ 58441e91-b837-496c-b1db-5dd428a6eba7
+"""
+```julia
+transform(f::CuArray{Bool, 2}, tfm::Wenbo)
+```
+
+Applies a squared euclidean distance transform to an input 2D boolean image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
+"""
+function transform(f::CuArray{Bool, 2}, tfm::Wenbo)
+    col_length, row_length = size(f)
+    l = length(f)
+    f_new = CUDA.zeros(col_length,row_length)
+    threads = min(l, config_threads)
+    blocks = cld(l, threads)
+    _2D_1_2!(f_new, f, row_length, l; threads, blocks)
+    _2D_2!(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+    return f_new
+end
+
+# ╔═╡ fa31dc82-c2e6-4bb7-884a-dc02ad9bace4
 """
 ```julia
 transform(f::CuArray{T, 2}, tfm::Wenbo) where T
@@ -397,8 +455,8 @@ function transform(f::CuArray{T, 2}, tfm::Wenbo) where T
     f_new = CUDA.zeros(col_length,row_length)
     threads = min(l, config_threads)
     blocks = cld(l, threads)
-    _2D_1!(f_new, f, row_length, l; threads, blocks)
-    _2D_2_2!(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+    _2D_1_1!(f_new, f, row_length, l; threads, blocks)
+    _2D_2!(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     return f_new
 end
 
@@ -408,7 +466,48 @@ md"""
 """
 
 # ╔═╡ 24527d9b-1fa2-443d-ad4c-76a53b1ba4c2
-function _kernel_3D_1!(out, f, dim2_l, dim3_l, l)
+function _kernel_3D_1_1!(out, f, dim2_l, dim3_l, l)
+	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+    if i > l
+        return
+    end 
+    temp =  dim2_l*dim3_l
+    dim1 = CUDA.cld(i, temp)
+    temp2 = (i-1)%temp+1
+    dim2 = CUDA.cld(temp2, dim3_l)
+    dim3 = temp2 % dim3_l + 1
+    # 1d DT alone dim2
+    @inbounds if f[dim1, dim2, dim3] != 1
+        ct = 1
+        curr_l = CUDA.min(dim2-1, dim2_l-dim2)
+        while ct <= curr_l
+            @inbounds if f[dim1, dim2-ct, dim3]==1 || f[dim1, dim2+ct, dim3]==1
+                @inbounds out[dim1, dim2, dim3] = ct*ct
+                return 
+            end
+            ct += 1
+        end
+        while ct < dim2
+            @inbounds if f[dim1, dim2-ct, dim3]==1
+                @inbounds out[dim1, dim2, dim3] = ct*ct
+                return 
+            end
+            ct += 1    
+        end
+        while dim2+ct <= dim2_l
+            @inbounds if f[dim1, dim2+ct, dim3]==1
+                @inbounds out[dim1, dim2, dim3] = ct*ct
+                return 
+            end
+            ct += 1
+        end
+        @inbounds out[dim1, dim2, dim3] = 1f10
+    end
+    return 
+end
+
+# ╔═╡ 36bee155-1c27-40be-a956-30ef54ab14ef
+function _kernel_3D_1_2!(out, f, dim2_l, dim3_l, l)
 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
     if i > l
         return
@@ -516,12 +615,33 @@ end
 
 # ╔═╡ 5b76543c-e095-423d-a39c-db981dbb7c34
 begin
-	_3D_1! = @cuda launch=false _kernel_3D_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)
+	_3D_1_1! = @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0)
+	_3D_1_2! = @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)
 	_3D_2! = @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)
 	_3D_3! = @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)
 end
 
 # ╔═╡ 43a06f59-9559-4a56-9eb0-47b8909841f7
+"""
+```julia
+transform(f::CuArray{Bool, 3}, tfm::Wenbo)
+```
+
+Applies a squared euclidean distance transform to an input 3D boolean image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
+"""
+function transform(f::CuArray{Bool, 3}, tfm::Wenbo)
+    d1, d2, d3 = size(f)
+    l = length(f)
+    f_new = CUDA.zeros(d1,d2,d3)
+    threads = min(l, config_threads)
+    blocks = cld(l, threads)
+    _3D_1_2!(f_new, f, d2, d3, l; threads, blocks)
+    _3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+    _3D_3!(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+    return f_new
+end 
+
+# ╔═╡ f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 """
 ```julia
 transform(f::CuArray{T, 3}, tfm::Wenbo) where T
@@ -535,7 +655,7 @@ function transform(f::CuArray{T, 3}, tfm::Wenbo) where T
     f_new = CUDA.zeros(d1,d2,d3)
     threads = min(l, config_threads)
     blocks = cld(l, threads)
-    _3D_1!(f_new, f, d2, d3, l; threads, blocks)
+    _3D_1_1!(f_new, f, d2, d3, l; threads, blocks)
     _3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
     _3D_3!(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
     return f_new
@@ -612,23 +732,27 @@ end
 # ╟─dd8014b7-3960-4a2e-878c-c86bbc5e7303
 # ╠═b2328983-1c71-49b8-9b43-39bb3febf54b
 # ╟─58e1cdff-59b8-44d9-a1b7-ecc14b09556c
-# ╠═d663cf13-4a3a-4667-8971-ddb5c455d85c
+# ╟─d663cf13-4a3a-4667-8971-ddb5c455d85c
 # ╟─0f0675ad-899d-4808-9757-deaae19a58a5
 # ╠═7fecbf6c-59b0-4465-a7c3-c5217b3980c0
 # ╟─37cccaee-053d-4f9c-81ef-58b274ec25b8
 # ╠═f1977b4e-1834-449a-a8c9-f984a55eeca4
 # ╟─8da39536-8765-40fe-a158-335c905e99e6
 # ╟─c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
+# ╟─ad52080b-7d59-459d-829d-2a77ddf12c5f
 # ╟─b5963be3-7794-4ae0-9330-6177a82605ef
 # ╟─927f25f9-1687-415f-b5bb-8a8f40afdd0f
 # ╟─2d7aac0f-00d1-43b8-b667-e3812ad5ecd3
 # ╠═58441e91-b837-496c-b1db-5dd428a6eba7
+# ╠═fa31dc82-c2e6-4bb7-884a-dc02ad9bace4
 # ╟─01719cd4-f69e-47f5-9d84-36229fc3e73c
 # ╟─24527d9b-1fa2-443d-ad4c-76a53b1ba4c2
+# ╟─36bee155-1c27-40be-a956-30ef54ab14ef
 # ╟─22c9dd53-6ae6-45f9-8a44-c3777aefef5c
 # ╟─678c8a54-0b50-4419-8984-e0f0507e9b48
 # ╟─5b76543c-e095-423d-a39c-db981dbb7c34
 # ╠═43a06f59-9559-4a56-9eb0-47b8909841f7
+# ╠═f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 # ╟─ebee3240-63cf-4323-9755-a135834208c8
 # ╟─fccb36b9-ee1b-411f-aded-147a88b23872
 # ╠═88806a34-a025-40b2-810d-b3320a137543
