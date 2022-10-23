@@ -262,6 +262,11 @@ end;
 	@test test == answer
 end;
 
+# ╔═╡ 91899f57-48cc-49e4-b100-116f2326d126
+md"""
+## GPU
+"""
+
 # ╔═╡ 6293532a-198d-49a2-b450-3ab7c7be3227
 md"""
 ### 2D
@@ -269,6 +274,7 @@ md"""
 
 # ╔═╡ edc19bce-db97-4a0d-a4a9-11e9241434e9
 if CUDA.has_cuda_gpu()
+	ks = DistanceTransforms.get_GPU_kernels(Wenbo())
 	@testset "wenbo 2D GPU" begin
 		img = [
 			0 1 1 1 0 0 0 1 1
@@ -280,7 +286,7 @@ if CUDA.has_cuda_gpu()
 			0 1 1 1 0 0 0 0 1
 		]
 		tfm = Wenbo()
-		test = transform(CUDA.CuArray(img), tfm)
+		test = transform(CuArray(img), tfm, ks)
 		answer = CuArray([
 			1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 			0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -298,11 +304,11 @@ end;
 
 # ╔═╡ 9d3e6bab-d8a5-42d3-862b-135f10887562
 if CUDA.has_cuda_gpu()
-	@testset "wenbo 2D gpu" begin
+	@testset "wenbo 2D GPU" begin
 		img = rand([0, 1], 10, 10)
 		img2 = copy(img)
 		tfm = Wenbo()
-		test = transform(CUDA.CuArray(img), tfm)
+		test = transform(CUDA.CuArray(img), tfm, ks)
 		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
@@ -318,7 +324,7 @@ md"""
 
 # ╔═╡ f5159fb2-30bc-4828-bb21-d9ad7343fe85
 if CUDA.has_cuda_gpu()
-	@testset "wenbo 3D multi-threaded" begin
+	@testset "wenbo 3D GPU" begin
 		img = [
 			0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0
@@ -340,7 +346,7 @@ if CUDA.has_cuda_gpu()
 		end
 		vol_inv = CuArray(cat(container2..., dims=3))
 		tfm = Wenbo()
-		test = transform(vol_inv, tfm)
+		test = transform(vol_inv, tfm, ks)
 		a1 = img_inv
 		a2 = img
 		ans = cat(a1, a2, dims=3)
@@ -357,11 +363,11 @@ end;
 
 # ╔═╡ 4fa62723-c3e2-4afd-911b-e3f2285df74d
 if CUDA.has_cuda_gpu()
-	@testset "squared euclidean 3D gpu" begin
+	@testset "Wenbo 3D GPU" begin
 		img = rand([0, 1], 10, 10, 10)
 		img2 = copy(img)
 		tfm = Wenbo()
-		test = transform(CUDA.CuArray(img), tfm)
+		test = transform(CUDA.CuArray(img), tfm, ks)
 		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
@@ -411,7 +417,6 @@ end;
 	img = rand([0, 1], 10, 10)
 	tfm = Wenbo()
 	ex = DepthFirstEx()
-	println(typeof(ex))
 	test = transform(img, tfm, ex)
 	answer = transform(img, tfm)
 	@test test == answer
@@ -510,6 +515,7 @@ end;
 # ╟─89bf91b7-2a29-48ed-8c0c-b6e46fa5de4e
 # ╠═bdef08b3-f15c-4769-ba7d-c3dc4f9a0006
 # ╠═51117c0a-5f23-4b5d-ab76-81d25cd73a27
+# ╟─91899f57-48cc-49e4-b100-116f2326d126
 # ╟─6293532a-198d-49a2-b450-3ab7c7be3227
 # ╠═edc19bce-db97-4a0d-a4a9-11e9241434e9
 # ╠═9d3e6bab-d8a5-42d3-862b-135f10887562

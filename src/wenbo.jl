@@ -303,6 +303,26 @@ md"""
 ## GPU
 """
 
+# ╔═╡ 1062d2aa-902a-42e2-98d2-e560fc63e7ae
+"""
+```julia
+get_GPU_kernels(tfm::Wenbo)
+```
+
+Returns an array with the needed kernels for GPU version of `transform(..., tfm::Wenbo)`. This function should be called before calling any GPU version of `transform(..., tfm::Wenbo)`.
+"""
+function get_GPU_kernels(tfm::Wenbo)
+	kerenls = []
+	push!(kerenls, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0))
+	push!(kerenls, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0))
+	push!(kerenls, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0))
+	push!(kerenls, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0))
+	push!(kerenls, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0))
+	push!(kerenls, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0))
+	push!(kerenls, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0))
+	return kerenls
+end
+
 # ╔═╡ 142ffde6-da12-42fd-9768-e27782841903
 
 	# _2D_1_1! 1
@@ -445,6 +465,26 @@ function transform(f::CuArray{T, 2}, tfm::Wenbo, kernels) where T
     kernels[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     return f_new
 end
+
+# ╔═╡ 3e999998-6762-4d50-9776-392dbea9df23
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	img_0 = [
+	    0 1 1 1 0 0 0 1 1
+	    1 1 1 1 1 0 0 0 1
+	    1 0 0 0 1 0 0 1 1
+	    1 0 0 0 1 0 1 1 0
+	    1 0 0 0 1 1 0 1 0
+	    1 1 1 1 1 0 0 1 0
+	    0 1 1 1 0 0 0 0 1
+	]
+	img_B = Bool.(img_0)
+	img_G = CuArray(img_0)
+	img_BG = CuArray(img_B)
+	ks = get_GPU_kernels(Wenbo())
+end
+  ╠═╡ =#
 
 # ╔═╡ 01719cd4-f69e-47f5-9d84-36229fc3e73c
 md"""
@@ -599,46 +639,6 @@ function _kernel_3D_3!(out, org, dim2_l, dim3_l, l)
     return
 end 
 
-# ╔═╡ 1062d2aa-902a-42e2-98d2-e560fc63e7ae
-"""
-```julia
-get_GPU_kernels(tfm::Wenbo)
-```
-
-Returns an array with the needed kernels for GPU version of `transform(..., tfm::Wenbo)`. This function should be called before calling any GPU version of `transform(..., tfm::Wenbo)`.
-"""
-function get_GPU_kernels(tfm::Wenbo)
-	kerenls = []
-	push!(kerenls, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0))
-	push!(kerenls, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0))
-	push!(kerenls, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0))
-	return kerenls
-end
-
-# ╔═╡ 3e999998-6762-4d50-9776-392dbea9df23
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	img_0 = [
-	    0 1 1 1 0 0 0 1 1
-	    1 1 1 1 1 0 0 0 1
-	    1 0 0 0 1 0 0 1 1
-	    1 0 0 0 1 0 1 1 0
-	    1 0 0 0 1 1 0 1 0
-	    1 1 1 1 1 0 0 1 0
-	    0 1 1 1 0 0 0 0 1
-	]
-	img_B = Bool.(img_0)
-	img_G = CuArray(img_0)
-	img_BG = CuArray(img_B)
-	ks = get_GPU_kernels(Wenbo())
-end
-  ╠═╡ =#
-
 # ╔═╡ f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 """
 ```julia
@@ -659,6 +659,12 @@ function transform(f::CuArray{T, 3}, tfm::Wenbo, kernels) where T
     kernels[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
     return f_new
 end 
+
+# ╔═╡ ae072ece-1e88-4473-a64b-afaff348920c
+# ╠═╡ disabled = true
+#=╠═╡
+transform(img_G, Wenbo(), ks)
+  ╠═╡ =#
 
 # ╔═╡ ebee3240-63cf-4323-9755-a135834208c8
 md"""
@@ -713,12 +719,6 @@ function transform(f::AbstractArray, tfm::Wenbo, ex)
 	return f
 end 
 
-# ╔═╡ ae072ece-1e88-4473-a64b-afaff348920c
-# ╠═╡ disabled = true
-#=╠═╡
-transform(img_G, Wenbo(), ks)
-  ╠═╡ =#
-
 # ╔═╡ Cell order:
 # ╠═19f1c4b6-23c4-11ed-02f2-fb3e9263a1a1
 # ╠═69d06c40-9861-41d5-b1c3-cc7b7ccd1d48
@@ -744,7 +744,6 @@ transform(img_G, Wenbo(), ks)
 # ╠═f1977b4e-1834-449a-a8c9-f984a55eeca4
 # ╟─8da39536-8765-40fe-a158-335c905e99e6
 # ╠═1062d2aa-902a-42e2-98d2-e560fc63e7ae
-# ╠═142ffde6-da12-42fd-9768-e27782841903
 # ╟─c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
 # ╟─ad52080b-7d59-459d-829d-2a77ddf12c5f
 # ╟─b5963be3-7794-4ae0-9330-6177a82605ef
