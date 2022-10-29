@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.12
 
 using Markdown
 using InteractiveUtils
@@ -27,19 +27,19 @@ md"""
 
 # ╔═╡ edc7480a-11ec-4952-8984-af97d3967639
 md"""
-## In-Place
+## Single-Thread
 """
 
 # ╔═╡ ab715087-a707-485b-9463-8d17fe0bcaab
 md"""
-### 1D!
+### 1D
 """
 
 # ╔═╡ f860bf51-4c1f-4b82-a67d-d5294733345f
 @testset "wenbo 1D" begin
 	f = [1, 1, 0, 0, 0, 1, 1]
 	tfm = Wenbo()
-	test = transform!(boolean_indicator(f), tfm)
+	test = transform(f, tfm)
 	answer = [0.0, 0.0, 1.0, 4.0, 1.0, 0.0, 0.0]
 	@test test == answer
 end;
@@ -48,7 +48,7 @@ end;
 @testset "wenbo 1D" begin
 	f = [0, 0, 0, 1]
 	tfm = Wenbo()
-	test = transform!(boolean_indicator(f), tfm)
+	test = transform(f, tfm)
 	answer = [9.0, 4.0, 1.0, 0.0]
 	@test test == answer
 end;
@@ -57,14 +57,14 @@ end;
 @testset "wenbo 1D" begin
 	f = [1, 0, 0, 0]
 	tfm = Wenbo()
-	test = transform!(boolean_indicator(f), tfm)
+	test = transform(f, tfm)
 	answer = [0, 1, 4, 9]
 	@test test == answer
 end;
 
 # ╔═╡ eac8edcd-ee45-4824-a3b7-cd0535260cb6
 md"""
-### 2D!
+### 2D
 """
 
 # ╔═╡ eb456533-684f-45e7-9591-7cebf493f63c
@@ -79,7 +79,7 @@ md"""
 		0 1 1 1 0 0 0 0 1
 	]
 	tfm = Wenbo()
-	test = transform!(boolean_indicator(img), tfm)
+	test = transform(img, tfm)
 	answer = [
 		1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 		0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -108,7 +108,7 @@ end;
 		0 0 0 0 0 0 0 0 0 0 0
 	]
 	tfm = Wenbo()
-	test = transform!(boolean_indicator(img), tfm)
+	test = transform(img, tfm)
 	answer = [
 		18.0  13.0  10.0  9.0  9.0  9.0  10.0  13.0  18.0  25.0  34.0
 		13.0   8.0   5.0  4.0  4.0  4.0   5.0   8.0  13.0  20.0  25.0
@@ -127,7 +127,7 @@ end;
 
 # ╔═╡ e05ea048-d7bd-48a1-b943-2dc9b9ba5e02
 md"""
-### 3D!
+### 3D
 """
 
 # ╔═╡ b1d3b0d0-5103-4fdf-8d55-16babca9ee21
@@ -153,7 +153,7 @@ md"""
 	end
 	vol_inv = cat(container2..., dims=3)
 	tfm = Wenbo()
-	test = transform!(boolean_indicator(vol_inv), tfm)
+	test = transform(vol_inv, tfm)
 	a1 = img_inv
 	a2 = img
 	ans = cat(a1, a2, dims=3)
@@ -172,7 +172,7 @@ md"""
 
 # ╔═╡ cdcd1cda-be51-4a2a-a69d-381338fd5bd9
 md"""
-### 2D!
+### 2D
 """
 
 # ╔═╡ ea81cc9e-2ee9-4d62-9288-c081ef9ef0c4
@@ -188,7 +188,7 @@ md"""
 	]
 	tfm = Wenbo()
 	nthreads = Threads.nthreads()
-	test = transform!(boolean_indicator(img), tfm, nthreads)
+	test = transform(img, tfm, nthreads)
 	answer = [
 		1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 		0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -206,14 +206,14 @@ end;
 	img = rand([0, 1], 10, 10)
 	tfm = Wenbo()
 	nthreads = Threads.nthreads()
-	test = transform!(boolean_indicator(img), tfm, nthreads)
-	answer = transform!(boolean_indicator(img), tfm)
+	test = transform(img, tfm, nthreads)
+	answer = transform(img, tfm)
 	@test test == answer
 end;
 
 # ╔═╡ 89bf91b7-2a29-48ed-8c0c-b6e46fa5de4e
 md"""
-### 3D!
+### 3D
 """
 
 # ╔═╡ bdef08b3-f15c-4769-ba7d-c3dc4f9a0006
@@ -240,7 +240,7 @@ md"""
 	vol_inv = cat(container2..., dims=3)
 	tfm = Wenbo()
 	nthreads = Threads.nthreads()
-	test = transform!(boolean_indicator(vol_inv), tfm, nthreads)
+	test = transform(vol_inv, tfm, nthreads)
 	a1 = img_inv
 	a2 = img
 	ans = cat(a1, a2, dims=3)
@@ -257,18 +257,24 @@ end;
 	img = rand([0, 1], 10, 10, 10)
 	tfm = Wenbo()
 	nthreads = Threads.nthreads()
-	test = transform!(boolean_indicator(img), tfm, nthreads)
-	answer = transform!(boolean_indicator(img), tfm)
+	test = transform(img, tfm, nthreads)
+	answer = transform(img, tfm)
 	@test test == answer
 end;
 
+# ╔═╡ 91899f57-48cc-49e4-b100-116f2326d126
+md"""
+## GPU
+"""
+
 # ╔═╡ 6293532a-198d-49a2-b450-3ab7c7be3227
 md"""
-### 2D!
+### 2D
 """
 
 # ╔═╡ edc19bce-db97-4a0d-a4a9-11e9241434e9
 if CUDA.has_cuda_gpu()
+	ks = DistanceTransforms.get_GPU_kernels(Wenbo())
 	@testset "wenbo 2D GPU" begin
 		img = [
 			0 1 1 1 0 0 0 1 1
@@ -280,7 +286,7 @@ if CUDA.has_cuda_gpu()
 			0 1 1 1 0 0 0 0 1
 		]
 		tfm = Wenbo()
-		test = transform!(CUDA.CuArray(boolean_indicator(img)), tfm)
+		test = transform(CuArray(img), tfm, ks)
 		answer = CuArray([
 			1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 			0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -298,12 +304,12 @@ end;
 
 # ╔═╡ 9d3e6bab-d8a5-42d3-862b-135f10887562
 if CUDA.has_cuda_gpu()
-	@testset "wenbo 2D gpu" begin
+	@testset "wenbo 2D GPU" begin
 		img = rand([0, 1], 10, 10)
 		img2 = copy(img)
-		tfm = SquaredEuclidean()
-		test = transform!(CUDA.CuArray(boolean_indicator(img)), tfm)
-		answer = transform!(boolean_indicator(img2), tfm)
+		tfm = Wenbo()
+		test = transform(CUDA.CuArray(img), tfm, ks)
+		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
 else
@@ -313,12 +319,12 @@ end;
 
 # ╔═╡ 35ff78e2-b1d7-4792-8145-ced70a6ff233
 md"""
-### 3D!
+### 3D
 """
 
 # ╔═╡ f5159fb2-30bc-4828-bb21-d9ad7343fe85
 if CUDA.has_cuda_gpu()
-	@testset "wenbo 3D multi-threaded" begin
+	@testset "wenbo 3D GPU" begin
 		img = [
 			0 0 0 0 0 0 0 0 0 0 0
 			0 0 0 0 0 0 0 0 0 0 0
@@ -340,7 +346,7 @@ if CUDA.has_cuda_gpu()
 		end
 		vol_inv = CuArray(cat(container2..., dims=3))
 		tfm = Wenbo()
-		test = transform!(boolean_indicator(vol_inv), tfm)
+		test = transform(vol_inv, tfm, ks)
 		a1 = img_inv
 		a2 = img
 		ans = cat(a1, a2, dims=3)
@@ -357,12 +363,12 @@ end;
 
 # ╔═╡ 4fa62723-c3e2-4afd-911b-e3f2285df74d
 if CUDA.has_cuda_gpu()
-	@testset "squared euclidean 3D gpu" begin
+	@testset "Wenbo 3D GPU" begin
 		img = rand([0, 1], 10, 10, 10)
 		img2 = copy(img)
 		tfm = Wenbo()
-		test = transform!(CUDA.CuArray(boolean_indicator(img)), tfm)
-		answer = transform!(boolean_indicator(img2), tfm)
+		test = transform(CUDA.CuArray(img), tfm, ks)
+		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
 else
@@ -377,7 +383,7 @@ md"""
 
 # ╔═╡ 278053f3-de28-4090-add3-c08257aff74f
 md"""
-### 2D!
+### 2D
 """
 
 # ╔═╡ f87ded07-5767-4a4c-8d00-d9fa5d6914bc
@@ -393,7 +399,7 @@ md"""
 	]
 	tfm = Wenbo()
 	ex = DepthFirstEx()
-	test = transform!(boolean_indicator(img), tfm, ex)
+	test = transform(img, tfm, ex)
 	answer = [
 		 1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 		 0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -411,8 +417,8 @@ end;
 	img = rand([0, 1], 10, 10)
 	tfm = Wenbo()
 	ex = DepthFirstEx()
-	test = transform!(boolean_indicator(img), tfm, ex)
-	answer = transform!(boolean_indicator(img), tfm)
+	test = transform(img, tfm, ex)
+	answer = transform(img, tfm)
 	@test test == answer
 end;
 
@@ -429,7 +435,7 @@ end;
 	]
 	tfm = Wenbo()
 	ex = NonThreadedEx()
-	test = transform!(boolean_indicator(img), tfm, ex)
+	test = transform(img, tfm, ex)
 	answer = [
 		 1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 		 0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -447,8 +453,8 @@ end;
 	img = rand([0, 1], 10, 10)
 	tfm = Wenbo()
 	ex = NonThreadedEx()
-	test = transform!(boolean_indicator(img), tfm, ex)
-	answer = transform!(boolean_indicator(img), tfm)
+	test = transform(img, tfm, ex)
+	answer = transform(img, tfm)
 	@test test == answer
 end;
 
@@ -465,7 +471,7 @@ end;
 	]
 	tfm = Wenbo()
 	ex = WorkStealingEx()
-	test = transform!(boolean_indicator(img), tfm, ex)
+	test = transform(img, tfm, ex)
 	answer = [
 		 1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 		 0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -483,8 +489,8 @@ end;
 	img = rand([0, 1], 10, 10)
 	tfm = Wenbo()
 	ex = WorkStealingEx()
-	test = transform!(boolean_indicator(img), tfm, ex)
-	answer = transform!(boolean_indicator(img), tfm)
+	test = transform(img, tfm, ex)
+	answer = transform(img, tfm)
 	@test test == answer
 end;
 
@@ -492,7 +498,7 @@ end;
 # ╠═38a67f7e-3b1a-4a6c-9916-91eab4ad4d63
 # ╠═3b8595ae-b215-4e3b-b615-ff460793f028
 # ╟─4a043231-7888-4408-a663-4541e8606245
-# ╟─edc7480a-11ec-4952-8984-af97d3967639
+# ╠═edc7480a-11ec-4952-8984-af97d3967639
 # ╟─ab715087-a707-485b-9463-8d17fe0bcaab
 # ╠═f860bf51-4c1f-4b82-a67d-d5294733345f
 # ╠═f6d1f13b-2b81-4253-ad80-38dd6c11eb93
@@ -509,6 +515,7 @@ end;
 # ╟─89bf91b7-2a29-48ed-8c0c-b6e46fa5de4e
 # ╠═bdef08b3-f15c-4769-ba7d-c3dc4f9a0006
 # ╠═51117c0a-5f23-4b5d-ab76-81d25cd73a27
+# ╟─91899f57-48cc-49e4-b100-116f2326d126
 # ╟─6293532a-198d-49a2-b450-3ab7c7be3227
 # ╠═edc19bce-db97-4a0d-a4a9-11e9241434e9
 # ╠═9d3e6bab-d8a5-42d3-862b-135f10887562
