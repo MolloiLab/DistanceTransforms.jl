@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.12
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -274,7 +274,7 @@ md"""
 
 # ╔═╡ edc19bce-db97-4a0d-a4a9-11e9241434e9
 if CUDA.has_cuda_gpu()
-	ks = DistanceTransforms.get_GPU_kernels(Wenbo())
+	# ks = DistanceTransforms.get_GPU_kernels(Wenbo())
 	@testset "wenbo 2D GPU" begin
 		img = [
 			0 1 1 1 0 0 0 1 1
@@ -286,7 +286,7 @@ if CUDA.has_cuda_gpu()
 			0 1 1 1 0 0 0 0 1
 		]
 		tfm = Wenbo()
-		test = transform(CuArray(img), tfm, ks)
+		test = transform(CuArray(img), tfm)
 		answer = CuArray([
 			1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 			0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -308,7 +308,7 @@ if CUDA.has_cuda_gpu()
 		img = rand([0, 1], 10, 10)
 		img2 = copy(img)
 		tfm = Wenbo()
-		test = transform(CUDA.CuArray(img), tfm, ks)
+		test = transform(CUDA.CuArray(img), tfm)
 		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
@@ -346,7 +346,7 @@ if CUDA.has_cuda_gpu()
 		end
 		vol_inv = CuArray(cat(container2..., dims=3))
 		tfm = Wenbo()
-		test = transform(vol_inv, tfm, ks)
+		test = transform(vol_inv, tfm)
 		a1 = img_inv
 		a2 = img
 		ans = cat(a1, a2, dims=3)
@@ -367,7 +367,7 @@ if CUDA.has_cuda_gpu()
 		img = rand([0, 1], 10, 10, 10)
 		img2 = copy(img)
 		tfm = Wenbo()
-		test = transform(CUDA.CuArray(img), tfm, ks)
+		test = transform(CUDA.CuArray(img), tfm)
 		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
