@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.12
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -417,7 +417,7 @@ end
 # ╔═╡ 58441e91-b837-496c-b1db-5dd428a6eba7
 """
 ```julia
-transform(f::CuArray{Bool, 2}, tfm::Wenbo)
+transform(f::CuArray{T, 2}, tfm::Wenbo, kernels) where T 
 ```
 
 Applies a squared euclidean distance transform to an input 2D boolean image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
@@ -426,12 +426,11 @@ function transform(f::CuArray{T, 2}, tfm::Wenbo, kernels) where T
     col_length, row_length = size(f)
     l = length(f)
     f_new = CUDA.zeros(col_length,row_length)
-    threads = min(l, launch_configuration(kernels[1].fun).threads)
+    threads = min(l, kernels[8])
     blocks = cld(l, threads)
 	k1 = T<:Bool ? kernels[2] : kernels[1]
     k1(f_new, f, row_length, l; threads, blocks)
     kernels[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
-    CUDA.reclaim()
 	return f_new
 end
 
@@ -597,41 +596,24 @@ get_GPU_kernels(tfm::Wenbo)
 Returns an array with the needed kernels for GPU version of `transform(..., tfm::Wenbo)`. This function should be called before calling any GPU version of `transform(..., tfm::Wenbo)`.
 """
 function get_GPU_kernels(tfm::Wenbo)
-	kerenls = []
-	push!(kerenls, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0))
-	push!(kerenls, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0))
-	push!(kerenls, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0))
-	push!(kerenls, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0))
-	return kerenls
+	kernels = []
+	push!(kernels, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0))
+	push!(kernels, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0))
+	push!(kernels, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0))
+	push!(kernels, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0))
+	push!(kernels, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0))
+	push!(kernels, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0))
+	push!(kernels, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0))
+	GPU_threads = launch_configuration(kernels[1].fun).threads
+	println("GPU threads = $GPU_threads.")
+	push!(kernels, GPU_threads)
+	return kernels
 end
-
-# ╔═╡ 3e999998-6762-4d50-9776-392dbea9df23
-# ╠═╡ disabled = true
-#=╠═╡
-begin
-	img_0 = [
-	    0 1 1 1 0 0 0 1 1
-	    1 1 1 1 1 0 0 0 1
-	    1 0 0 0 1 0 0 1 1
-	    1 0 0 0 1 0 1 1 0
-	    1 0 0 0 1 1 0 1 0
-	    1 1 1 1 1 0 0 1 0
-	    0 1 1 1 0 0 0 0 1
-	]
-	img_B = Bool.(img_0)
-	img_G = CuArray(img_0)
-	img_BG = CuArray(img_B)
-	ks = get_GPU_kernels(Wenbo())
-end
-  ╠═╡ =#
 
 # ╔═╡ f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 """
 ```julia
-transform(f::CuArray{T, 3}, tfm::Wenbo) where T
+function transform(f::CuArray{T, 3}, tfm::Wenbo, kernels) where T
 ```
 
 Applies a squared euclidean distance transform to an input 3D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
@@ -640,13 +622,12 @@ function transform(f::CuArray{T, 3}, tfm::Wenbo, kernels) where T
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
-    threads = min(l, launch_configuration(kernels[1].fun).threads)
+    threads = min(l, kernels[8])
     blocks = cld(l, threads)
 	k1 = T<:Bool ? kernels[5] : kernels[4]
     k1(f_new, f, d2, d3, l; threads, blocks)
     kernels[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
     kernels[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
-	CUDA.reclaim()
     return f_new
 end 
 
@@ -703,12 +684,6 @@ function transform(f::AbstractArray, tfm::Wenbo, ex)
 	return f
 end 
 
-# ╔═╡ ae072ece-1e88-4473-a64b-afaff348920c
-# ╠═╡ disabled = true
-#=╠═╡
-transform(img_G, Wenbo(), ks)
-  ╠═╡ =#
-
 # ╔═╡ Cell order:
 # ╠═19f1c4b6-23c4-11ed-02f2-fb3e9263a1a1
 # ╠═69d06c40-9861-41d5-b1c3-cc7b7ccd1d48
@@ -739,8 +714,6 @@ transform(img_G, Wenbo(), ks)
 # ╟─b5963be3-7794-4ae0-9330-6177a82605ef
 # ╟─927f25f9-1687-415f-b5bb-8a8f40afdd0f
 # ╠═58441e91-b837-496c-b1db-5dd428a6eba7
-# ╠═3e999998-6762-4d50-9776-392dbea9df23
-# ╠═ae072ece-1e88-4473-a64b-afaff348920c
 # ╟─01719cd4-f69e-47f5-9d84-36229fc3e73c
 # ╟─24527d9b-1fa2-443d-ad4c-76a53b1ba4c2
 # ╟─36bee155-1c27-40be-a956-30ef54ab14ef
