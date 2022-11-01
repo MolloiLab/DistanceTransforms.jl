@@ -303,25 +303,8 @@ md"""
 ## GPU
 """
 
-# ╔═╡ 1062d2aa-902a-42e2-98d2-e560fc63e7ae
-# """
-# ```julia
-# get_GPU_kernels(tfm::Wenbo)
-# ```
-
-# Returns an array with the needed kernels for GPU version of `transform(..., tfm::Wenbo)`. This function should be called before calling any GPU version of `transform(..., tfm::Wenbo)`.
-# """
-# function get_GPU_kernels(tfm::Wenbo)
-# 	kerenls = []
-# 	push!(kerenls, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0)) # 1
-# 	push!(kerenls, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0)) # 2
-# 	push!(kerenls, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0)) # 3
-# 	push!(kerenls, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0)) # 4
-# 	push!(kerenls, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)) # 5
-# 	push!(kerenls, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)) # 6
-# 	push!(kerenls, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)) # 7
-# 	return kerenls
-# end
+# ╔═╡ 6b98e312-826f-4259-8d7c-f6cb61c4c27d
+ks = []
 
 # ╔═╡ c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
 md"""
@@ -436,8 +419,8 @@ end
 
 # ╔═╡ b6b10ccd-bf6d-413c-b37a-446f5671e3d1
 begin
-	k1 = @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0),CuArray{Int64, 2}(undef, 0, 0),0,0) # 1
-	GPU_threads = launch_configuration(k1.fun).threads
+	# k1 = @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0),CuArray{Int64, 2}(undef, 0, 0),0,0) # 1
+	# GPU_threads = launch_configuration(k1.fun).threads
 	# k2 = @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0) # 2
 	# k3 = @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef,0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0) # 3
 end
@@ -454,12 +437,12 @@ function transform(f::CuArray{Bool, 2}, tfm::Wenbo)
     col_length, row_length = size(f)
     l = length(f)
     f_new = CUDA.zeros(col_length,row_length)
-    threads = min(l, GPU_threads)
+    threads = min(l, ks[8])
     blocks = cld(l, threads)
-    @cuda blocks=blocks threads=threads _kernel_2D_1_2!(f_new, f, row_length, l) #k2
-	# k2(f_new, f, row_length, l; threads, blocks)
-	@cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
-    # k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+    # @cuda blocks=blocks threads=threads _kernel_2D_1_2!(f_new, f, row_length, l) #k2
+	ks[2](f_new, f, row_length, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
+    ks[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     CUDA.reclaim()
 	return f_new
 end
@@ -476,12 +459,12 @@ function transform(f::CuArray{Int, 2}, tfm::Wenbo)
     col_length, row_length = size(f)
     l = length(f)
     f_new = CUDA.zeros(col_length,row_length)
-    threads = min(l, GPU_threads)
+    threads = min(l, ks[8])
     blocks = cld(l, threads)
-	@cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
- #    k1(f_new, f, row_length, l; threads, blocks)
-	@cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
-    # k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
+    ks[1](f_new, f, row_length, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
+    ks[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     CUDA.reclaim()
 	return f_new
 end
@@ -639,6 +622,29 @@ function _kernel_3D_3!(out, org, dim2_l, dim3_l, l)
     return
 end 
 
+# ╔═╡ 1062d2aa-902a-42e2-98d2-e560fc63e7ae
+# """
+# ```julia
+# get_GPU_kernels(tfm::Wenbo)
+# ```
+
+# Returns an array with the needed kernels for GPU version of `transform(..., tfm::Wenbo)`. This function should be called before calling any GPU version of `transform(..., tfm::Wenbo)`.
+# """
+
+function initialize_GPU_kernels(tfm::Wenbo)
+	push!(ks, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0)) #1
+	push!(ks, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0)) #2
+	push!(ks, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0)) #3
+	push!(ks, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0)) #4
+	push!(ks, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)) #5
+	push!(ks, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)) #6
+	push!(ks, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)) #7
+	GPU_threads = launch_configuration(ks[1].fun).threads
+	println("$GPU_threads GPU threads.")
+	push!(ks, GPU_threads) #8
+	return nothing
+end
+
 # ╔═╡ 70ff72b3-4e43-40d2-8279-077801dc9ac8
 # begin
 # 	k4 = @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0)
@@ -660,14 +666,14 @@ function transform(f::CuArray{Bool, 3}, tfm::Wenbo)
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
-    threads = min(l, GPU_threads)
+    threads = min(l, ks[8])
     blocks = cld(l, threads)
-	@cuda blocks=blocks threads=threads _kernel_3D_1_2!(f_new, f, d2, d3, l) #k5
-    # k5(f_new, f, d2, d3, l; threads, blocks)
-	@cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
-    # k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-	@cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
-    # k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_3D_1_2!(f_new, f, d2, d3, l) #k5
+    ks[5](f_new, f, d2, d3, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
+    ks[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
+    ks[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
 	CUDA.reclaim()
     return f_new
 end 
@@ -685,14 +691,14 @@ function transform(f::CuArray{Int, 3}, tfm::Wenbo)
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
-    threads = min(l, GPU_threads)
+    threads = min(l, ks[8])
     blocks = cld(l, threads)
-	@cuda blocks=blocks threads=threads _kernel_3D_1_1!(f_new, f, d2, d3, l) #k4
-    k4(f_new, f, d2, d3, l; threads, blocks)
-	@cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
-    # k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-	@cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
-    # k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_3D_1_1!(f_new, f, d2, d3, l) #k4
+    ks[4](f_new, f, d2, d3, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
+    ks[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
+    ks[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
 	CUDA.reclaim()
     return f_new
 end 
@@ -777,6 +783,7 @@ end
 # ╟─37cccaee-053d-4f9c-81ef-58b274ec25b8
 # ╠═f1977b4e-1834-449a-a8c9-f984a55eeca4
 # ╟─8da39536-8765-40fe-a158-335c905e99e6
+# ╠═6b98e312-826f-4259-8d7c-f6cb61c4c27d
 # ╠═1062d2aa-902a-42e2-98d2-e560fc63e7ae
 # ╟─c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
 # ╟─ad52080b-7d59-459d-829d-2a77ddf12c5f
