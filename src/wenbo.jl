@@ -457,8 +457,10 @@ function transform(f::CuArray{Bool, 2}, tfm::Wenbo)
     f_new = CUDA.zeros(col_length,row_length)
     threads = min(l, GPU_threads)
     blocks = cld(l, threads)
-    k2(f_new, f, row_length, l; threads, blocks)
-    k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+    @cuda blocks=blocks threads=threads _kernel_2D_1_2!(f_new, f, row_length, l) #k2
+	# k2(f_new, f, row_length, l; threads, blocks)
+	@cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
+    # k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     CUDA.reclaim()
 	return f_new
 end
@@ -466,20 +468,22 @@ end
 # ╔═╡ abee05dd-cce0-416c-b473-292fee0d3172
 """
 ```julia
-transform(f::CuArray{T, 2}, tfm::Wenbo) where T  
+transform(f::CuArray{Int, 2}, tfm::Wenbo)
 ```
 
 Applies a squared euclidean distance transform to an input 2D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
 """
-function transform(f::CuArray{T, 2}, tfm::Wenbo) where T   
+function transform(f::CuArray{Int, 2}, tfm::Wenbo)   
 	println("GPU 2D T")
     col_length, row_length = size(f)
     l = length(f)
     f_new = CUDA.zeros(col_length,row_length)
     threads = min(l, GPU_threads)
     blocks = cld(l, threads)
+	@cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
     k1(f_new, f, row_length, l; threads, blocks)
-    k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+	@cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
+    # k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     CUDA.reclaim()
 	return f_new
 end
