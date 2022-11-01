@@ -306,30 +306,6 @@ md"""
 # ╔═╡ efb73d4b-eb4f-484e-afed-f70b22751fbd
 ks = []
 
-# ╔═╡ a3eb56d1-dba9-44a5-bd35-03baa1d19b9d
-
-
-# ╔═╡ be2ad676-5182-43d2-9f17-cfc2d92bfd5e
-
-
-# ╔═╡ 3ea0dc5d-b1a4-4129-a974-55d0b7a3be72
-
-
-# ╔═╡ 78e71a93-c77b-4b03-8f15-3996cfe677b8
-
-
-# ╔═╡ b1a9a19c-68dc-439d-843b-04b3c8f59050
-
-
-# ╔═╡ 67ae5e89-9a1c-4ece-ab7b-f2e7876697a3
-
-
-# ╔═╡ 323d23c1-ce96-4946-9f01-a2bce04ecca4
-
-
-# ╔═╡ 574aad62-5f62-4bb7-9183-4b68fc48f728
-
-
 # ╔═╡ c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
 md"""
 ### 2D
@@ -441,12 +417,48 @@ end
     return
 end
 
-# ╔═╡ b6b10ccd-bf6d-413c-b37a-446f5671e3d1
-begin
-	# k1 = @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0),CuArray{Int64, 2}(undef, 0, 0),0,0) # 1
-	# GPU_threads = launch_configuration(k1.fun).threads
-	# k2 = @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0) # 2
-	# k3 = @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef,0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0) # 3
+# ╔═╡ 58441e91-b837-496c-b1db-5dd428a6eba7
+"""
+```julia
+transform(f::CuArray{Bool, 2}, tfm::Wenbo)
+```
+
+Applies a squared euclidean distance transform to an input 2D boolean image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
+"""
+function transform(f::CuArray{Bool, 2}, tfm::Wenbo)
+    col_length, row_length = size(f)
+    l = length(f)
+    f_new = CUDA.zeros(col_length,row_length)
+    threads = min(l, ks[8])
+    blocks = cld(l, threads)
+	ks[2](f_new, f, row_length, l; threads, blocks)
+	# k2(f_new, f, row_length, l; threads, blocks)
+    ks[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+	# k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+    CUDA.reclaim()
+	return f_new
+end
+
+# ╔═╡ abee05dd-cce0-416c-b473-292fee0d3172
+"""
+```julia
+transform(f::CuArray{Int, 2}, tfm::Wenbo)
+```
+
+Applies a squared euclidean distance transform to an input 2D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
+"""
+function transform(f::CuArray{Int, 2}, tfm::Wenbo)
+    col_length, row_length = size(f)
+    l = length(f)
+    f_new = CUDA.zeros(col_length,row_length)
+    threads = min(l, ks[8])
+    blocks = cld(l, threads)
+    ks[1](f_new, f, row_length, l; threads, blocks)
+    # k1(f_new, f, row_length, l; threads, blocks)
+    ks[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+    # k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+    CUDA.reclaim()
+	return f_new
 end
 
 # ╔═╡ 01719cd4-f69e-47f5-9d84-36229fc3e73c
@@ -610,92 +622,20 @@ end
 
 # Returns an array with the needed kernels for GPU version of `transform(..., tfm::Wenbo)`. This function should be called before calling any GPU version of `transform(..., tfm::Wenbo)`.
 # """
-begin
-	k1 = 0
-	k2 = 0
-	k3 = 0
-	k4 = 0
-	k5 = 0
-	k6 = 0
-	k7 = 0
-	GPU_threads = 0
-	function initialize_GPU_kernels(tfm::Wenbo)
-		global k1
-		k1 = @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0);
-		global k2
-		k2 = @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0);
-		global k3
-		k3 = @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0);
-		global k4
-		k4 = @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0);
-		global k5
-		k5 = @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0);
-		global k6
-		k6 = @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0);
-		global k7
-		k7 = @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0);
-		global GPU_threads
-		GPU_threads = launch_configuration(k1.fun).threads;
-		println("GPU threads = $GPU_threads.")
-		return nothing
-	end
+function initialize_GPU_kernels(tfm::Wenbo)
+	empty!(ks)
+	push!(ks, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Int64, 2}(undef, 0, 0),0,0))
+	push!(ks, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0))
+	push!(ks, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0))
+	push!(ks, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0))
+	push!(ks, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0))
+	push!(ks, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0))
+	push!(ks, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0))
+	GPU_threads = launch_configuration(ks[1].fun).threads
+	println("GPU threads = $GPU_threads.")
+	push!(ks, GPU_threads)
+	return nothing
 end
-
-# ╔═╡ 58441e91-b837-496c-b1db-5dd428a6eba7
-"""
-```julia
-transform(f::CuArray{Bool, 2}, tfm::Wenbo)
-```
-
-Applies a squared euclidean distance transform to an input 2D boolean image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
-"""
-function transform(f::CuArray{Bool, 2}, tfm::Wenbo)
-    col_length, row_length = size(f)
-    l = length(f)
-    f_new = CUDA.zeros(col_length,row_length)
-    threads = min(l, GPU_threads)
-    blocks = cld(l, threads)
-    # @cuda blocks=blocks threads=threads _kernel_2D_1_2!(f_new, f, row_length, l) #k2
-	# ks[2](f_new, f, row_length, l; threads, blocks)
-	k2(f_new, f, row_length, l; threads, blocks)
-	# @cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
-    # ks[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
-	k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
-    CUDA.reclaim()
-	return f_new
-end
-
-# ╔═╡ abee05dd-cce0-416c-b473-292fee0d3172
-"""
-```julia
-transform(f::CuArray{Int, 2}, tfm::Wenbo)
-```
-
-Applies a squared euclidean distance transform to an input 2D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
-"""
-function transform(f::CuArray{Int, 2}, tfm::Wenbo)
-    col_length, row_length = size(f)
-    l = length(f)
-    f_new = CUDA.zeros(col_length,row_length)
-    threads = min(l, GPU_threads)
-    blocks = cld(l, threads)
-	# @cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
-    # ks[1](f_new, f, row_length, l; threads, blocks)
-    k1(f_new, f, row_length, l; threads, blocks)
-	# @cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
-    # ks[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
-    k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
-    CUDA.reclaim()
-	return f_new
-end
-
-# ╔═╡ 70ff72b3-4e43-40d2-8279-077801dc9ac8
-# begin
-# 	k4 = @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0)
-# 	k5 = @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)
-# 	k6 = @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)
-# 	k7 = @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)
-# end
 
 # ╔═╡ f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 """
@@ -710,17 +650,14 @@ function transform(f::CuArray{Bool, 3}, tfm::Wenbo)
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
-    threads = min(l, GPU_threads)
+    threads = min(l, ks[8])
     blocks = cld(l, threads)
-	# @cuda blocks=blocks threads=threads _kernel_3D_1_2!(f_new, f, d2, d3, l) #k5
-    # ks[5](f_new, f, d2, d3, l; threads, blocks)
-    k5(f_new, f, d2, d3, l; threads, blocks)
-	# @cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
-    # ks[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-    k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-	# @cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
-    # ks[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
-    k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+    ks[5](f_new, f, d2, d3, l; threads, blocks)
+    # k5(f_new, f, d2, d3, l; threads, blocks)
+    ks[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+    # k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+    ks[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+    # k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
 	CUDA.reclaim()
     return f_new
 end 
@@ -738,17 +675,14 @@ function transform(f::CuArray{Int, 3}, tfm::Wenbo)
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
-    threads = min(l, GPU_threads)
+    threads = min(l, ks[8])
     blocks = cld(l, threads)
-	# @cuda blocks=blocks threads=threads _kernel_3D_1_1!(f_new, f, d2, d3, l) #k4
-    # ks[4](f_new, f, d2, d3, l; threads, blocks)
-    k4(f_new, f, d2, d3, l; threads, blocks)
-	# @cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
-    # ks[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-    k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-	# @cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
-    # ks[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
-    k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+	ks[4](f_new, f, d2, d3, l; threads, blocks)
+    # k4(f_new, f, d2, d3, l; threads, blocks)
+	ks[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+    # k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+	ks[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+    # k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
 	CUDA.reclaim()
     return f_new
 end 
@@ -835,19 +769,10 @@ end
 # ╟─8da39536-8765-40fe-a158-335c905e99e6
 # ╠═efb73d4b-eb4f-484e-afed-f70b22751fbd
 # ╠═1062d2aa-902a-42e2-98d2-e560fc63e7ae
-# ╠═a3eb56d1-dba9-44a5-bd35-03baa1d19b9d
-# ╠═be2ad676-5182-43d2-9f17-cfc2d92bfd5e
-# ╠═3ea0dc5d-b1a4-4129-a974-55d0b7a3be72
-# ╠═78e71a93-c77b-4b03-8f15-3996cfe677b8
-# ╠═b1a9a19c-68dc-439d-843b-04b3c8f59050
-# ╠═67ae5e89-9a1c-4ece-ab7b-f2e7876697a3
-# ╠═323d23c1-ce96-4946-9f01-a2bce04ecca4
-# ╠═574aad62-5f62-4bb7-9183-4b68fc48f728
 # ╟─c41c40b2-e23a-4ddd-a4ae-62b37e399f5c
 # ╟─ad52080b-7d59-459d-829d-2a77ddf12c5f
 # ╟─b5963be3-7794-4ae0-9330-6177a82605ef
 # ╟─927f25f9-1687-415f-b5bb-8a8f40afdd0f
-# ╠═b6b10ccd-bf6d-413c-b37a-446f5671e3d1
 # ╠═58441e91-b837-496c-b1db-5dd428a6eba7
 # ╠═abee05dd-cce0-416c-b473-292fee0d3172
 # ╟─01719cd4-f69e-47f5-9d84-36229fc3e73c
@@ -855,7 +780,6 @@ end
 # ╟─36bee155-1c27-40be-a956-30ef54ab14ef
 # ╟─22c9dd53-6ae6-45f9-8a44-c3777aefef5c
 # ╟─678c8a54-0b50-4419-8984-e0f0507e9b48
-# ╠═70ff72b3-4e43-40d2-8279-077801dc9ac8
 # ╠═f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 # ╠═44d9a02a-b737-4989-9852-e40515accb8b
 # ╟─ebee3240-63cf-4323-9755-a135834208c8

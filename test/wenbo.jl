@@ -270,13 +270,13 @@ md"""
 # ╔═╡ e9fdc7cf-d7c2-40f8-88d2-0ab1cd8dba47
 DistanceTransforms.initialize_GPU_kernels(Wenbo())
 
-# ╔═╡ b3610364-3298-41e9-8c29-36773336ec83
-DistanceTransforms.ks
-
 # ╔═╡ 6293532a-198d-49a2-b450-3ab7c7be3227
 md"""
 ### 2D
 """
+
+# ╔═╡ 74084314-0b12-4463-83bd-d84915b4a207
+DistanceTransforms.ks
 
 # ╔═╡ edc19bce-db97-4a0d-a4a9-11e9241434e9
 if CUDA.has_cuda_gpu()
@@ -523,8 +523,8 @@ end;
 # ╠═51117c0a-5f23-4b5d-ab76-81d25cd73a27
 # ╟─91899f57-48cc-49e4-b100-116f2326d126
 # ╠═e9fdc7cf-d7c2-40f8-88d2-0ab1cd8dba47
-# ╠═b3610364-3298-41e9-8c29-36773336ec83
 # ╟─6293532a-198d-49a2-b450-3ab7c7be3227
+# ╠═74084314-0b12-4463-83bd-d84915b4a207
 # ╠═edc19bce-db97-4a0d-a4a9-11e9241434e9
 # ╠═9d3e6bab-d8a5-42d3-862b-135f10887562
 # ╟─35ff78e2-b1d7-4792-8145-ced70a6ff233
