@@ -438,8 +438,8 @@ end
 begin
 	k1 = @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0),CuArray{Int64, 2}(undef, 0, 0),0,0) # 1
 	GPU_threads = launch_configuration(k1.fun).threads
-	k2 = @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0) # 2
-	k3 = @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef,0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0) # 3
+	# k2 = @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0) # 2
+	# k3 = @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef,0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0) # 3
 end
 
 # ╔═╡ 58441e91-b837-496c-b1db-5dd428a6eba7
@@ -480,9 +480,9 @@ function transform(f::CuArray{Int, 2}, tfm::Wenbo)
     f_new = CUDA.zeros(col_length,row_length)
     threads = min(l, GPU_threads)
     blocks = cld(l, threads)
-	# @cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
+	@cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
  #    k1(f_new, f, row_length, l; threads, blocks)
-	# @cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
+	@cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
     # k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     CUDA.reclaim()
 	return f_new
