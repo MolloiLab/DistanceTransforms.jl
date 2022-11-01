@@ -480,9 +480,9 @@ function transform(f::CuArray{Int, 2}, tfm::Wenbo)
     f_new = CUDA.zeros(col_length,row_length)
     threads = min(l, GPU_threads)
     blocks = cld(l, threads)
-	@cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
-    k1(f_new, f, row_length, l; threads, blocks)
-	@cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
+	# @cuda blocks=blocks threads=threads _kernel_2D_1_1!(f_new, f, row_length, l) # k1
+ #    k1(f_new, f, row_length, l; threads, blocks)
+	# @cuda blocks=blocks threads=threads _kernel_2D_2!(deepcopy(f_new), f_new, row_length, col_length, l) #k3
     # k3(deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
     CUDA.reclaim()
 	return f_new
