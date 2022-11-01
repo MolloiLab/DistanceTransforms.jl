@@ -640,12 +640,12 @@ function _kernel_3D_3!(out, org, dim2_l, dim3_l, l)
 end 
 
 # ╔═╡ 70ff72b3-4e43-40d2-8279-077801dc9ac8
-begin
-	k4 = @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0)
-	k5 = @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)
-	k6 = @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)
-	k7 = @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)
-end
+# begin
+# 	k4 = @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Int64, 3}(undef, 0, 0, 0),0,0,0)
+# 	k5 = @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)
+# 	k6 = @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)
+# 	k7 = @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)
+# end
 
 # ╔═╡ f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 """
@@ -656,15 +656,18 @@ function transform(f::CuArray{Bool, 3}, tfm::Wenbo)
 Applies a squared euclidean distance transform to an input 3D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
 """
 function transform(f::CuArray{Bool, 3}, tfm::Wenbo) 
-	println("GPU 3D Bool")
+	# println("GPU 3D Bool")
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
     threads = min(l, GPU_threads)
     blocks = cld(l, threads)
-    k5(f_new, f, d2, d3, l; threads, blocks)
-    k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-    k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+	@cuda blocks=blocks threads=threads _kernel_3D_1_2!(f_new, f, d2, d3, l) #k5
+    # k5(f_new, f, d2, d3, l; threads, blocks)
+	@cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
+    # k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+	@cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
+    # k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
 	CUDA.reclaim()
     return f_new
 end 
@@ -672,21 +675,24 @@ end
 # ╔═╡ 44d9a02a-b737-4989-9852-e40515accb8b
 """
 ```julia
-transform(f::CuArray{T, 3}, tfm::Wenbo) where T
+transform(f::CuArray{Int, 3}, tfm::Wenbo)
 ```
 
 Applies a squared euclidean distance transform to an input 3D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
 """
-function transform(f::CuArray{T, 3}, tfm::Wenbo) where T 
-	println("GPU 3D T")
+function transform(f::CuArray{Int, 3}, tfm::Wenbo)
+	# println("GPU 3D T")
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
     threads = min(l, GPU_threads)
     blocks = cld(l, threads)
+	@cuda blocks=blocks threads=threads _kernel_3D_1_1!(f_new, f, d2, d3, l) #k4
     k4(f_new, f, d2, d3, l; threads, blocks)
-    k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-    k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+	@cuda blocks=blocks threads=threads _kernel_3D_2!(f_new, deepcopy(f_new), d1, d2, d3, l) #k6
+    # k6(f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+	@cuda blocks=blocks threads=threads _kernel_3D_3!(f_new, deepcopy(f_new), d2, d3, l) # k7
+    # k7(f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
 	CUDA.reclaim()
     return f_new
 end 
