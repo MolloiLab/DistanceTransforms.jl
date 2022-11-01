@@ -450,8 +450,7 @@ transform(f::CuArray{Bool, 2}, tfm::Wenbo)
 
 Applies a squared euclidean distance transform to an input 2D boolean image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
 """
-function transform(f::CuArray{Bool, 2}, tfm::Wenbo) 
-	println("GPU 2D Bool")
+function transform(f::CuArray{Bool, 2}, tfm::Wenbo)
     col_length, row_length = size(f)
     l = length(f)
     f_new = CUDA.zeros(col_length,row_length)
@@ -473,8 +472,7 @@ transform(f::CuArray{Int, 2}, tfm::Wenbo)
 
 Applies a squared euclidean distance transform to an input 2D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. GPU version of `transform(..., tfm::Wenbo)`
 """
-function transform(f::CuArray{Int, 2}, tfm::Wenbo)   
-	println("GPU 2D T")
+function transform(f::CuArray{Int, 2}, tfm::Wenbo)
     col_length, row_length = size(f)
     l = length(f)
     f_new = CUDA.zeros(col_length,row_length)
