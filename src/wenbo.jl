@@ -545,7 +545,7 @@ end
 # ╔═╡ 25b46272-9f45-45f1-bf81-128a4bcf041f
 function _transform_batch(batch_size, f::CuArray{T, 3}, tfm::Wenbo, kernels) where T  
 	col_length, row_length, _ = size(f)
-	println("size = $col_length, $row_length, $batch_size")
+	# println("size = $col_length, $row_length, $batch_size")
 	l = col_length * row_length
 	f_new = CUDA.zeros(col_length,row_length, batch_size)
 	threads = min(l, kernels[8])
@@ -732,6 +732,154 @@ function _kernel_3D_3!(out, org, dim2_l, dim3_l, l)
     return
 end 
 
+# ╔═╡ a0dc7da8-54dc-43d6-a501-49ae35951563
+function _kernel_3D_1_1_batch!(out, f, dim2_l, dim3_l, l, slice_idx)
+	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+    if i > l
+        return
+    end 
+    temp =  dim2_l*dim3_l
+    dim1 = CUDA.cld(i, temp)
+    temp2 = (i-1)%temp+1
+    dim2 = CUDA.cld(temp2, dim3_l)
+    dim3 = temp2 % dim3_l + 1
+    # 1d DT alone dim2
+    @inbounds if f[dim1, dim2, dim3, slice_idx] != 1
+        ct = 1
+        curr_l = CUDA.min(dim2-1, dim2_l-dim2)
+        while ct <= curr_l
+            @inbounds if f[dim1, dim2-ct, dim3, slice_idx]==1 || f[dim1, dim2+ct, dim3, slice_idx]==1
+                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+                return 
+            end
+            ct += 1
+        end
+        while ct < dim2
+            @inbounds if f[dim1, dim2-ct, dim3, slice_idx]==1
+                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+                return 
+            end
+            ct += 1    
+        end
+        while dim2+ct <= dim2_l
+            @inbounds if f[dim1, dim2+ct, dim3, slice_idx]==1
+                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+                return 
+            end
+            ct += 1
+        end
+        @inbounds out[dim1, dim2, dim3, slice_idx] = 1f10
+    end
+    return 
+end
+
+# ╔═╡ e4872d2f-1931-4019-993f-14c318362be6
+function _kernel_3D_1_2_batch!(out, f, dim2_l, dim3_l, l, slice_idx)
+	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+    if i > l
+        return
+    end 
+    temp =  dim2_l*dim3_l
+    dim1 = CUDA.cld(i, temp)
+    temp2 = (i-1)%temp+1
+    dim2 = CUDA.cld(temp2, dim3_l)
+    dim3 = temp2 % dim3_l + 1
+    # 1d DT alone dim2
+    @inbounds if !f[dim1, dim2, dim3, slice_idx]
+        ct = 1
+        curr_l = CUDA.min(dim2-1, dim2_l-dim2)
+        while ct <= curr_l
+            @inbounds if f[dim1, dim2-ct, dim3, slice_idx] || f[dim1, dim2+ct, dim3, slice_idx]
+                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+                return 
+            end
+            ct += 1
+        end
+        while ct < dim2
+            @inbounds if f[dim1, dim2-ct, dim3, slice_idx]
+                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+                return 
+            end
+            ct += 1    
+        end
+        while dim2+ct <= dim2_l
+            @inbounds if f[dim1, dim2+ct, dim3, slice_idx]
+                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+                return 
+            end
+            ct += 1
+        end
+        @inbounds out[dim1, dim2, dim3, slice_idx] = 1f10
+    end
+    return 
+end
+
+# ╔═╡ 8d4ea8ae-1fd6-4448-9852-4beb552425a7
+function _kernel_3D_2_batch!(out, org, dim1_l, dim2_l, dim3_l, l, slice_idx)
+	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+    if i > l
+        return
+    end 
+    temp =  dim2_l*dim3_l
+    dim1 = cld(i, temp)
+    temp2 = (i-1)%temp+1
+    dim2 = cld(temp2, dim3_l)
+    dim3 = temp2 % dim3_l + 1
+    # 2d DT alone dim1
+    # @inbounds out[dim1, dim2, dim3] = dim1
+    ct = 1
+    @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+    @inbounds while ct < curr_l && dim1+ct <= dim1_l
+        @inbounds if org[dim1+ct, dim2, dim3, slice_idx] < out[dim1, dim2, dim3, slice_idx]
+            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1+ct, dim2, dim3, slice_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        end
+        ct += 1
+    end
+    ct = 1
+    @inbounds while ct < curr_l && dim1-ct > 0
+        @inbounds if org[dim1-ct, dim2, dim3, slice_idx] < out[dim1, dim2, dim3, slice_idx]
+            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1-ct, dim2, dim3, slice_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        end
+        ct += 1
+    end
+    return
+end
+
+# ╔═╡ 1d497ec9-12fb-4289-b2f2-2e51cbf042e5
+function _kernel_3D_3_batch!(out, org, dim2_l, dim3_l, l, slice_idx)
+	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+    if i > l
+        return
+    end 
+    temp =  dim2_l*dim3_l
+    dim1 = cld(i, temp)
+    temp2 = (i-1)%temp+1
+    dim2 = cld(temp2, dim3_l)
+    dim3 = temp2 % dim3_l + 1
+    # 2d DT alone dim3
+    # @inbounds out[dim1, dim2, dim3] = dim1
+    ct = 1
+    @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+    @inbounds while ct < curr_l && dim3+ct <= dim3_l
+        @inbounds if org[dim1, dim2, dim3+ct, slice_idx] < out[dim1, dim2, dim3, slice_idx]
+            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1, dim2, dim3+ct, slice_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        end
+        ct += 1
+    end
+    ct = 1
+    @inbounds while ct < curr_l && ct < dim3
+        @inbounds if org[dim1, dim2, dim3-ct, slice_idx] < out[dim1, dim2, dim3, slice_idx]
+            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1, dim2, dim3-ct, slice_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        end
+        ct += 1
+    end
+    return
+end 
+
 # ╔═╡ 1062d2aa-902a-42e2-98d2-e560fc63e7ae
 """
 ```julia
@@ -756,7 +904,29 @@ function get_GPU_kernels(tfm::Wenbo)
 	push!(kernels, @cuda launch=false _kernel_2D_1_1_batch!(CuArray{Float32, 3}(undef,0,0,0), CuArray{Float32, 3}(undef, 0,0,0),0,0,0)) #9
 	push!(kernels, @cuda launch=false _kernel_2D_1_2_batch!(CuArray{Float32, 3}(undef,0,0,0), CuArray{Bool, 3}(undef, 0,0,0),0,0,0)) #10
 	push!(kernels, @cuda launch=false _kernel_2D_2_batch!(CuArray{Float32, 3}(undef, 0,0,0),CuArray{Float32, 3}(undef, 0,0,0),0,0,0,0)) #11
+
+	push!(kernels, @cuda launch=false _kernel_3D_1_1_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0)) #12
+	push!(kernels, @cuda launch=false _kernel_3D_1_2_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Bool, 4}(undef, 0,0,0,0),0,0,0,0)) #13
+	push!(kernels, @cuda launch=false _kernel_3D_2_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0,0)) #14
+	push!(kernels, @cuda launch=false _kernel_3D_3_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0)) #15
 	return kernels
+end
+
+# ╔═╡ 83ded49e-77e3-49da-8c77-ac7375670b3d
+function _transform_batch(batch_size, f::CuArray{T, 4}, tfm::Wenbo, kernels) where T  
+	d1, d2, d3, _ = size(f)
+	# println("size = $d1, $d2, $d3")
+	l = d1 * d2 * d3
+	f_new = CUDA.zeros(d1, d2, d3, batch_size)
+	threads = min(l, kernels[8])
+	blocks = cld(l, threads)
+	k1 = T<:Bool ? kernels[13] : kernels[12]
+	for slice_idx = 1:batch_size
+		k1(f_new, f, d2, d3, l, slice_idx; threads, blocks)
+		kernels[14](f_new, deepcopy(f_new), d1, d2, d3, l, slice_idx; threads, blocks)
+    	kernels[15](f_new, deepcopy(f_new), d2, d3, l, slice_idx; threads, blocks)
+	end
+	return f_new
 end
 
 # ╔═╡ f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
@@ -785,17 +955,6 @@ md"""
 ### GPU-Batch
 """
 
-# ╔═╡ cecc5fdf-ff53-41aa-8bec-50296c167ca8
-function _record_ith_batch(img_batch, img_slice, slice_idx, ndim, l)
-    i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
-    if i > l
-        return
-    end 
-    image_idx = i + l*(slice_idx-1)
-    img_batch[image_idx] = img_slice[i]
-    return nothing
-end
-
 # ╔═╡ 14358a91-52aa-4f39-9d75-884ca53a7ce8
 """
 ```julia
@@ -809,10 +968,17 @@ function transform(batch_size::Number, f::CuArray, tfm::Wenbo, kernels)
 end 
 
 # ╔═╡ 42a77639-403a-42a1-8d69-fc6bdbc9c613
-img2D_batch = CuArray(round.(rand(Float32, 6,6,3)))
+# begin
+# 	img2D_batch = CuArray(round.(rand(Float32, 6,6,3)))
+# 	img3D_batch = CuArray(round.(rand(Float32, 6,6,6,3)))
+# 	""
+# end
 
 # ╔═╡ 5c10f6c3-1755-4cb8-a9fd-923447291998
-ks = get_GPU_kernels(Wenbo());
+# ks = get_GPU_kernels(Wenbo());
+
+# ╔═╡ ea1da50b-22b5-4323-b0d4-142e717c7e40
+# Array(transform(3, img3D_batch, Wenbo(), ks))
 
 # ╔═╡ ebee3240-63cf-4323-9755-a135834208c8
 md"""
@@ -867,9 +1033,6 @@ function transform(f::AbstractArray, tfm::Wenbo, ex)
 	return f
 end 
 
-# ╔═╡ ea1da50b-22b5-4323-b0d4-142e717c7e40
-transform(3, img2D_batch, Wenbo(), ks)
-
 # ╔═╡ Cell order:
 # ╠═19f1c4b6-23c4-11ed-02f2-fb3e9263a1a1
 # ╠═69d06c40-9861-41d5-b1c3-cc7b7ccd1d48
@@ -903,21 +1066,25 @@ transform(3, img2D_batch, Wenbo(), ks)
 # ╟─927f25f9-1687-415f-b5bb-8a8f40afdd0f
 # ╟─2a1c7734-805e-4971-9e07-a39c840457f0
 # ╟─716e061a-dec8-4515-b2ce-f893ca23f99e
-# ╠═aaf5a46a-67c7-457b-bc83-d1c2163583b8
-# ╠═25b46272-9f45-45f1-bf81-128a4bcf041f
+# ╟─aaf5a46a-67c7-457b-bc83-d1c2163583b8
+# ╟─25b46272-9f45-45f1-bf81-128a4bcf041f
 # ╠═58441e91-b837-496c-b1db-5dd428a6eba7
 # ╟─01719cd4-f69e-47f5-9d84-36229fc3e73c
 # ╟─24527d9b-1fa2-443d-ad4c-76a53b1ba4c2
 # ╟─36bee155-1c27-40be-a956-30ef54ab14ef
 # ╟─22c9dd53-6ae6-45f9-8a44-c3777aefef5c
 # ╟─678c8a54-0b50-4419-8984-e0f0507e9b48
+# ╟─a0dc7da8-54dc-43d6-a501-49ae35951563
+# ╟─e4872d2f-1931-4019-993f-14c318362be6
+# ╟─8d4ea8ae-1fd6-4448-9852-4beb552425a7
+# ╟─1d497ec9-12fb-4289-b2f2-2e51cbf042e5
+# ╟─83ded49e-77e3-49da-8c77-ac7375670b3d
 # ╠═f8a18f6e-8d35-43a3-a9a8-ae2f4abfe803
 # ╟─882322db-dd8e-415d-a5d4-b6cc68761f07
-# ╟─cecc5fdf-ff53-41aa-8bec-50296c167ca8
 # ╠═14358a91-52aa-4f39-9d75-884ca53a7ce8
-# ╠═42a77639-403a-42a1-8d69-fc6bdbc9c613
-# ╠═5c10f6c3-1755-4cb8-a9fd-923447291998
-# ╠═ea1da50b-22b5-4323-b0d4-142e717c7e40
+# ╟─42a77639-403a-42a1-8d69-fc6bdbc9c613
+# ╟─5c10f6c3-1755-4cb8-a9fd-923447291998
+# ╟─ea1da50b-22b5-4323-b0d4-142e717c7e40
 # ╟─ebee3240-63cf-4323-9755-a135834208c8
 # ╟─fccb36b9-ee1b-411f-aded-147a88b23872
 # ╠═88806a34-a025-40b2-810d-b3320a137543
