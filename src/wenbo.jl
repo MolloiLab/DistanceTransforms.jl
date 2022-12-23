@@ -306,12 +306,12 @@ md"""
 # ╔═╡ 84555ba9-ac32-4409-81e4-1e21d02aa1a1
 """
 ```julia
-transform(batch_size::Number, f::AbstractArray, tfm::Wenbo)
+transform(batch_size::Number, f::AbstractArray, tfm::Wenbo, _)
 ```
 
 Applies squared euclidean distance transforms to a number of batch_size N-dimension images using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. The length of last dimension of input should be equal to the batch size. 
 """
-function transform(batch_size::Number, f::AbstractArray, tfm::Wenbo)
+function transform(batch_size::Number, f::AbstractArray, tfm::Wenbo, _)
 	n_dims = ndims(f)
 	f_new = similar(f, Float32)
 	Threads.@threads for i = 1: batch_size
