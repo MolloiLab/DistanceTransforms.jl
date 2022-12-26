@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.8
 
 using Markdown
 using InteractiveUtils
@@ -311,11 +311,14 @@ transform(batch_size::Number, f::AbstractArray, tfm::Wenbo, _)
 
 Applies squared euclidean distance transforms to a number of batch_size N-dimension images using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. The length of last dimension of input should be equal to the batch size. 
 """
-function transform(batch_size::Number, f::AbstractArray, tfm::Wenbo, _)
+function transform(is_batch::Bool, f::AbstractArray, tfm::Wenbo, _)
 	n_dims = ndims(f)
+	num_channels, num_batchs = size(f)[n_dims-1], size(f)[n_dims]
 	f_new = similar(f, Float32)
-	Threads.@threads for i = 1: batch_size
-		@inbounds selectdim(f_new, n_dims, i)[:] = transform(selectdim(f, n_dims, i), tfm)
+	for batch_idx = 1: num_batchs
+		Threads.@threads for channel_idx = 1:num_channels
+			@inbounds selectdim(selectdim(f_new, n_dims, batch_idx), n_dims-1, channel_idx)[:] = transform(selectdim(selectdim(f, n_dims, batch_idx), n_dims-1, channel_idx), tfm)
+		end
 	end
 	return f_new
 end 
@@ -338,27 +341,27 @@ function _kernel_2D_1_1!(out, f, row_l, l)
 	end 
 	row = cld(i, row_l)
 	col = i%row_l+1
-	@inbounds if f[row, col] == 1
+	@inbounds if f[row, col] >= 0.5f0
 		return 
 	end
 	ct = 1
 	curr_l = min(col-1, row_l-col)
 	while ct <= curr_l
-		@inbounds if f[row, col-ct] == 1 || f[row, col+ct] == 1
+		@inbounds if f[row, col-ct] >= 0.5f0 || f[row, col+ct] >= 0.5f0
 			@inbounds out[row, col] = ct*ct
 			return 
 		end
 		ct += 1
 	end
 	while ct < col
-		@inbounds if f[row, col-ct] == 1
+		@inbounds if f[row, col-ct] >= 0.5f0
 			@inbounds out[row, col] = ct*ct
 			return 
 		end
 		ct += 1    
 	end
 	while col+ct <= row_l
-		@inbounds if f[row, col+ct] == 1
+		@inbounds if f[row, col+ct] >= 0.5f0
 			@inbounds out[row, col] = ct*ct
 			return 
 		end
@@ -369,42 +372,42 @@ function _kernel_2D_1_1!(out, f, row_l, l)
 end
 
 # ╔═╡ b5963be3-7794-4ae0-9330-6177a82605ef
-function _kernel_2D_1_2!(out, f, row_l, l)
-	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
-	if i > l
-		return
-	end 
-	row = cld(i, row_l)
-	col = i%row_l+1
-	@inbounds if f[row, col]
-		return 
-	end
-	ct = 1
-	curr_l = min(col-1, row_l-col)
-	while ct <= curr_l
-		@inbounds if f[row, col-ct] || f[row, col+ct]
-			@inbounds out[row, col] = ct*ct
-			return 
-		end
-		ct += 1
-	end
-	while ct < col
-		@inbounds if f[row, col-ct]
-			@inbounds out[row, col] = ct*ct
-			return 
-		end
-		ct += 1    
-	end
-	while col+ct <= row_l
-		@inbounds if f[row, col+ct]
-			@inbounds out[row, col] = ct*ct
-			return 
-		end
-		ct += 1
-	end
-	@inbounds out[row, col] = 1f10
-	return 
-end
+# function _kernel_2D_1_2!(out, f, row_l, l)
+# 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+# 	if i > l
+# 		return
+# 	end 
+# 	row = cld(i, row_l)
+# 	col = i%row_l+1
+# 	@inbounds if f[row, col] 
+# 		return 
+# 	end
+# 	ct = 1
+# 	curr_l = min(col-1, row_l-col)
+# 	while ct <= curr_l
+# 		@inbounds if f[row, col-ct] || f[row, col+ct]
+# 			@inbounds out[row, col] = ct*ct
+# 			return 
+# 		end
+# 		ct += 1
+# 	end
+# 	while ct < col
+# 		@inbounds if f[row, col-ct]
+# 			@inbounds out[row, col] = ct*ct
+# 			return 
+# 		end
+# 		ct += 1    
+# 	end
+# 	while col+ct <= row_l
+# 		@inbounds if f[row, col+ct]
+# 			@inbounds out[row, col] = ct*ct
+# 			return 
+# 		end
+# 		ct += 1
+# 	end
+# 	@inbounds out[row, col] = 1f10
+# 	return 
+# end
 
 # ╔═╡ 927f25f9-1687-415f-b5bb-8a8f40afdd0f
  function _kernel_2D_2!(org, out, row_l, col_l, l)
@@ -437,83 +440,83 @@ end
 end
 
 # ╔═╡ 2a1c7734-805e-4971-9e07-a39c840457f0
-function _kernel_2D_1_1_batch!(out, f, row_l, l, slice_idx)
+function _kernel_2D_1_1_batch!(out, f, row_l, l, channel_idx, batch_idx)
 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
 	if i > l
 		return
 	end 
 	row = cld(i, row_l)
 	col = i%row_l+1
-	@inbounds if f[row, col, slice_idx] == 1
+	@inbounds if f[row, col, channel_idx, batch_idx] >= 0.5f0
 		return 
 	end
 	ct = 1
 	curr_l = min(col-1, row_l-col)
 	while ct <= curr_l
-		@inbounds if f[row, col-ct, slice_idx] == 1 || f[row, col+ct, slice_idx] == 1
-			@inbounds out[row, col, slice_idx] = ct*ct
+		@inbounds if f[row, col-ct, channel_idx, batch_idx] >= 0.5f0 || f[row, col+ct, channel_idx, batch_idx] >= 0.5f0
+			@inbounds out[row, col, channel_idx, batch_idx] = ct*ct
 			return 
 		end
 		ct += 1
 	end
 	while ct < col
-		@inbounds if f[row, col-ct, slice_idx] == 1
-			@inbounds out[row, col, slice_idx] = ct*ct
+		@inbounds if f[row, col-ct, channel_idx, batch_idx] >= 0.5f0
+			@inbounds out[row, col, channel_idx, batch_idx] = ct*ct
 			return 
 		end
 		ct += 1    
 	end
 	while col+ct <= row_l
-		@inbounds if f[row, col+ct, slice_idx] == 1
-			@inbounds out[row, col, slice_idx] = ct*ct
+		@inbounds if f[row, col+ct, channel_idx, batch_idx] >= 0.5f0
+			@inbounds out[row, col, channel_idx, batch_idx] = ct*ct
 			return 
 		end
 		ct += 1
 	end
-	@inbounds out[row, col, slice_idx] = 1f10
+	@inbounds out[row, col, channel_idx, batch_idx] = 1f10
 	return 
 end
 
 # ╔═╡ 716e061a-dec8-4515-b2ce-f893ca23f99e
-function _kernel_2D_1_2_batch!(out, f, row_l, l, slice_idx)
-	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
-	if i > l
-		return
-	end 
-	row = cld(i, row_l)
-	col = i%row_l+1
-	@inbounds if f[row, col, slice_idx]
-		return 
-	end
-	ct = 1
-	curr_l = min(col-1, row_l-col)
-	while ct <= curr_l
-		@inbounds if f[row, col-ct, slice_idx] || f[row, col+ct, slice_idx]
-			@inbounds out[row, col, slice_idx] = ct*ct
-			return 
-		end
-		ct += 1
-	end
-	while ct < col
-		@inbounds if f[row, col-ct, slice_idx]
-			@inbounds out[row, col, slice_idx] = ct*ct
-			return 
-		end
-		ct += 1    
-	end
-	while col+ct <= row_l
-		@inbounds if f[row, col+ct, slice_idx]
-			@inbounds out[row, col, slice_idx] = ct*ct
-			return 
-		end
-		ct += 1
-	end
-	@inbounds out[row, col, slice_idx] = 1f10
-	return 
-end
+# function _kernel_2D_1_2_batch!(out, f, row_l, l, channel_idx, batch_idx)
+# 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+# 	if i > l
+# 		return
+# 	end 
+# 	row = cld(i, row_l)
+# 	col = i%row_l+1
+# 	@inbounds if f[row, col, channel_idx, batch_idx]
+# 		return 
+# 	end
+# 	ct = 1
+# 	curr_l = min(col-1, row_l-col)
+# 	while ct <= curr_l
+# 		@inbounds if f[row, col-ct, channel_idx, batch_idx] || f[row, col+ct, channel_idx, batch_idx]
+# 			@inbounds out[row, col, channel_idx, batch_idx] = ct*ct
+# 			return 
+# 		end
+# 		ct += 1
+# 	end
+# 	while ct < col
+# 		@inbounds if f[row, col-ct, channel_idx, batch_idx]
+# 			@inbounds out[row, col, channel_idx, batch_idx] = ct*ct
+# 			return 
+# 		end
+# 		ct += 1    
+# 	end
+# 	while col+ct <= row_l
+# 		@inbounds if f[row, col+ct, channel_idx, batch_idx]
+# 			@inbounds out[row, col, channel_idx, batch_idx] = ct*ct
+# 			return 
+# 		end
+# 		ct += 1
+# 	end
+# 	@inbounds out[row, col, channel_idx, batch_idx] = 1f10
+# 	return 
+# end
 
 # ╔═╡ aaf5a46a-67c7-457b-bc83-d1c2163583b8
- function _kernel_2D_2_batch!(org, out, row_l, col_l, l, slice_idx)
+ function _kernel_2D_2_batch!(org, out, row_l, col_l, l, channel_idx, batch_idx)
 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
     if i > l
         return
@@ -521,20 +524,20 @@ end
     row = cld(i, row_l)
     col = i%row_l+1
     ct = 1
-    @inbounds curr_l = CUDA.sqrt(out[row, col, slice_idx])
+    @inbounds curr_l = CUDA.sqrt(out[row, col, channel_idx, batch_idx])
     @inbounds while ct < curr_l && row+ct <= col_l
-        @inbounds temp = muladd(ct,ct,org[row+ct, col, slice_idx])
-        @inbounds if temp < out[row, col, slice_idx]
-            @inbounds out[row, col] = temp
+        @inbounds temp = muladd(ct,ct,org[row+ct, col, channel_idx, batch_idx])
+        @inbounds if temp < out[row, col, channel_idx, batch_idx]
+            @inbounds out[row, col, channel_idx, batch_idx] = temp
             curr_l = CUDA.sqrt(temp)
         end
         ct += 1
     end
     ct = 1
     @inbounds while ct < curr_l && row > ct
-        @inbounds temp = muladd(ct,ct,org[row-ct, col, slice_idx])
-        @inbounds if temp < out[row, col, slice_idx]
-            @inbounds out[row, col] = temp
+        @inbounds temp = muladd(ct,ct,org[row-ct, col, channel_idx, batch_idx])
+        @inbounds if temp < out[row, col, channel_idx, batch_idx]
+            @inbounds out[row, col, channel_idx, batch_idx] = temp
             curr_l = CUDA.sqrt(temp)
         end
         ct += 1
@@ -543,17 +546,19 @@ end
 end
 
 # ╔═╡ 25b46272-9f45-45f1-bf81-128a4bcf041f
-function _transform_batch(batch_size, f::CuArray{T, 3}, tfm::Wenbo, kernels) where T  
-	col_length, row_length, _ = size(f)
+function _transform_batch(f::CuArray{T, 4}, tfm::Wenbo, kernels) where T  
+	col_length, row_length, num_channels, batch_size = size(f)
 	# println("size = $col_length, $row_length, $batch_size")
 	l = col_length * row_length
-	f_new = CUDA.zeros(col_length,row_length, batch_size)
-	threads = min(l, kernels[8])
+	f_new = CUDA.zeros(col_length,row_length,num_channels,batch_size)
+	@inbounds threads = min(l, kernels[6])
 	blocks = cld(l, threads)
-	k1 = T<:Bool ? kernels[10] : kernels[9]
-	for slice_idx = 1:batch_size
-		k1(f_new, f, row_length, l, slice_idx; threads, blocks)
-		kernels[11](deepcopy(f_new), f_new, row_length, col_length, l, slice_idx; threads, blocks)
+	# @inbounds k1 = T<:Bool ? kernels[10] : kernels[9]
+	for batch_idx = 1:batch_size
+		Threads.@threads for channel_idx = 1:num_channels
+			@inbounds kernels[7](f_new, f, row_length, l, channel_idx, batch_idx; threads, blocks)
+			@inbounds kernels[8](deepcopy(f_new), f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
+		end
 	end
 	return f_new
 end
@@ -571,11 +576,11 @@ function transform(f::CuArray{T, 2}, tfm::Wenbo, kernels) where T
 	col_length, row_length = size(f)
 	l = length(f)
 	f_new = CUDA.zeros(col_length,row_length)
-	threads = min(l, kernels[8])
+	threads = min(l, kernels[6])
 	blocks = cld(l, threads)
-	k1 = T<:Bool ? kernels[2] : kernels[1]
-	k1(f_new, f, row_length, l; threads, blocks)
-	kernels[3](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+	# k1 = T<:Bool ? kernels[2] : kernels[1]
+	@inbounds kernels[1](f_new, f, row_length, l; threads, blocks)
+	@inbounds kernels[2](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
 	return f_new
 end
 
@@ -595,26 +600,26 @@ function _kernel_3D_1_1!(out, f, dim2_l, dim3_l, l)
     temp2 = (i-1)%temp+1
     dim2 = CUDA.cld(temp2, dim3_l)
     dim3 = temp2 % dim3_l + 1
-    # 1d DT alone dim2
-    @inbounds if f[dim1, dim2, dim3] != 1
+    # 1d DT along dim2
+    @inbounds if f[dim1, dim2, dim3] < 0.5f0
         ct = 1
         curr_l = CUDA.min(dim2-1, dim2_l-dim2)
         while ct <= curr_l
-            @inbounds if f[dim1, dim2-ct, dim3]==1 || f[dim1, dim2+ct, dim3]==1
+            @inbounds if f[dim1, dim2-ct, dim3]>=0.5f0 || f[dim1, dim2+ct, dim3]>=0.5f0
                 @inbounds out[dim1, dim2, dim3] = ct*ct
                 return 
             end
             ct += 1
         end
         while ct < dim2
-            @inbounds if f[dim1, dim2-ct, dim3]==1
+            @inbounds if f[dim1, dim2-ct, dim3]>=0.5f0
                 @inbounds out[dim1, dim2, dim3] = ct*ct
                 return 
             end
             ct += 1    
         end
         while dim2+ct <= dim2_l
-            @inbounds if f[dim1, dim2+ct, dim3]==1
+            @inbounds if f[dim1, dim2+ct, dim3]>=0.5f0
                 @inbounds out[dim1, dim2, dim3] = ct*ct
                 return 
             end
@@ -626,45 +631,45 @@ function _kernel_3D_1_1!(out, f, dim2_l, dim3_l, l)
 end
 
 # ╔═╡ 36bee155-1c27-40be-a956-30ef54ab14ef
-function _kernel_3D_1_2!(out, f, dim2_l, dim3_l, l)
-	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
-    if i > l
-        return
-    end 
-    temp =  dim2_l*dim3_l
-    dim1 = CUDA.cld(i, temp)
-    temp2 = (i-1)%temp+1
-    dim2 = CUDA.cld(temp2, dim3_l)
-    dim3 = temp2 % dim3_l + 1
-    # 1d DT alone dim2
-    @inbounds if !f[dim1, dim2, dim3]
-        ct = 1
-        curr_l = CUDA.min(dim2-1, dim2_l-dim2)
-        while ct <= curr_l
-            @inbounds if f[dim1, dim2-ct, dim3] || f[dim1, dim2+ct, dim3]
-                @inbounds out[dim1, dim2, dim3] = ct*ct
-                return 
-            end
-            ct += 1
-        end
-        while ct < dim2
-            @inbounds if f[dim1, dim2-ct, dim3]
-                @inbounds out[dim1, dim2, dim3] = ct*ct
-                return 
-            end
-            ct += 1    
-        end
-        while dim2+ct <= dim2_l
-            @inbounds if f[dim1, dim2+ct, dim3]
-                @inbounds out[dim1, dim2, dim3] = ct*ct
-                return 
-            end
-            ct += 1
-        end
-        @inbounds out[dim1, dim2, dim3] = 1f10
-    end
-    return 
-end
+# function _kernel_3D_1_2!(out, f, dim2_l, dim3_l, l)
+# 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+#     if i > l
+#         return
+#     end 
+#     temp =  dim2_l*dim3_l
+#     dim1 = CUDA.cld(i, temp)
+#     temp2 = (i-1)%temp+1
+#     dim2 = CUDA.cld(temp2, dim3_l)
+#     dim3 = temp2 % dim3_l + 1
+#     # 1d DT alone dim2
+#     @inbounds if !f[dim1, dim2, dim3]
+#         ct = 1
+#         curr_l = CUDA.min(dim2-1, dim2_l-dim2)
+#         while ct <= curr_l
+#             @inbounds if f[dim1, dim2-ct, dim3] || f[dim1, dim2+ct, dim3]
+#                 @inbounds out[dim1, dim2, dim3] = ct*ct
+#                 return 
+#             end
+#             ct += 1
+#         end
+#         while ct < dim2
+#             @inbounds if f[dim1, dim2-ct, dim3]
+#                 @inbounds out[dim1, dim2, dim3] = ct*ct
+#                 return 
+#             end
+#             ct += 1    
+#         end
+#         while dim2+ct <= dim2_l
+#             @inbounds if f[dim1, dim2+ct, dim3]
+#                 @inbounds out[dim1, dim2, dim3] = ct*ct
+#                 return 
+#             end
+#             ct += 1
+#         end
+#         @inbounds out[dim1, dim2, dim3] = 1f10
+#     end
+#     return 
+# end
 
 # ╔═╡ 22c9dd53-6ae6-45f9-8a44-c3777aefef5c
 function _kernel_3D_2!(out, org, dim1_l, dim2_l, dim3_l, l)
@@ -677,8 +682,7 @@ function _kernel_3D_2!(out, org, dim1_l, dim2_l, dim3_l, l)
     temp2 = (i-1)%temp+1
     dim2 = cld(temp2, dim3_l)
     dim3 = temp2 % dim3_l + 1
-    # 2d DT alone dim1
-    # @inbounds out[dim1, dim2, dim3] = dim1
+    # 2d DT along dim1
     ct = 1
     @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3])
     @inbounds while ct < curr_l && dim1+ct <= dim1_l
@@ -710,8 +714,7 @@ function _kernel_3D_3!(out, org, dim2_l, dim3_l, l)
     temp2 = (i-1)%temp+1
     dim2 = cld(temp2, dim3_l)
     dim3 = temp2 % dim3_l + 1
-    # 2d DT alone dim3
-    # @inbounds out[dim1, dim2, dim3] = dim1
+    # 2d DT along dim3=
     ct = 1
     @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3])
     @inbounds while ct < curr_l && dim3+ct <= dim3_l
@@ -733,7 +736,7 @@ function _kernel_3D_3!(out, org, dim2_l, dim3_l, l)
 end 
 
 # ╔═╡ a0dc7da8-54dc-43d6-a501-49ae35951563
-function _kernel_3D_1_1_batch!(out, f, dim2_l, dim3_l, l, slice_idx)
+function _kernel_3D_1_1_batch!(out, f, dim2_l, dim3_l, l, channel_idx, batch_idx)
 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
     if i > l
         return
@@ -744,78 +747,78 @@ function _kernel_3D_1_1_batch!(out, f, dim2_l, dim3_l, l, slice_idx)
     dim2 = CUDA.cld(temp2, dim3_l)
     dim3 = temp2 % dim3_l + 1
     # 1d DT alone dim2
-    @inbounds if f[dim1, dim2, dim3, slice_idx] != 1
+    @inbounds if f[dim1, dim2, dim3, channel_idx, batch_idx] < 0.5f0
         ct = 1
         curr_l = CUDA.min(dim2-1, dim2_l-dim2)
         while ct <= curr_l
-            @inbounds if f[dim1, dim2-ct, dim3, slice_idx]==1 || f[dim1, dim2+ct, dim3, slice_idx]==1
-                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+            @inbounds if f[dim1, dim2-ct, dim3, channel_idx, batch_idx] >= 0.5f0 || f[dim1, dim2+ct, dim3, channel_idx, batch_idx] >= 0.5f0
+                @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = ct*ct
                 return 
             end
             ct += 1
         end
         while ct < dim2
-            @inbounds if f[dim1, dim2-ct, dim3, slice_idx]==1
-                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+            @inbounds if f[dim1, dim2-ct, dim3, channel_idx, batch_idx] >= 0.5f0
+                @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = ct*ct
                 return 
             end
             ct += 1    
         end
         while dim2+ct <= dim2_l
-            @inbounds if f[dim1, dim2+ct, dim3, slice_idx]==1
-                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
+            @inbounds if f[dim1, dim2+ct, dim3, channel_idx, batch_idx] >= 0.5f0
+                @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = ct*ct
                 return 
             end
             ct += 1
         end
-        @inbounds out[dim1, dim2, dim3, slice_idx] = 1f10
+        @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = 1f10
     end
     return 
 end
 
 # ╔═╡ e4872d2f-1931-4019-993f-14c318362be6
-function _kernel_3D_1_2_batch!(out, f, dim2_l, dim3_l, l, slice_idx)
-	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
-    if i > l
-        return
-    end 
-    temp =  dim2_l*dim3_l
-    dim1 = CUDA.cld(i, temp)
-    temp2 = (i-1)%temp+1
-    dim2 = CUDA.cld(temp2, dim3_l)
-    dim3 = temp2 % dim3_l + 1
-    # 1d DT alone dim2
-    @inbounds if !f[dim1, dim2, dim3, slice_idx]
-        ct = 1
-        curr_l = CUDA.min(dim2-1, dim2_l-dim2)
-        while ct <= curr_l
-            @inbounds if f[dim1, dim2-ct, dim3, slice_idx] || f[dim1, dim2+ct, dim3, slice_idx]
-                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
-                return 
-            end
-            ct += 1
-        end
-        while ct < dim2
-            @inbounds if f[dim1, dim2-ct, dim3, slice_idx]
-                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
-                return 
-            end
-            ct += 1    
-        end
-        while dim2+ct <= dim2_l
-            @inbounds if f[dim1, dim2+ct, dim3, slice_idx]
-                @inbounds out[dim1, dim2, dim3, slice_idx] = ct*ct
-                return 
-            end
-            ct += 1
-        end
-        @inbounds out[dim1, dim2, dim3, slice_idx] = 1f10
-    end
-    return 
-end
+# function _kernel_3D_1_2_batch!(out, f, dim2_l, dim3_l, l, channel_idx, batch_idx)
+# 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+#     if i > l
+#         return
+#     end 
+#     temp =  dim2_l*dim3_l
+#     dim1 = CUDA.cld(i, temp)
+#     temp2 = (i-1)%temp+1
+#     dim2 = CUDA.cld(temp2, dim3_l)
+#     dim3 = temp2 % dim3_l + 1
+#     # 1d DT alone dim2
+#     @inbounds if !f[dim1, dim2, dim3, channel_idx, batch_idx]
+#         ct = 1
+#         curr_l = CUDA.min(dim2-1, dim2_l-dim2)
+#         while ct <= curr_l
+#             @inbounds if f[dim1, dim2-ct, dim3, channel_idx, batch_idx] || f[dim1, dim2+ct, dim3, channel_idx, batch_idx]
+#                 @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = ct*ct
+#                 return 
+#             end
+#             ct += 1
+#         end
+#         while ct < dim2
+#             @inbounds if f[dim1, dim2-ct, dim3, channel_idx, batch_idx]
+#                 @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = ct*ct
+#                 return 
+#             end
+#             ct += 1    
+#         end
+#         while dim2+ct <= dim2_l
+#             @inbounds if f[dim1, dim2+ct, dim3, channel_idx, batch_idx]
+#                 @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = ct*ct
+#                 return 
+#             end
+#             ct += 1
+#         end
+#         @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = 1f10
+#     end
+#     return 
+# end
 
 # ╔═╡ 8d4ea8ae-1fd6-4448-9852-4beb552425a7
-function _kernel_3D_2_batch!(out, org, dim1_l, dim2_l, dim3_l, l, slice_idx)
+function _kernel_3D_2_batch!(out, org, dim1_l, dim2_l, dim3_l, l, channel_idx, batch_idx)
 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
     if i > l
         return
@@ -825,22 +828,21 @@ function _kernel_3D_2_batch!(out, org, dim1_l, dim2_l, dim3_l, l, slice_idx)
     temp2 = (i-1)%temp+1
     dim2 = cld(temp2, dim3_l)
     dim3 = temp2 % dim3_l + 1
-    # 2d DT alone dim1
-    # @inbounds out[dim1, dim2, dim3] = dim1
+    # 2d DT along dim1
     ct = 1
-    @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+    @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, channel_idx, batch_idx])
     @inbounds while ct < curr_l && dim1+ct <= dim1_l
-        @inbounds if org[dim1+ct, dim2, dim3, slice_idx] < out[dim1, dim2, dim3, slice_idx]
-            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1+ct, dim2, dim3, slice_idx]))
-            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        @inbounds if org[dim1+ct, dim2, dim3, channel_idx, batch_idx] < out[dim1, dim2, dim3, channel_idx, batch_idx]
+            @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = min(out[dim1, dim2, dim3, channel_idx, batch_idx], muladd(ct,ct,org[dim1+ct, dim2, dim3, channel_idx, batch_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, channel_idx, batch_idx])
         end
         ct += 1
     end
     ct = 1
     @inbounds while ct < curr_l && dim1-ct > 0
-        @inbounds if org[dim1-ct, dim2, dim3, slice_idx] < out[dim1, dim2, dim3, slice_idx]
-            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1-ct, dim2, dim3, slice_idx]))
-            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        @inbounds if org[dim1-ct, dim2, dim3, channel_idx, batch_idx] < out[dim1, dim2, dim3, channel_idx, batch_idx]
+            @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = min(out[dim1, dim2, dim3, channel_idx, batch_idx], muladd(ct,ct,org[dim1-ct, dim2, dim3, channel_idx, batch_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, channel_idx, batch_idx])
         end
         ct += 1
     end
@@ -848,7 +850,7 @@ function _kernel_3D_2_batch!(out, org, dim1_l, dim2_l, dim3_l, l, slice_idx)
 end
 
 # ╔═╡ 1d497ec9-12fb-4289-b2f2-2e51cbf042e5
-function _kernel_3D_3_batch!(out, org, dim2_l, dim3_l, l, slice_idx)
+function _kernel_3D_3_batch!(out, org, dim2_l, dim3_l, l, channel_idx, batch_idx)
 	i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
     if i > l
         return
@@ -858,22 +860,21 @@ function _kernel_3D_3_batch!(out, org, dim2_l, dim3_l, l, slice_idx)
     temp2 = (i-1)%temp+1
     dim2 = cld(temp2, dim3_l)
     dim3 = temp2 % dim3_l + 1
-    # 2d DT alone dim3
-    # @inbounds out[dim1, dim2, dim3] = dim1
+    # 2d DT along dim3
     ct = 1
-    @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+    @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, channel_idx, batch_idx])
     @inbounds while ct < curr_l && dim3+ct <= dim3_l
-        @inbounds if org[dim1, dim2, dim3+ct, slice_idx] < out[dim1, dim2, dim3, slice_idx]
-            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1, dim2, dim3+ct, slice_idx]))
-            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        @inbounds if org[dim1, dim2, dim3+ct, channel_idx, batch_idx] < out[dim1, dim2, dim3, channel_idx, batch_idx]
+            @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = min(out[dim1, dim2, dim3, channel_idx, batch_idx], muladd(ct,ct,org[dim1, dim2, dim3+ct, channel_idx, batch_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, channel_idx, batch_idx])
         end
         ct += 1
     end
     ct = 1
     @inbounds while ct < curr_l && ct < dim3
-        @inbounds if org[dim1, dim2, dim3-ct, slice_idx] < out[dim1, dim2, dim3, slice_idx]
-            @inbounds out[dim1, dim2, dim3, slice_idx] = min(out[dim1, dim2, dim3, slice_idx], muladd(ct,ct,org[dim1, dim2, dim3-ct, slice_idx]))
-            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, slice_idx])
+        @inbounds if org[dim1, dim2, dim3-ct, channel_idx, batch_idx] < out[dim1, dim2, dim3, channel_idx, batch_idx]
+            @inbounds out[dim1, dim2, dim3, channel_idx, batch_idx] = min(out[dim1, dim2, dim3, channel_idx, batch_idx], muladd(ct,ct,org[dim1, dim2, dim3-ct, channel_idx, batch_idx]))
+            @inbounds curr_l = CUDA.sqrt(out[dim1, dim2, dim3, channel_idx, batch_idx])
         end
         ct += 1
     end
@@ -890,41 +891,46 @@ Returns an array with the needed kernels for GPU version of `transform(..., tfm:
 """
 function get_GPU_kernels(tfm::Wenbo)
 	kernels = []
+	# 2D kernels:
 	push!(kernels, @cuda launch=false _kernel_2D_1_1!(CuArray{Float32, 2}(undef,0,0), CuArray{Float32, 2}(undef, 0, 0),0,0)) #1
-	push!(kernels, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0)) #2
-	push!(kernels, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0)) #3
-	push!(kernels, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)) #4
-	push!(kernels, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)) #5
-	push!(kernels, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)) #6
-	push!(kernels, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)) #7
+	# push!(kernels, @cuda launch=false _kernel_2D_1_2!(CuArray{Float32, 2}(undef,0,0), CuArray{Bool, 2}(undef, 0, 0),0,0)) 
+	push!(kernels, @cuda launch=false _kernel_2D_2!(CuArray{Float32, 2}(undef, 0,0),CuArray{Float32, 2}(undef, 0,0),0,0,0)) #2
+	# 3D kernels:
+	push!(kernels, @cuda launch=false _kernel_3D_1_1!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)) #3
+	# push!(kernels, @cuda launch=false _kernel_3D_1_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Bool, 3}(undef, 0, 0, 0),0,0,0)) 
+	push!(kernels, @cuda launch=false _kernel_3D_2!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0,0)) #4
+	push!(kernels, @cuda launch=false _kernel_3D_3!(CuArray{Float32, 3}(undef, 0, 0, 0), CuArray{Float32, 3}(undef, 0, 0, 0),0,0,0)) #5
+	# GPU_threads:
 	GPU_threads = launch_configuration(kernels[1].fun).threads
 	println("GPU threads = $GPU_threads.")
-	push!(kernels, GPU_threads) #8
-
-	push!(kernels, @cuda launch=false _kernel_2D_1_1_batch!(CuArray{Float32, 3}(undef,0,0,0), CuArray{Float32, 3}(undef, 0,0,0),0,0,0)) #9
-	push!(kernels, @cuda launch=false _kernel_2D_1_2_batch!(CuArray{Float32, 3}(undef,0,0,0), CuArray{Bool, 3}(undef, 0,0,0),0,0,0)) #10
-	push!(kernels, @cuda launch=false _kernel_2D_2_batch!(CuArray{Float32, 3}(undef, 0,0,0),CuArray{Float32, 3}(undef, 0,0,0),0,0,0,0)) #11
-
-	push!(kernels, @cuda launch=false _kernel_3D_1_1_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0)) #12
-	push!(kernels, @cuda launch=false _kernel_3D_1_2_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Bool, 4}(undef, 0,0,0,0),0,0,0,0)) #13
-	push!(kernels, @cuda launch=false _kernel_3D_2_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0,0)) #14
-	push!(kernels, @cuda launch=false _kernel_3D_3_batch!(CuArray{Float32, 4}(undef, 0,0,0,0), CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0)) #15
+	push!(kernels, GPU_threads) #6
+	# Batch 2D kernels:
+	push!(kernels, @cuda launch=false _kernel_2D_1_1_batch!(CuArray{Float32, 4}(undef,0,0,0,0), CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0)) #7
+	# push!(kernels, @cuda launch=false _kernel_2D_1_2_batch!(CuArray{Float32, 4}(undef,0,0,0,0), CuArray{Bool, 4}(undef, 0,0,0,0),0,0,0,0)) 
+	push!(kernels, @cuda launch=false _kernel_2D_2_batch!(CuArray{Float32, 4}(undef, 0,0,0,0),CuArray{Float32, 4}(undef, 0,0,0,0),0,0,0,0,0)) #8
+	# Batch 3D kernels:
+	push!(kernels, @cuda launch=false _kernel_3D_1_1_batch!(CuArray{Float32, 5}(undef, 0,0,0,0,0), CuArray{Float32, 5}(undef, 0,0,0,0,0),0,0,0,0,0)) #9
+	# push!(kernels, @cuda launch=false _kernel_3D_1_2_batch!(CuArray{Float32, 5}(undef, 0,0,0,0,0), CuArray{Bool, 4}(undef, 0,0,0,0,0),0,0,0,0,0)) 
+	push!(kernels, @cuda launch=false _kernel_3D_2_batch!(CuArray{Float32, 5}(undef, 0,0,0,0,0), CuArray{Float32, 5}(undef, 0,0,0,0,0),0,0,0,0,0,0)) #10
+	push!(kernels, @cuda launch=false _kernel_3D_3_batch!(CuArray{Float32, 5}(undef, 0,0,0,0,0), CuArray{Float32, 5}(undef, 0,0,0,0,0),0,0,0,0,0)) #11
 	return kernels
 end
 
 # ╔═╡ 83ded49e-77e3-49da-8c77-ac7375670b3d
-function _transform_batch(batch_size, f::CuArray{T, 4}, tfm::Wenbo, kernels) where T  
-	d1, d2, d3, _ = size(f)
+function _transform_batch(f::CuArray{T, 5}, tfm::Wenbo, kernels) where T  
+	d1, d2, d3, num_channels, batch_size = size(f)
 	# println("size = $d1, $d2, $d3")
 	l = d1 * d2 * d3
-	f_new = CUDA.zeros(d1, d2, d3, batch_size)
-	threads = min(l, kernels[8])
+	f_new = CUDA.zeros(d1, d2, d3, num_channels, batch_size)
+	@inbounds threads = min(l, kernels[6])
 	blocks = cld(l, threads)
-	k1 = T<:Bool ? kernels[13] : kernels[12]
-	for slice_idx = 1:batch_size
-		k1(f_new, f, d2, d3, l, slice_idx; threads, blocks)
-		kernels[14](f_new, deepcopy(f_new), d1, d2, d3, l, slice_idx; threads, blocks)
-    	kernels[15](f_new, deepcopy(f_new), d2, d3, l, slice_idx; threads, blocks)
+	# @inbounds k1 = T<:Bool ? kernels[13] : kernels[12]
+	for batch_idx = 1:batch_size
+		Threads.@threads for channel_idx = 1:num_channels
+			@inbounds kernels[9](f_new, f, d2, d3, l, channel_idx, batch_idx; threads, blocks)
+			@inbounds kernels[10](f_new, deepcopy(f_new), d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
+	    	@inbounds kernels[11](f_new, deepcopy(f_new), d2, d3, l, channel_idx, batch_idx; threads, blocks)
+		end
 	end
 	return f_new
 end
@@ -941,12 +947,12 @@ function transform(f::CuArray{T, 3}, tfm::Wenbo, kernels) where T
     d1, d2, d3 = size(f)
     l = length(f)
     f_new = CUDA.zeros(d1,d2,d3)
-    threads = min(l, kernels[8])
+    threads = min(l, kernels[6])
     blocks = cld(l, threads)
-	k1 = T<:Bool ? kernels[5] : kernels[4]
-    k1(f_new, f, d2, d3, l; threads, blocks)
-    kernels[6](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-    kernels[7](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+	# k1 = T<:Bool ? kernels[5] : kernels[4]
+    @inbounds kernels[3](f_new, f, d2, d3, l; threads, blocks)
+    @inbounds kernels[4](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
+    @inbounds kernels[5](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
     return f_new
 end 
 
@@ -958,19 +964,19 @@ md"""
 # ╔═╡ 14358a91-52aa-4f39-9d75-884ca53a7ce8
 """
 ```julia
-transform(batch_size::Number, f::CuArray, tfm::Wenbo, kernels)
+transform(is_batched::Bool, f::CuArray, tfm::Wenbo, kernels)
 ```
 
 Applies squared euclidean distance transforms to a number of batch_size N-dimension images using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements. The length of last dimension of input should be equal to the batch size. GPU version of 'CPU-Batch'.
 """
-function transform(batch_size::Number, f::CuArray, tfm::Wenbo, kernels)
-	return _transform_batch(batch_size, f, tfm, kernels)
+function transform(is_batched::Bool, f::CuArray, tfm::Wenbo, kernels)
+	return _transform_batch(f, tfm, kernels)
 end 
 
 # ╔═╡ 42a77639-403a-42a1-8d69-fc6bdbc9c613
 # begin
-# 	img2D_batch = CuArray(round.(rand(Float32, 6,6,3)))
-# 	img3D_batch = CuArray(round.(rand(Float32, 6,6,6,3)))
+# 	img2D_batch = CuArray(rand(Float32, 8,6,2,2))
+# 	img3D_batch = CuArray(rand(Float32, 6,6,6,2,2))
 # 	""
 # end
 
@@ -978,7 +984,7 @@ end
 # ks = get_GPU_kernels(Wenbo());
 
 # ╔═╡ ea1da50b-22b5-4323-b0d4-142e717c7e40
-# Array(transform(3, img3D_batch, Wenbo(), ks))
+# Array(transform(true, img3D_batch, Wenbo(), ks))
 
 # ╔═╡ ebee3240-63cf-4323-9755-a135834208c8
 md"""
