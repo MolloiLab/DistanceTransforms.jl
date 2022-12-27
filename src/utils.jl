@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.12
+# v0.19.8
 
 using Markdown
 using InteractiveUtils
@@ -34,7 +34,7 @@ boolean_indicator(f)
 
 If `f` is a boolean indicator where 0's correspond to background and 1s correspond to the foreground, then mark background pixels with a large number `1e10`
 """
-boolean_indicator(f) = @. ifelse(f == 0, 1.0f10, 0.0f0)
+boolean_indicator(f) = @. ifelse(f < 0.5, 1.0f10, 0.0f0)
 
 """
 ```julia
