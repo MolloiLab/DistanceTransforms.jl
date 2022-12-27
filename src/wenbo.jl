@@ -555,7 +555,7 @@ function _transform_batch(f::CuArray{T, 4}, tfm::Wenbo, kernels) where T
 	blocks = cld(l, threads)
 	# @inbounds k1 = T<:Bool ? kernels[10] : kernels[9]
 	for batch_idx = 1:batch_size
-		Threads.@threads for channel_idx = 1:num_channels
+		for channel_idx = 1:num_channels
 			@inbounds kernels[7](f_new, f, row_length, l, channel_idx, batch_idx; threads, blocks)
 			@inbounds kernels[8](deepcopy(f_new), f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
 		end
@@ -926,7 +926,7 @@ function _transform_batch(f::CuArray{T, 5}, tfm::Wenbo, kernels) where T
 	blocks = cld(l, threads)
 	# @inbounds k1 = T<:Bool ? kernels[13] : kernels[12]
 	for batch_idx = 1:batch_size
-		Threads.@threads for channel_idx = 1:num_channels
+		for channel_idx = 1:num_channels
 			@inbounds kernels[9](f_new, f, d2, d3, l, channel_idx, batch_idx; threads, blocks)
 			@inbounds kernels[10](f_new, deepcopy(f_new), d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
 	    	@inbounds kernels[11](f_new, deepcopy(f_new), d2, d3, l, channel_idx, batch_idx; threads, blocks)
