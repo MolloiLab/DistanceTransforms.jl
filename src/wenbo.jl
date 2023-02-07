@@ -112,73 +112,67 @@ md"""
 """
 
 # ╔═╡ 16991d8b-ec84-49d0-90a9-15a78f1668bb
-function _encode(leftD, rightf)
-	if rightf == 1f10
-		return -leftD
-	end
-	idx = 0
-	while rightf>1
-		rightf  /=10
-		idx+=1 
-	end
-	return -leftD-idx/10-rightf/10
-end
+# function _encode(leftD, rightf)
+# 	if rightf == 1f10
+# 		return -leftD
+# 	end
+# 	idx = 0
+# 	while rightf>1
+# 		rightf  /=10
+# 		idx+=1 
+# 	end
+# 	return -leftD-idx/10-rightf/10
+# end
 
 # ╔═╡ e7dbc916-c5cb-4f86-8ea1-adbcb0bdf8ea
-function _decode(curr)	
-	curr *= -10   				
-	temp = Int(floor(curr))		
-	curr -= temp 				
-	if curr == 0
-		return 1f10
-	end
-	temp %= 10
-	while temp > 0
-		temp -= 1
-		curr*=10
-	end
-	return round(curr)
-end
+# function _decode(curr)	
+# 	curr *= -10   				
+# 	temp = Int(floor(curr))		
+# 	curr -= temp 				
+# 	if curr == 0
+# 		return 1f10
+# 	end
+# 	temp %= 10
+# 	while temp > 0
+# 		temp -= 1
+# 		curr*=10
+# 	end
+# 	return round(curr)
+# end
 
 # ╔═╡ 32a4bf03-98f8-4ed9-9c12-f45c09b0b0dd
-function _transform2!(f::AbstractVector)
+function _transform2!(f::AbstractVector, org::AbstractVector)
 	l = length(f)
 	pointerA = 1
-	while pointerA<=l && @inbounds f[pointerA] <= 1
+	while pointerA<=l && @inbounds f[pointerA] <= 1f0
 		pointerA += 1
 	end
 	p = 0
 	while pointerA<=l
 		@inbounds curr = f[pointerA]
-		prev = curr
+		# left
 		temp = min(pointerA-1, p+1)
 		p = 0
 		while 0 < temp
-			@inbounds fi = f[pointerA-temp]
-			fi = fi < 0 ? _decode(fi) : fi
-			newDistance = muladd(temp, temp, fi)
+			@inbounds newDistance = muladd(temp, temp, org[pointerA-temp])
 			if newDistance < curr
 				curr = newDistance
 				p = temp
 			end
 			temp -= 1
 		end
+		# right
 		temp = 1
 		templ = length(f) - pointerA
 		while temp <= templ && muladd(temp, temp, -curr) < 0
 			@inbounds curr = min(curr, muladd(temp, temp, f[pointerA+temp]))
 			temp += 1
 		end
-		@inbounds f[pointerA] = _encode(curr, prev)
+		@inbounds f[pointerA] = curr
 		pointerA+=1
-		while pointerA<=l && @inbounds f[pointerA] <= 1
+		while pointerA<=l && @inbounds f[pointerA] <= 1f0
 			pointerA += 1
 		end
-	end
-	i = 0
-	while i<l
-		i+=1
-		f[i] = floor(abs(f[i]))
 	end
 end
 
@@ -187,8 +181,9 @@ function _transform3!(f)
 	for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
+	org = deepcopy(f)
 	for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]))
+		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
 end
 
@@ -205,8 +200,9 @@ function transform(f::AbstractMatrix, tfm::Wenbo)
 	for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
+	org = deepcopy(f)
 	for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]))
+		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
 	return f
 end
@@ -229,8 +225,9 @@ function transform(f::AbstractArray, tfm::Wenbo)
 	for i in axes(f, 3)
 		@inbounds _transform3!(@view(f[:, :, i]))
 	end
+	org = deepcopy(f)
 	for j in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[j, :]))
+		@inbounds _transform2!(@view(f[j, :]), @view(org[j, :]))
 	end
 	return f
 end 
@@ -245,8 +242,9 @@ function _transform4!(f)
 	Threads.@threads for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
+	org = deepcopy(f)
 	Threads.@threads for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:, j]))
+		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
 end
 
@@ -268,8 +266,9 @@ function transform(f::AbstractMatrix, tfm::Wenbo, nthreads::Number)
 	Threads.@threads for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
+	org = deepcopy(f)
 	Threads.@threads for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:, j]))
+		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
 	return f
 end
@@ -292,8 +291,9 @@ function transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 	Threads.@threads for i in axes(f, 3)
 		@inbounds _transform4!(@view(f[:, :, i]))
 	end
+	org = deepcopy(f)
 	Threads.@threads for j in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[j, :]))
+		@inbounds _transform2!(@view(f[j, :]), @view(org[j, :]))
 	end
 	return f
 end 
@@ -1009,8 +1009,9 @@ function transform(f::AbstractMatrix, tfm::Wenbo, ex)
 	@floop ex for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
+	org = deepcopy(f)
 	@floop ex for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:, j]))
+		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
 	return f
 end
@@ -1033,8 +1034,9 @@ function transform(f::AbstractArray, tfm::Wenbo, ex)
 	@floop ex for k in axes(f, 3)
 		@inbounds _transform4!(@view(f[:, :, k]))
 	end
+	org = deepcopy(f)
 	@floop ex for i in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[i, :]))
+		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
 	end
 	return f
 end 
