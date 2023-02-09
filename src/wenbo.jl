@@ -222,12 +222,12 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo)
 	f = boolean_indicator(f)
-	for i in CartesianIndices(f[:,1,:])
-		@inbounds _transform1!(@view(f[i[1], :, i[2]]))
+	for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform1!(@view(f[:, i]))
 	end
 	org = deepcopy(f)
-	for i in CartesianIndices(f[1,:,:])
-		@inbounds _transform2!(@view(f[:, i]), @view(org[:, i]))
+	for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
 	end
 	org = deepcopy(f)
 	for i in CartesianIndices(f[:,:,1])
@@ -292,12 +292,12 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 	f = boolean_indicator(f)
-	Threads.@threads for i in CartesianIndices(f[:,1,:])
-		@inbounds _transform1!(@view(f[i[1], :, i[2]]))
+	Threads.@threads for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform1!(@view(f[:, i]))
 	end
 	org = deepcopy(f)
-	Threads.@threads for i in CartesianIndices(f[1,:,:])
-		@inbounds _transform2!(@view(f[:, i]), @view(org[:, i]))
+	Threads.@threads for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
 	end
 	org = deepcopy(f)
 	Threads.@threads for i in CartesianIndices(f[:,:,1])
@@ -1039,12 +1039,12 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo, ex)
 	f = boolean_indicator(f)
-	@floop ex for i in CartesianIndices(f[:,1,:])
-		@inbounds _transform1!(@view(f[i[1], :, i[2]]))
+	@floop ex for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform1!(@view(f[:, i]))
 	end
 	org = deepcopy(f)
-	@floop ex for i in CartesianIndices(f[1,:,:])
-		@inbounds _transform2!(@view(f[:, i]), @view(org[:, i]))
+	@floop ex for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
 	end
 	org = deepcopy(f)
 	@floop ex for i in CartesianIndices(f[:,:,1])
