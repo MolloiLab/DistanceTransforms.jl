@@ -177,15 +177,15 @@ function _transform2!(f::AbstractVector, org::AbstractVector)
 end
 
 # ╔═╡ 89fed2a6-b09e-47b1-a020-efed76ba57de
-function _transform3!(f)
-	for i in axes(f, 1)
-		@inbounds _transform1!(@view(f[i, :]))
-	end
-	org = deepcopy(f)
-	for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
-	end
-end
+# function _transform3!(f)
+# 	for i in axes(f, 1)
+# 		@inbounds _transform1!(@view(f[i, :]))
+# 	end
+# 	org = deepcopy(f)
+# 	for j in axes(f, 2)
+# 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
+# 	end
+# end
 
 # ╔═╡ 423df2ac-b9a2-4d59-b5fc-8de0e8cc6691
 """
@@ -222,12 +222,16 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo)
 	f = boolean_indicator(f)
-	for i in axes(f, 3)
-		@inbounds _transform3!(@view(f[:, :, i]))
+	for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform1!(@view(f[i[1], :, i[2]]))
 	end
 	org = deepcopy(f)
-	for j in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[j, :]), @view(org[j, :]))
+	for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform2!(@view(f[:, i]), @view(org[:, i]))
+	end
+	org = deepcopy(f)
+	for i in CartesianIndices(f[:,:,1])
+		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
 	end
 	return f
 end 
@@ -238,15 +242,15 @@ md"""
 """
 
 # ╔═╡ d663cf13-4a3a-4667-8971-ddb5c455d85c
-function _transform4!(f)
-	Threads.@threads for i in axes(f, 1)
-		@inbounds _transform1!(@view(f[i, :]))
-	end
-	org = deepcopy(f)
-	Threads.@threads for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
-	end
-end
+# function _transform4!(f)
+# 	Threads.@threads for i in axes(f, 1)
+# 		@inbounds _transform1!(@view(f[i, :]))
+# 	end
+# 	org = deepcopy(f)
+# 	Threads.@threads for j in axes(f, 2)
+# 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
+# 	end
+# end
 
 # ╔═╡ 0f0675ad-899d-4808-9757-deaae19a58a5
 md"""
@@ -288,12 +292,16 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 	f = boolean_indicator(f)
-	Threads.@threads for i in axes(f, 3)
-		@inbounds _transform4!(@view(f[:, :, i]))
+	Threads.@threads for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform1!(@view(f[i[1], :, i[2]]))
 	end
 	org = deepcopy(f)
-	Threads.@threads for j in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[j, :]), @view(org[j, :]))
+	Threads.@threads for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform2!(@view(f[:, i]), @view(org[:, i]))
+	end
+	org = deepcopy(f)
+	Threads.@threads for i in CartesianIndices(f[:,:,1])
+		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
 	end
 	return f
 end 
@@ -1031,8 +1039,12 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo, ex)
 	f = boolean_indicator(f)
-	@floop ex for k in axes(f, 3)
-		@inbounds _transform4!(@view(f[:, :, k]))
+	@floop ex for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform1!(@view(f[i[1], :, i[2]]))
+	end
+	org = deepcopy(f)
+	@floop ex for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform2!(@view(f[:, i]), @view(org[:, i]))
 	end
 	org = deepcopy(f)
 	@floop ex for i in CartesianIndices(f[:,:,1])
