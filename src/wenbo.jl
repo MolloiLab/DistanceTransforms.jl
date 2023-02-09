@@ -181,7 +181,7 @@ end
 # 	for i in axes(f, 1)
 # 		@inbounds _transform1!(@view(f[i, :]))
 # 	end
-# 	org = deepcopy(f)
+# 	org = copy(f)
 # 	for j in axes(f, 2)
 # 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 # 	end
@@ -200,7 +200,7 @@ function transform(f::AbstractMatrix, tfm::Wenbo)
 	for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	for j in axes(f, 2)
 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
@@ -225,11 +225,11 @@ function transform(f::AbstractArray, tfm::Wenbo)
 	for i in CartesianIndices(f[1,:,:])
 		@inbounds _transform1!(@view(f[:, i]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	for i in CartesianIndices(f[:,1,:])
 		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	for i in CartesianIndices(f[:,:,1])
 		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
 	end
@@ -246,7 +246,7 @@ md"""
 # 	Threads.@threads for i in axes(f, 1)
 # 		@inbounds _transform1!(@view(f[i, :]))
 # 	end
-# 	org = deepcopy(f)
+# 	org = copy(f)
 # 	Threads.@threads for j in axes(f, 2)
 # 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 # 	end
@@ -270,7 +270,7 @@ function transform(f::AbstractMatrix, tfm::Wenbo, nthreads::Number)
 	Threads.@threads for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	Threads.@threads for j in axes(f, 2)
 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
@@ -295,11 +295,11 @@ function transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 	Threads.@threads for i in CartesianIndices(f[1,:,:])
 		@inbounds _transform1!(@view(f[:, i]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	Threads.@threads for i in CartesianIndices(f[:,1,:])
 		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	Threads.@threads for i in CartesianIndices(f[:,:,1])
 		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
 	end
@@ -565,7 +565,7 @@ function _transform_batch(f::CuArray{T, 4}, tfm::Wenbo, kernels) where T
 	for batch_idx = 1:batch_size
 		for channel_idx = 1:num_channels
 			@inbounds kernels[7](f_new, f, row_length, l, channel_idx, batch_idx; threads, blocks)
-			@inbounds kernels[8](deepcopy(f_new), f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
+			@inbounds kernels[8](copy(f_new), f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
 		end
 	end
 	return f_new
@@ -588,7 +588,7 @@ function transform(f::CuArray{T, 2}, tfm::Wenbo, kernels) where T
 	blocks = cld(l, threads)
 	# k1 = T<:Bool ? kernels[2] : kernels[1]
 	@inbounds kernels[1](f_new, f, row_length, l; threads, blocks)
-	@inbounds kernels[2](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+	@inbounds kernels[2](copy(f_new), f_new, row_length, col_length, l; threads, blocks)
 	return f_new
 end
 
@@ -936,8 +936,8 @@ function _transform_batch(f::CuArray{T, 5}, tfm::Wenbo, kernels) where T
 	for batch_idx = 1:batch_size
 		for channel_idx = 1:num_channels
 			@inbounds kernels[9](f_new, f, d2, d3, l, channel_idx, batch_idx; threads, blocks)
-			@inbounds kernels[10](f_new, deepcopy(f_new), d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
-	    	@inbounds kernels[11](f_new, deepcopy(f_new), d2, d3, l, channel_idx, batch_idx; threads, blocks)
+			@inbounds kernels[10](f_new, copy(f_new), d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
+	    	@inbounds kernels[11](f_new, copy(f_new), d2, d3, l, channel_idx, batch_idx; threads, blocks)
 		end
 	end
 	return f_new
@@ -959,8 +959,8 @@ function transform(f::CuArray{T, 3}, tfm::Wenbo, kernels) where T
     blocks = cld(l, threads)
 	# k1 = T<:Bool ? kernels[5] : kernels[4]
     @inbounds kernels[3](f_new, f, d2, d3, l; threads, blocks)
-    @inbounds kernels[4](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-    @inbounds kernels[5](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+    @inbounds kernels[4](f_new, copy(f_new), d1, d2, d3, l; threads, blocks)
+    @inbounds kernels[5](f_new, copy(f_new), d2, d3, l; threads, blocks)
     return f_new
 end 
 
@@ -1017,7 +1017,7 @@ function transform(f::AbstractMatrix, tfm::Wenbo, ex)
 	@floop ex for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	@floop ex for j in axes(f, 2)
 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
@@ -1042,11 +1042,11 @@ function transform(f::AbstractArray, tfm::Wenbo, ex)
 	@floop ex for i in CartesianIndices(f[1,:,:])
 		@inbounds _transform1!(@view(f[:, i]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	@floop ex for i in CartesianIndices(f[:,1,:])
 		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
 	end
-	org = deepcopy(f)
+	org = copy(f)
 	@floop ex for i in CartesianIndices(f[:,:,1])
 		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
 	end
