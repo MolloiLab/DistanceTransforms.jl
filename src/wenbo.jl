@@ -221,20 +221,19 @@ transform(f::AbstractArray, tfm::Wenbo)
 Applies a squared euclidean distance transform to an input 3D image using the Wenbo algorithm. Returns an array with spatial information embedded in the array elements.
 """
 function transform(f::AbstractArray, tfm::Wenbo)
-	# f = boolean_indicator(f)
-	# for i in CartesianIndices(f[1,:,:])
-	# 	@inbounds _transform1!(@view(f[:, i]))
-	# end
-	# org = deepcopy(f)
-	# for i in CartesianIndices(f[:,1,:])
-	# 	@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
-	# end
-	# org = deepcopy(f)
-	# for i in CartesianIndices(f[:,:,1])
-	# 	@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
-	# end
-	# return f
-	return 0
+	f = boolean_indicator(f)
+	for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform1!(@view(f[:, i]))
+	end
+	org = deepcopy(f)
+	for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
+	end
+	org = deepcopy(f)
+	for i in CartesianIndices(f[:,:,1])
+		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
+	end
+	return f
 end 
 
 # ╔═╡ 58e1cdff-59b8-44d9-a1b7-ecc14b09556c
