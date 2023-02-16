@@ -50,7 +50,7 @@ function _transform1!(f::AbstractVector)
 		pointerA = 1
 		l = length(f)
 		while pointerA <= l
-			while pointerA <= l && @inbounds f[pointerA] == 0
+			while pointerA <= l && @inbounds f[pointerA] == 0f0
 				pointerA+=1
 			end
 			pointerB = pointerA
@@ -112,33 +112,34 @@ md"""
 """
 
 # ╔═╡ 16991d8b-ec84-49d0-90a9-15a78f1668bb
-# function _encode(leftD, rightf)
-# 	if rightf == 1f10
-# 		return -leftD
-# 	end
-# 	idx = 0
-# 	while rightf>1
-# 		rightf  /=10
-# 		idx+=1 
-# 	end
-# 	return -leftD-idx/10-rightf/10
-# end
+function _encode(leftD::Float32, rightf::Float32)
+	if rightf == 1f10
+		return -leftD
+	end
+	idx = 0f0
+	while rightf >= 1f0
+		rightf /= 10f0
+		idx += 1f0
+	end
+	return -leftD-idx/10f0-rightf/10f0
+end
 
 # ╔═╡ e7dbc916-c5cb-4f86-8ea1-adbcb0bdf8ea
-# function _decode(curr)	
-# 	curr *= -10   				
-# 	temp = Int(floor(curr))		
-# 	curr -= temp 				
-# 	if curr == 0
-# 		return 1f10
-# 	end
-# 	temp %= 10
-# 	while temp > 0
-# 		temp -= 1
-# 		curr*=10
-# 	end
-# 	return round(curr)
-# end
+function _decode(curr::Float32)		
+	curr *= -1f0    
+	curr -= floor(curr) 		
+	curr *= 10f0    
+	temp = floor(curr % 10f0)
+	if temp == 0f0
+		return 1f10
+	end
+	curr -= temp			
+	while temp > 0f0
+		temp -= 1f0
+		curr *= 10f0
+	end
+	return round(curr)
+end
 
 # ╔═╡ 32a4bf03-98f8-4ed9-9c12-f45c09b0b0dd
 function _transform2!(f::AbstractVector, org::AbstractVector)
@@ -177,15 +178,48 @@ function _transform2!(f::AbstractVector, org::AbstractVector)
 end
 
 # ╔═╡ 89fed2a6-b09e-47b1-a020-efed76ba57de
-# function _transform3!(f)
-# 	for i in axes(f, 1)
-# 		@inbounds _transform1!(@view(f[i, :]))
-# 	end
-# 	org = copy(f)
-# 	for j in axes(f, 2)
-# 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
-# 	end
-# end
+function _transform2_EN_DE!(f::AbstractVector)
+	l = length(f)
+	pointerA = 1
+	while pointerA<=l && @inbounds f[pointerA] <= 1f0
+		pointerA += 1
+	end
+	p = 0
+	while pointerA<=l
+		@inbounds curr = f[pointerA]
+		# left
+		prev = curr
+		temp = min(pointerA-1, p+1)
+		p = 0
+		while 0 < temp
+			@inbounds fi = f[pointerA-temp]
+			fi = fi < 0 ? _decode(fi) : fi
+			newDistance = muladd(temp, temp, fi)
+			if newDistance < curr
+				curr = newDistance
+				p = temp
+			end
+			temp -= 1
+		end
+		# right
+		temp = 1
+		templ = length(f) - pointerA
+		while temp <= templ && muladd(temp, temp, -curr) < 0
+			@inbounds curr = min(curr, muladd(temp, temp, f[pointerA+temp]))
+			temp += 1
+		end
+		@inbounds f[pointerA] = _encode(curr, prev)
+		pointerA+=1
+		while pointerA<=l && @inbounds f[pointerA] <= 1f0
+			pointerA += 1
+		end
+	end
+	i = 0
+	while i<l
+		i+=1
+		f[i] = floor(abs(f[i]))
+	end
+end
 
 # ╔═╡ 423df2ac-b9a2-4d59-b5fc-8de0e8cc6691
 """
@@ -225,13 +259,11 @@ function transform(f::AbstractArray, tfm::Wenbo)
 	for i in CartesianIndices(f[1,:,:])
 		@inbounds _transform1!(@view(f[:, i]))
 	end
-	org = copy(f)
 	for i in CartesianIndices(f[:,1,:])
-		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
+		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]]))
 	end
-	org = copy(f)
 	for i in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
+		@inbounds _transform2_EN_DE!(@view(f[i, :]))
 	end
 	return f
 end 
@@ -270,9 +302,8 @@ function transform(f::AbstractMatrix, tfm::Wenbo, nthreads::Number)
 	Threads.@threads for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
-	org = copy(f)
 	Threads.@threads for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
+		@inbounds _transform2_EN_DE!(@view(f[:,j]))
 	end
 	return f
 end
@@ -295,13 +326,11 @@ function transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 	Threads.@threads for i in CartesianIndices(f[1,:,:])
 		@inbounds _transform1!(@view(f[:, i]))
 	end
-	org = copy(f)
 	Threads.@threads for i in CartesianIndices(f[:,1,:])
-		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
+		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]]))
 	end
-	org = copy(f)
 	Threads.@threads for i in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
+		@inbounds _transform2_EN_DE!(@view(f[i, :]))
 	end
 	return f
 end 
@@ -324,8 +353,8 @@ function transform(is_batch::Bool, f::AbstractArray, tfm::Wenbo, _)
 	num_channels, num_batchs = size(f)[n_dims-1], size(f)[n_dims]
 	f_new = similar(f, Float32)
 	for batch_idx = 1: num_batchs
-		Threads.@threads for channel_idx = 1:num_channels
-			@inbounds selectdim(selectdim(f_new, n_dims, batch_idx), n_dims-1, channel_idx)[:] = transform(selectdim(selectdim(f, n_dims, batch_idx), n_dims-1, channel_idx), tfm)
+		for channel_idx = 1:num_channels
+			@inbounds selectdim(selectdim(f_new, n_dims, batch_idx), n_dims-1, channel_idx)[:] = transform(selectdim(selectdim(f, n_dims, batch_idx), n_dims-1, channel_idx), tfm, 16)
 		end
 	end
 	return f_new
@@ -1017,9 +1046,8 @@ function transform(f::AbstractMatrix, tfm::Wenbo, ex)
 	@floop ex for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
-	org = copy(f)
 	@floop ex for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
+		@inbounds _transform2_EN_DE!(@view(f[:,j]))
 	end
 	return f
 end
@@ -1042,13 +1070,11 @@ function transform(f::AbstractArray, tfm::Wenbo, ex)
 	@floop ex for i in CartesianIndices(f[1,:,:])
 		@inbounds _transform1!(@view(f[:, i]))
 	end
-	org = copy(f)
 	@floop ex for i in CartesianIndices(f[:,1,:])
-		@inbounds _transform2!(@view(f[i[1], :, i[2]]), @view(org[i[1], :, i[2]]))
+		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]]))
 	end
-	org = copy(f)
 	@floop ex for i in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[i, :]), @view(org[i, :]))
+		@inbounds _transform2_EN_DE!(@view(f[i, :]))
 	end
 	return f
 end 
