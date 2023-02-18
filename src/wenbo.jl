@@ -50,7 +50,7 @@ function _transform1!(f::AbstractVector)
 		pointerA = 1
 		l = length(f)
 		while pointerA <= l
-			while pointerA <= l && @inbounds f[pointerA] == 0
+			while pointerA <= l && @inbounds f[pointerA] == 0f0
 				pointerA+=1
 			end
 			pointerB = pointerA
@@ -112,44 +112,82 @@ md"""
 """
 
 # ╔═╡ 16991d8b-ec84-49d0-90a9-15a78f1668bb
-function _encode(leftD, rightf)
+function _encode(leftD::Float32, rightf::Float32)
 	if rightf == 1f10
 		return -leftD
 	end
-	idx = 0
-	while rightf>1
-		rightf  /=10
-		idx+=1 
+	idx = 0f0
+	while rightf >= 1f0
+		rightf /= 10f0
+		idx += 1f0
 	end
-	return -leftD-idx/10-rightf/10
+	return -leftD-idx/10f0-rightf/10f0
 end
 
 # ╔═╡ e7dbc916-c5cb-4f86-8ea1-adbcb0bdf8ea
-function _decode(curr)	
-	curr *= -10   				
-	temp = Int(floor(curr))		
-	curr -= temp 				
-	if curr == 0
+function _decode(curr::Float32)		
+	curr *= -1f0    
+	curr -= floor(curr) 		
+	curr *= 10f0    
+	temp = floor(curr % 10f0)
+	if temp == 0f0
 		return 1f10
 	end
-	temp %= 10
-	while temp > 0
-		temp -= 1
-		curr*=10
+	curr -= temp			
+	while temp > 0f0
+		temp -= 1f0
+		curr *= 10f0
 	end
 	return round(curr)
 end
 
 # ╔═╡ 32a4bf03-98f8-4ed9-9c12-f45c09b0b0dd
-function _transform2!(f::AbstractVector)
+function _transform2!(f::AbstractVector, org::AbstractVector)
 	l = length(f)
 	pointerA = 1
-	while pointerA<=l && @inbounds f[pointerA] <= 1
+	while pointerA<=l && @inbounds f[pointerA] <= 1f0
 		pointerA += 1
 	end
 	p = 0
 	while pointerA<=l
 		@inbounds curr = f[pointerA]
+		# left
+		temp = min(pointerA-1, p+1)
+		p = 0
+		while 0 < temp
+			@inbounds newDistance = muladd(temp, temp, org[pointerA-temp])
+			if newDistance < curr
+				curr = newDistance
+				p = temp
+			end
+			temp -= 1
+		end
+		# right
+		temp = 1
+		templ = length(f) - pointerA
+		while temp <= templ && muladd(temp, temp, -curr) < 0
+			@inbounds curr = min(curr, muladd(temp, temp, f[pointerA+temp]))
+			temp += 1
+		end
+		@inbounds f[pointerA] = curr
+		pointerA+=1
+		while pointerA<=l && @inbounds f[pointerA] <= 1f0
+			pointerA += 1
+		end
+	end
+end
+
+# ╔═╡ 89fed2a6-b09e-47b1-a020-efed76ba57de
+function _transform2_EN_DE!(f::AbstractVector)
+	l = length(f)
+	pointerA = 1
+	while pointerA<=l && @inbounds f[pointerA] <= 1f0
+		pointerA += 1
+	end
+	p = 0
+	while pointerA<=l
+		@inbounds curr = f[pointerA]
+		# left
 		prev = curr
 		temp = min(pointerA-1, p+1)
 		p = 0
@@ -163,6 +201,7 @@ function _transform2!(f::AbstractVector)
 			end
 			temp -= 1
 		end
+		# right
 		temp = 1
 		templ = length(f) - pointerA
 		while temp <= templ && muladd(temp, temp, -curr) < 0
@@ -171,7 +210,7 @@ function _transform2!(f::AbstractVector)
 		end
 		@inbounds f[pointerA] = _encode(curr, prev)
 		pointerA+=1
-		while pointerA<=l && @inbounds f[pointerA] <= 1
+		while pointerA<=l && @inbounds f[pointerA] <= 1f0
 			pointerA += 1
 		end
 	end
@@ -179,16 +218,6 @@ function _transform2!(f::AbstractVector)
 	while i<l
 		i+=1
 		f[i] = floor(abs(f[i]))
-	end
-end
-
-# ╔═╡ 89fed2a6-b09e-47b1-a020-efed76ba57de
-function _transform3!(f)
-	for i in axes(f, 1)
-		@inbounds _transform1!(@view(f[i, :]))
-	end
-	for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]))
 	end
 end
 
@@ -205,8 +234,9 @@ function transform(f::AbstractMatrix, tfm::Wenbo)
 	for i in axes(f, 1)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
+	org = copy(f)
 	for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:,j]))
+		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
 	end
 	return f
 end
@@ -226,11 +256,14 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo)
 	f = boolean_indicator(f)
-	for i in axes(f, 3)
-		@inbounds _transform3!(@view(f[:, :, i]))
+	for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform1!(@view(f[:, i]))
 	end
-	for j in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[j, :]))
+	for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]]))
+	end
+	for i in CartesianIndices(f[:,:,1])
+		@inbounds _transform2_EN_DE!(@view(f[i, :]))
 	end
 	return f
 end 
@@ -241,14 +274,15 @@ md"""
 """
 
 # ╔═╡ d663cf13-4a3a-4667-8971-ddb5c455d85c
-function _transform4!(f)
-	Threads.@threads for i in axes(f, 1)
-		@inbounds _transform1!(@view(f[i, :]))
-	end
-	Threads.@threads for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:, j]))
-	end
-end
+# function _transform4!(f)
+# 	Threads.@threads for i in axes(f, 1)
+# 		@inbounds _transform1!(@view(f[i, :]))
+# 	end
+# 	org = copy(f)
+# 	Threads.@threads for j in axes(f, 2)
+# 		@inbounds _transform2!(@view(f[:,j]), @view(org[:,j]))
+# 	end
+# end
 
 # ╔═╡ 0f0675ad-899d-4808-9757-deaae19a58a5
 md"""
@@ -269,7 +303,7 @@ function transform(f::AbstractMatrix, tfm::Wenbo, nthreads::Number)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
 	Threads.@threads for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:, j]))
+		@inbounds _transform2_EN_DE!(@view(f[:,j]))
 	end
 	return f
 end
@@ -289,11 +323,14 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo, nthreads::Number)
 	f = boolean_indicator(f)
-	Threads.@threads for i in axes(f, 3)
-		@inbounds _transform4!(@view(f[:, :, i]))
+	Threads.@threads for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform1!(@view(f[:, i]))
 	end
-	Threads.@threads for j in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[j, :]))
+	Threads.@threads for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]]))
+	end
+	Threads.@threads for i in CartesianIndices(f[:,:,1])
+		@inbounds _transform2_EN_DE!(@view(f[i, :]))
 	end
 	return f
 end 
@@ -316,8 +353,8 @@ function transform(is_batch::Bool, f::AbstractArray, tfm::Wenbo, _)
 	num_channels, num_batchs = size(f)[n_dims-1], size(f)[n_dims]
 	f_new = similar(f, Float32)
 	for batch_idx = 1: num_batchs
-		Threads.@threads for channel_idx = 1:num_channels
-			@inbounds selectdim(selectdim(f_new, n_dims, batch_idx), n_dims-1, channel_idx)[:] = transform(selectdim(selectdim(f, n_dims, batch_idx), n_dims-1, channel_idx), tfm)
+		for channel_idx = 1:num_channels
+			@inbounds selectdim(selectdim(f_new, n_dims, batch_idx), n_dims-1, channel_idx)[:] = transform(selectdim(selectdim(f, n_dims, batch_idx), n_dims-1, channel_idx), tfm, 16)
 		end
 	end
 	return f_new
@@ -557,7 +594,7 @@ function _transform_batch(f::CuArray{T, 4}, tfm::Wenbo, kernels) where T
 	for batch_idx = 1:batch_size
 		for channel_idx = 1:num_channels
 			@inbounds kernels[7](f_new, f, row_length, l, channel_idx, batch_idx; threads, blocks)
-			@inbounds kernels[8](deepcopy(f_new), f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
+			@inbounds kernels[8](copy(f_new), f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
 		end
 	end
 	return f_new
@@ -580,7 +617,7 @@ function transform(f::CuArray{T, 2}, tfm::Wenbo, kernels) where T
 	blocks = cld(l, threads)
 	# k1 = T<:Bool ? kernels[2] : kernels[1]
 	@inbounds kernels[1](f_new, f, row_length, l; threads, blocks)
-	@inbounds kernels[2](deepcopy(f_new), f_new, row_length, col_length, l; threads, blocks)
+	@inbounds kernels[2](copy(f_new), f_new, row_length, col_length, l; threads, blocks)
 	return f_new
 end
 
@@ -928,8 +965,8 @@ function _transform_batch(f::CuArray{T, 5}, tfm::Wenbo, kernels) where T
 	for batch_idx = 1:batch_size
 		for channel_idx = 1:num_channels
 			@inbounds kernels[9](f_new, f, d2, d3, l, channel_idx, batch_idx; threads, blocks)
-			@inbounds kernels[10](f_new, deepcopy(f_new), d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
-	    	@inbounds kernels[11](f_new, deepcopy(f_new), d2, d3, l, channel_idx, batch_idx; threads, blocks)
+			@inbounds kernels[10](f_new, copy(f_new), d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
+	    	@inbounds kernels[11](f_new, copy(f_new), d2, d3, l, channel_idx, batch_idx; threads, blocks)
 		end
 	end
 	return f_new
@@ -951,8 +988,8 @@ function transform(f::CuArray{T, 3}, tfm::Wenbo, kernels) where T
     blocks = cld(l, threads)
 	# k1 = T<:Bool ? kernels[5] : kernels[4]
     @inbounds kernels[3](f_new, f, d2, d3, l; threads, blocks)
-    @inbounds kernels[4](f_new, deepcopy(f_new), d1, d2, d3, l; threads, blocks)
-    @inbounds kernels[5](f_new, deepcopy(f_new), d2, d3, l; threads, blocks)
+    @inbounds kernels[4](f_new, copy(f_new), d1, d2, d3, l; threads, blocks)
+    @inbounds kernels[5](f_new, copy(f_new), d2, d3, l; threads, blocks)
     return f_new
 end 
 
@@ -1010,7 +1047,7 @@ function transform(f::AbstractMatrix, tfm::Wenbo, ex)
 		@inbounds _transform1!(@view(f[i, :]))
 	end
 	@floop ex for j in axes(f, 2)
-		@inbounds _transform2!(@view(f[:, j]))
+		@inbounds _transform2_EN_DE!(@view(f[:,j]))
 	end
 	return f
 end
@@ -1030,11 +1067,14 @@ Applies a squared euclidean distance transform to an input 3D image using the We
 """
 function transform(f::AbstractArray, tfm::Wenbo, ex)
 	f = boolean_indicator(f)
-	@floop ex for k in axes(f, 3)
-		@inbounds _transform4!(@view(f[:, :, k]))
+	@floop ex for i in CartesianIndices(f[1,:,:])
+		@inbounds _transform1!(@view(f[:, i]))
+	end
+	@floop ex for i in CartesianIndices(f[:,1,:])
+		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]]))
 	end
 	@floop ex for i in CartesianIndices(f[:,:,1])
-		@inbounds _transform2!(@view(f[i, :]))
+		@inbounds _transform2_EN_DE!(@view(f[i, :]))
 	end
 	return f
 end 

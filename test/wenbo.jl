@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -286,7 +286,7 @@ if CUDA.has_cuda_gpu()
 			0 1 1 1 0 0 0 0 1
 		]
 		tfm = Wenbo()
-		test = transform(CuArray(img), tfm, ks)
+		test = transform(CuArray(Float32.(img)), tfm, ks)
 		answer = CuArray([
 			1.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0  0.0
 			0.0  0.0  0.0  0.0  0.0  1.0  2.0  1.0  0.0
@@ -308,7 +308,7 @@ if CUDA.has_cuda_gpu()
 		img = rand([0, 1], 10, 10)
 		img2 = copy(img)
 		tfm = Wenbo()
-		test = transform(CUDA.CuArray(img), tfm, ks)
+		test = transform(CUDA.CuArray(Float32.(img)), tfm, ks)
 		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
@@ -344,7 +344,7 @@ if CUDA.has_cuda_gpu()
 		for i in 1:10
 			push!(container2, vol)
 		end
-		vol_inv = CuArray(cat(container2..., dims=3))
+		vol_inv = CuArray(Float32.(cat(container2..., dims=3)))
 		tfm = Wenbo()
 		test = transform(vol_inv, tfm, ks)
 		a1 = img_inv
@@ -367,7 +367,7 @@ if CUDA.has_cuda_gpu()
 		img = rand([0, 1], 10, 10, 10)
 		img2 = copy(img)
 		tfm = Wenbo()
-		test = transform(CUDA.CuArray(img), tfm, ks)
+		test = transform(CUDA.CuArray(Float32.(img)), tfm, ks)
 		answer = transform(img2, tfm)
 		@test test == CuArray(answer)
 	end
