@@ -6,8 +6,8 @@ using FLoops
 using FoldsCUDA
 
 include("./borgefors.jl")
-include("./maurer.jl")
 include("./felzenszwalb.jl")
+include("./maurer.jl")
 include("./utils.jl")
 include("./wenbo.jl")
 
