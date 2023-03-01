@@ -1,13 +1,4 @@
 module DistanceTransforms
-using PythonCall
-
-const scipy = PythonCall.pynew()
-
-function __init__()
-    PythonCall.pycopy!(scipy, pyimport("scipy"))
-end
-
-export scipy
 
 using ImageMorphology
 using CUDA
@@ -17,7 +8,6 @@ using FoldsCUDA
 include("./borgefors.jl")
 include("./felzenszwalb.jl")
 include("./maurer.jl")
-include("./scipy.jl")
 include("./utils.jl")
 include("./wenbo.jl")
 
@@ -33,9 +23,6 @@ export DistanceTransform,
 
     # Export felzenszwalb.jl functions
     Felzenszwalb,
-
-    # Export Scipy.jl functions
-    Scipy,
 
     # Export utils.jl functions
     boolean_indicator,
