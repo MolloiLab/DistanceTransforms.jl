@@ -358,24 +358,6 @@ function transform(f_org::AbstractMatrix, tfm::Wenbo)
 	return f
 end
 
-# ╔═╡ 259b57a1-b487-42dc-bd13-1f7e967cea7e
-function transform(f_org::AbstractMatrix, tfm::Wenbo, _::Bool)
-	l, l2 = size(f_org)
-	f = Array{Float32, 2}(undef, l, l2)
-	# phase 1
-	flags = Array{Bool}(undef, l)
-	for i = 1 : l
-		flags[i] = @inbounds _transform1!(@view(f[i, :]), @view(f_org[i, :]), l2)
-	end
-	d1 = _set_bound_2D_1!(flags, l)
-    d2 = _set_bound_2D_2!(flags, l)
-	# phase 2
-	for i = 1 : l2
-		@inbounds _transform2_EN_DE!(@view(f[:,i]), l, d1, d2)
-	end
-	return f
-end
-
 # ╔═╡ dd8014b7-3960-4a2e-878c-c86bbc5e7303
 md"""
 ### 3D
@@ -1331,7 +1313,6 @@ end
 # ╟─edd255fa-e1bc-45f0-8b3a-92be5084dc23
 # ╟─a3fd1e1c-4cbb-4310-b6be-a4e61d43e8a5
 # ╠═423df2ac-b9a2-4d59-b5fc-8de0e8cc6691
-# ╠═259b57a1-b487-42dc-bd13-1f7e967cea7e
 # ╟─dd8014b7-3960-4a2e-878c-c86bbc5e7303
 # ╟─43f3a316-82f2-4f30-b5aa-497455f24e86
 # ╟─3253554d-4725-41f7-b086-a02137491d8f
