@@ -350,6 +350,7 @@ function transform(f_org::AbstractMatrix, tfm::Wenbo)
 	end
     d1 = _set_bound_2D_1!(flags, l)
     d2 = _set_bound_2D_2!(flags, l)
+	d1 == d2 == 0 && return f 
 	# phase 2
 	org = copy(f)
 	for i = 1 : l2
@@ -429,6 +430,7 @@ function transform(f_org::AbstractArray, tfm::Wenbo)
 	end
     d1 = _set_bound_3D_1!(flags, l2, l3)
     d2 = _set_bound_3D_2!(flags, l2, l3)
+	d1 == d2 == 0 && return f 
     d3 = _set_bound_3D_3!(flags, l2, l3)
     d4 = _set_bound_3D_4!(flags, l2, l3)
 	# phase 2
@@ -484,6 +486,7 @@ function transform(f_org::AbstractMatrix, tfm::Wenbo, nthreads::Number)
     	Threads.@spawn d1 = _set_bound_2D_1!(flags, l)
     	Threads.@spawn d2 = _set_bound_2D_2!(flags, l)
     end
+	d1 == d2 == 0 && return f 
 	# phase 2
 	Threads.@threads for i = 1 : l2
 		@inbounds _transform2_EN_DE!(@view(f[:,i]), l, d1, d2)
@@ -519,6 +522,7 @@ function transform(f_org::AbstractArray, tfm::Wenbo, nthreads::Number)
     	Threads.@spawn d3 = _set_bound_3D_3!(flags, l2, l3)
     	Threads.@spawn d4 = _set_bound_3D_4!(flags, l2, l3)
     end
+	d1 == d2 == 0 && return f 
 	# phase 2
 	Threads.@threads for i in CartesianIndices(@view(f[:,1,d1:d2]))
 		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]+d1-1]), l2, d3, d4)
@@ -1249,6 +1253,7 @@ function transform(f_org::AbstractMatrix, tfm::Wenbo, ex)
     	Threads.@spawn d1 = _set_bound_2D_1!(flags, l)
     	Threads.@spawn d2 = _set_bound_2D_2!(flags, l)
     end
+	d1 == d2 == 0 && return f 
 	# phase 2
 	@floop for i = 1 : l2
 		@inbounds _transform2_EN_DE!(@view(f[:,i]), l, d1, d2)
@@ -1284,6 +1289,7 @@ function transform(f_org::AbstractArray, tfm::Wenbo, ex)
     	Threads.@spawn d3 = _set_bound_3D_3!(flags, l2, l3)
     	Threads.@spawn d4 = _set_bound_3D_4!(flags, l2, l3)
     end
+	d1 == d2 == 0 && return f 
 	# phase 2
 	@floop for i in CartesianIndices(@view(f[:,1,d1:d2]))
 		@inbounds _transform2_EN_DE!(@view(f[i[1], :, i[2]+d1-1]), l2, d3, d4)

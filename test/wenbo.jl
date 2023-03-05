@@ -35,6 +35,16 @@ md"""
 ### 1D
 """
 
+# ╔═╡ b1631892-ccf6-41af-8638-4a6403c4d663
+@testset "wenbo 1D" begin
+	f = zeros(7)
+	tfm = Wenbo()
+	test = transform(f, tfm)
+	answer = zeros(7)
+	answer .= 1e10
+	@test test == answer
+end;
+
 # ╔═╡ f860bf51-4c1f-4b82-a67d-d5294733345f
 @testset "wenbo 1D" begin
 	f = [1, 1, 0, 0, 0, 1, 1]
@@ -66,6 +76,16 @@ end;
 md"""
 ### 2D
 """
+
+# ╔═╡ ee618b43-e796-425f-b121-8c3670002efe
+@testset "Wenbo 2D" begin
+	img = zeros(15,15)
+	tfm = Wenbo()
+	test = transform(img, tfm)
+	answer = zeros(15,15)
+	answer .= 1e10
+	@test test == answer
+end;
 
 # ╔═╡ eb456533-684f-45e7-9591-7cebf493f63c
 @testset "Wenbo 2D" begin
@@ -130,6 +150,16 @@ md"""
 ### 3D
 """
 
+# ╔═╡ f55d8588-e44d-4c35-bccc-e5a1623c4b1a
+@testset "Wenbo 3D" begin
+	img = zeros(15, 15, 15)
+	tfm = Wenbo()
+	test = transform(img, tfm)
+	answer = zeros(15,15, 15)
+	answer .= 1e10
+	@test test == answer
+end;
+
 # ╔═╡ b1d3b0d0-5103-4fdf-8d55-16babca9ee21
 @testset "wenbo 3D" begin
 	img = [
@@ -175,6 +205,17 @@ md"""
 ### 2D
 """
 
+# ╔═╡ 5c5a851a-5550-4e9e-bf7d-de2a1350b525
+@testset "wenbo 2D multi-threaded" begin
+	img = zeros(15, 15)
+	tfm = Wenbo()
+	nthreads = Threads.nthreads()
+	test = transform(img, tfm, nthreads)
+	answer = zeros(15,15)
+	answer .= 1e10
+	@test test == answer
+end;
+
 # ╔═╡ ea81cc9e-2ee9-4d62-9288-c081ef9ef0c4
 @testset "wenbo 2D multi-threaded" begin
 	img = [
@@ -215,6 +256,17 @@ end;
 md"""
 ### 3D
 """
+
+# ╔═╡ 1e74f970-9c48-4b1d-8bbe-c1e08cc302ed
+@testset "wenbo 3D multi-threaded" begin
+	img = zeros(15, 15, 15)
+	tfm = Wenbo()
+	nthreads = Threads.nthreads()
+	test = transform(img, tfm, nthreads)
+	answer = zeros(15,15, 15)
+	answer .= 1e10
+	@test test == answer
+end;
 
 # ╔═╡ bdef08b3-f15c-4769-ba7d-c3dc4f9a0006
 @testset "wenbo 3D multi-threaded" begin
@@ -302,6 +354,21 @@ else
 	@warn "CUDA unavailable, not testing GPU support"
 end;
 
+# ╔═╡ 23d465b5-4ccb-44e5-ace0-37fe6b832531
+if CUDA.has_cuda_gpu()
+	@testset "wenbo 2D GPU" begin
+		img = zeros(15, 15)
+		tfm = Wenbo()
+		test = transform(CuArray(Float32.(img)), tfm, ks)
+		answer = zeros(15, 15)
+		answer .= 1e10
+		answer = CuArray(answer)
+		@test test == answer
+	end
+else
+	@warn "CUDA unavailable, not testing GPU support"
+end;
+
 # ╔═╡ 9d3e6bab-d8a5-42d3-862b-135f10887562
 if CUDA.has_cuda_gpu()
 	@testset "wenbo 2D GPU" begin
@@ -321,6 +388,21 @@ end;
 md"""
 ### 3D
 """
+
+# ╔═╡ 451ebcf1-dac1-4849-98d6-465a5ad1a4b1
+if CUDA.has_cuda_gpu()
+	@testset "wenbo 3D GPU" begin
+		img = zeros(15, 15, 15)
+		tfm = Wenbo()
+		test = transform(CuArray(Float32.(img)), tfm, ks)
+		answer = zeros(15, 15, 15)
+		answer .= 1e10
+		answer = CuArray(answer)
+		@test test == answer
+	end
+else
+	@warn "CUDA unavailable, not testing GPU support"
+end;
 
 # ╔═╡ f5159fb2-30bc-4828-bb21-d9ad7343fe85
 if CUDA.has_cuda_gpu()
@@ -385,6 +467,17 @@ md"""
 md"""
 ### 2D
 """
+
+# ╔═╡ b0b0a0ae-fb15-4b2c-86fe-0d4a1f13dc40
+@testset "wenbo 2D FoldsThreads " begin
+	img = zeros(15, 15)
+	tfm = Wenbo()
+	ex = DepthFirstEx()
+	test = transform(img, tfm, ex)
+	answer = zeros(15, 15)
+	answer .= 1e10
+	@test test == answer
+end;
 
 # ╔═╡ f87ded07-5767-4a4c-8d00-d9fa5d6914bc
 @testset "wenbo 2D FoldsThreads " begin
@@ -500,30 +593,38 @@ end;
 # ╟─4a043231-7888-4408-a663-4541e8606245
 # ╠═edc7480a-11ec-4952-8984-af97d3967639
 # ╟─ab715087-a707-485b-9463-8d17fe0bcaab
+# ╠═b1631892-ccf6-41af-8638-4a6403c4d663
 # ╠═f860bf51-4c1f-4b82-a67d-d5294733345f
 # ╠═f6d1f13b-2b81-4253-ad80-38dd6c11eb93
 # ╠═77970fcb-e584-4222-af3c-5b8482bab391
 # ╟─eac8edcd-ee45-4824-a3b7-cd0535260cb6
+# ╠═ee618b43-e796-425f-b121-8c3670002efe
 # ╠═eb456533-684f-45e7-9591-7cebf493f63c
 # ╠═350a21d9-552f-4d0a-a586-a8932fc4e245
 # ╟─e05ea048-d7bd-48a1-b943-2dc9b9ba5e02
+# ╠═f55d8588-e44d-4c35-bccc-e5a1623c4b1a
 # ╠═b1d3b0d0-5103-4fdf-8d55-16babca9ee21
 # ╟─8fb44a16-a4cb-4f4c-9a16-f85cacf9e81f
 # ╟─cdcd1cda-be51-4a2a-a69d-381338fd5bd9
+# ╠═5c5a851a-5550-4e9e-bf7d-de2a1350b525
 # ╠═ea81cc9e-2ee9-4d62-9288-c081ef9ef0c4
 # ╠═58c3aaee-be8c-42a9-a3f7-35aafc77a308
 # ╟─89bf91b7-2a29-48ed-8c0c-b6e46fa5de4e
+# ╠═1e74f970-9c48-4b1d-8bbe-c1e08cc302ed
 # ╠═bdef08b3-f15c-4769-ba7d-c3dc4f9a0006
 # ╠═51117c0a-5f23-4b5d-ab76-81d25cd73a27
 # ╟─91899f57-48cc-49e4-b100-116f2326d126
 # ╟─6293532a-198d-49a2-b450-3ab7c7be3227
+# ╠═23d465b5-4ccb-44e5-ace0-37fe6b832531
 # ╠═edc19bce-db97-4a0d-a4a9-11e9241434e9
 # ╠═9d3e6bab-d8a5-42d3-862b-135f10887562
 # ╟─35ff78e2-b1d7-4792-8145-ced70a6ff233
+# ╠═451ebcf1-dac1-4849-98d6-465a5ad1a4b1
 # ╠═f5159fb2-30bc-4828-bb21-d9ad7343fe85
 # ╠═4fa62723-c3e2-4afd-911b-e3f2285df74d
 # ╟─9755e49a-699d-4ebf-ab28-958007d1a0ab
 # ╟─278053f3-de28-4090-add3-c08257aff74f
+# ╠═b0b0a0ae-fb15-4b2c-86fe-0d4a1f13dc40
 # ╠═f87ded07-5767-4a4c-8d00-d9fa5d6914bc
 # ╠═c52fd17a-ad54-4317-96ac-a6c7b0da4f99
 # ╠═4a17f216-e186-4352-8c18-5fdb345add80
