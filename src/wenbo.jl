@@ -793,7 +793,9 @@ function _transform_batch(f::CuArray{T, 4}, tfm::Wenbo, kernels) where T
 	for batch_idx = 1:batch_size
 		for channel_idx = 1:num_channels
 			@inbounds kernels[7](f_new, f, row_length, l, channel_idx, batch_idx; threads, blocks)
-			@inbounds kernels[8](copy(f_new), f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
+			f_copy = copy(f_new)
+			@inbounds kernels[8](f_copy, f_new, row_length, col_length, l, channel_idx, batch_idx; threads, blocks)
+			f_copy = nothing
 		end
 	end
 	return f_new
@@ -816,7 +818,9 @@ function transform(f::CuArray{T, 2}, tfm::Wenbo, kernels) where T
 	blocks = cld(l, threads)
 	# k1 = T<:Bool ? kernels[2] : kernels[1]
 	@inbounds kernels[1](f_new, f, row_length, l; threads, blocks)
-	@inbounds kernels[2](copy(f_new), f_new, row_length, col_length, l; threads, blocks)
+	f_copy = copy(f_new)
+	@inbounds kernels[2](f_copy, f_new, row_length, col_length, l; threads, blocks)
+	f_copy = nothing
 	return f_new
 end
 
@@ -1164,8 +1168,11 @@ function _transform_batch(f::CuArray{T, 5}, tfm::Wenbo, kernels) where T
 	for batch_idx = 1:batch_size
 		for channel_idx = 1:num_channels
 			@inbounds kernels[9](f_new, f, d2, d3, l, channel_idx, batch_idx; threads, blocks)
-			@inbounds kernels[10](f_new, copy(f_new), d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
-	    	@inbounds kernels[11](f_new, copy(f_new), d2, d3, l, channel_idx, batch_idx; threads, blocks)
+			f_copy = copy(f_new)
+			@inbounds kernels[10](f_new, f_copy, d1, d2, d3, l, channel_idx, batch_idx; threads, blocks)
+			f_copy = copy(f_new)
+	    	@inbounds kernels[11](f_new, f_copy, d2, d3, l, channel_idx, batch_idx; threads, blocks)	
+			f_copy = nothing
 		end
 	end
 	return f_new
@@ -1187,8 +1194,11 @@ function transform(f::CuArray{T, 3}, tfm::Wenbo, kernels) where T
     blocks = cld(l, threads)
 	# k1 = T<:Bool ? kernels[5] : kernels[4]
     @inbounds kernels[3](f_new, f, d2, d3, l; threads, blocks)
-    @inbounds kernels[4](f_new, copy(f_new), d1, d2, d3, l; threads, blocks)
+	f_copy = copy(f_new)
+    @inbounds kernels[4](f_new, f_copy, d1, d2, d3, l; threads, blocks)
+	f_copy = copy(f_new)
     @inbounds kernels[5](f_new, copy(f_new), d2, d3, l; threads, blocks)
+	f_copy = nothing
     return f_new
 end 
 
@@ -1342,7 +1352,7 @@ end
 # ╟─2a1c7734-805e-4971-9e07-a39c840457f0
 # ╟─716e061a-dec8-4515-b2ce-f893ca23f99e
 # ╟─aaf5a46a-67c7-457b-bc83-d1c2163583b8
-# ╟─25b46272-9f45-45f1-bf81-128a4bcf041f
+# ╠═25b46272-9f45-45f1-bf81-128a4bcf041f
 # ╠═58441e91-b837-496c-b1db-5dd428a6eba7
 # ╟─01719cd4-f69e-47f5-9d84-36229fc3e73c
 # ╟─24527d9b-1fa2-443d-ad4c-76a53b1ba4c2
