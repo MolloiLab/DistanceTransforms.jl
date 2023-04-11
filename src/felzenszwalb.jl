@@ -233,7 +233,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements. GPU version of `transform!(..., tfm::Felzenszwalb)`
 """
-function transform(img::CuArray{T, 2}, tfm::Felzenszwalb; output=similar(img, Float32), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1)) where T
+function transform(img::CuArray{T, 2}, tfm::Felzenszwalb; output=similar(img, Float32), v=CUDA.ones(Int32, size(img)), z=CUDA.ones(Float32, size(img) .+ 1)) where T
 	# 1
 	@floop CUDAEx() for k in CartesianIndices(@view(img[:, 1]))
 	    @views transform(img[k,:], tfm; output=output[k,:], v=v[k,:], z=z[k,:])
@@ -262,7 +262,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements. GPU version of `transform!(..., tfm::Felzenszwalb)`
 """
-function transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; output=similar(vol, Float32), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1)) where T
+function transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; output=similar(vol, Float32), v=CUDA.ones(Int32, size(vol)), z=CUDA.ones(Float32, size(vol) .+ 1)) where T
 	# 1
     @floop CUDAEx() for k in CartesianIndices(@view(vol[1,:,:]))
         @views transform(vol[:, k], tfm; output=output[:, k], v=v[:, k], z=z[:, k])

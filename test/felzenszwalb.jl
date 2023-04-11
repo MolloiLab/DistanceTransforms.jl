@@ -428,12 +428,10 @@ end;
 if CUDA.has_cuda_gpu()
 	@testset "Felzenszwalb 3D gpu" begin
 		img = rand([0, 1], 10, 10, 10)
-		img2 = copy(img)
-		output, v, z = CUDA.zeros(size(img)), CUDA.ones(Int32, size(img)), CUDA.ones(size(img) .+ 1)
-		output2, v2, z2 = zeros(size(img2)), ones(Int32, size(img2)), ones(size(img2) .+ 1)
 		tfm = Felzenszwalb()
-		test = transform(CUDA.CuArray(boolean_indicator(img)), tfm; output=output, v=v, z=z)
-		answer = transform(boolean_indicator(img2), tfm; output=output2, v=v2, z=z2)
+		# test = transform(CUDA.CuArray(boolean_indicator(img)), tfm; output=output, v=v, z=z)
+		test = transform(CUDA.CuArray(boolean_indicator(img)), tfm)
+		answer = round.(transform(img, Maurer()) .^ 2)
 		@test test == CuArray(answer)
 	end
 else
