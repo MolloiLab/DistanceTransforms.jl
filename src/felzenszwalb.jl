@@ -57,10 +57,10 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements.
 """
-function transform(f::AbstractVector, tfm::Felzenszwalb; output=similar(f), v=ones(Int32, length(f)), z=ones(Float32, length(f)+1))
+function transform(f::AbstractVector, tfm::Felzenszwalb; output=similar(f, Float32), v=ones(Int32, length(f)), z=ones(Float32, length(f)+1))
 	z[1] = -1f10
 	z[2] = 1f10
-	k = 1; # Index of the rightmost parabola in the lower envelope
+	k = 1 # Index of the rightmost parabola in the lower envelope
 	for q = 2:length(f)
 		s = ((f[q] + q^2) - (f[v[k]] + v[k]^2)) / (2*q - 2*v[k])
 	    while s ≤ z[k]
@@ -98,7 +98,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements.
 """
-function transform(img::AbstractMatrix, tfm::Felzenszwalb; output=similar(img), v=ones(Int32, size(img)), z=ones(Float32, size(img) .+ 1))
+function transform(img::AbstractMatrix, tfm::Felzenszwalb; output=similar(img, Float32), v=ones(Int32, size(img)), z=ones(Float32, size(img) .+ 1))
 	# 1
 	for k in CartesianIndices(@view(img[:, 1]))
 	    @views transform(img[k,:], tfm; output=output[k,:], v=v[k,:], z=z[k,:])
@@ -129,7 +129,7 @@ Returns an array with spatial information embedded in the array
 elements.
 """
 function transform(vol::AbstractArray, tfm::Felzenszwalb;
-    output=similar(vol), v=ones(Int32, size(vol)), z=ones(Float32, size(vol) .+ 1))
+    output=similar(vol, Float32), v=ones(Int32, size(vol)), z=ones(Float32, size(vol) .+ 1))
 	# 1
     for k in CartesianIndices(@view(vol[1,:,:]))
         @views transform(vol[:, k], tfm; output=output[:, k], v=v[:, k], z=z[:, k])
@@ -167,7 +167,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements. Multi-Threaded version of `transform!(..., tfm::Felzenszwalb)`
 """
-function transform(img::AbstractMatrix, tfm::Felzenszwalb, nthreads::Number; output=similar(img), v=ones(Int32, size(img)), z=ones(Float32, size(img) .+ 1))
+function transform(img::AbstractMatrix, tfm::Felzenszwalb, nthreads::Number; output=similar(img, Float32), v=ones(Int32, size(img)), z=ones(Float32, size(img) .+ 1))
 	# 1
 	Threads.@threads for k in CartesianIndices(@view(img[:, 1]))
 	    @views transform(img[k,:], tfm; output=output[k,:], v=v[k,:], z=z[k,:])
@@ -196,7 +196,7 @@ transform!(vol::AbstractArray, tfm::Felzenszwalb, nthreads; output=zeros(size(vo
 Applies a squared euclidean distance transform to an input image. Returns an array with spatial information embedded in the array elements. Multi-Threaded version of `transform!(..., tfm::Felzenszwalb)`
 """
 function transform(vol::AbstractArray, tfm::Felzenszwalb, nthreads::Number; 
-    output=similar(vol), v=ones(Int32, size(vol)), z=ones(Float32, size(vol) .+ 1))
+    output=similar(vol, Float32), v=ones(Int32, size(vol)), z=ones(Float32, size(vol) .+ 1))
 	# 1
     Threads.@threads for k in CartesianIndices(@view(vol[1,:,:]))
         @views transform(vol[:, k], tfm; output=output[:, k], v=v[:, k], z=z[:, k])
@@ -233,7 +233,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements. GPU version of `transform!(..., tfm::Felzenszwalb)`
 """
-function transform(img::CuArray{T, 2}, tfm::Felzenszwalb; output=similar(img), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1)) where T
+function transform(img::CuArray{T, 2}, tfm::Felzenszwalb; output=similar(img, Float32), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1)) where T
 	# 1
 	@floop CUDAEx() for k in CartesianIndices(@view(img[:, 1]))
 	    @views transform(img[k,:], tfm; output=output[k,:], v=v[k,:], z=z[k,:])
@@ -262,7 +262,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements. GPU version of `transform!(..., tfm::Felzenszwalb)`
 """
-function transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; output=similar(vol), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1)) where T
+function transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; output=similar(vol, Float32), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1)) where T
 	# 1
     @floop CUDAEx() for k in CartesianIndices(@view(vol[1,:,:]))
         @views transform(vol[:, k], tfm; output=output[:, k], v=v[:, k], z=z[:, k])
@@ -299,7 +299,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements. Multi-Threaded version of `transform!(..., tfm::Felzenszwalb)` but utilizes FoldsThreads.jl for different threaded executors. `ex`=(FoldsThreads.DepthFirstEx(), FoldsThreads.NonThreadedEx(), FoldsThreads.WorkStealingEx())
 """
-function transform(img::AbstractMatrix, tfm::Felzenszwalb, ex; output=similar(img), v=ones(size(img)), z=ones(size(img) .+ 1))
+function transform(img::AbstractMatrix, tfm::Felzenszwalb, ex; output=similar(img, Float32), v=ones(size(img)), z=ones(size(img) .+ 1))
 	# 1
 	@floop ex for k in CartesianIndices(@view(img[:, 1]))
 	    @views transform(img[k,:], tfm; output=output[k,:], v=v[k,:], z=z[k,:])
@@ -328,7 +328,7 @@ Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
 elements. Multi-Threaded version of `transform!(..., tfm::Felzenszwalb)` but utilizes FoldsThreads.jl for different threaded executors. `ex`=(FoldsThreads.DepthFirstEx(), FoldsThreads.NonThreadedEx(), FoldsThreads.WorkStealingEx())
 """
-function transform(vol::AbstractArray, tfm::Felzenszwalb, ex; output=similar(vol), v=ones(size(vol)), z=ones(size(vol) .+ 1))
+function transform(vol::AbstractArray, tfm::Felzenszwalb, ex; output=similar(vol, Float32), v=ones(size(vol)), z=ones(size(vol) .+ 1))
 	# 1
     @floop ex for k in CartesianIndices(@view(vol[1,:,:]))
         @views transform(vol[:, k], tfm; output=output[:, k], v=v[:, k], z=z[:, k])
