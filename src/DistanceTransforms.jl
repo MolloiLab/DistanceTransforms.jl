@@ -1,9 +1,8 @@
 module DistanceTransforms
 
-using ImageMorphology
 using CUDA
 using FLoops
-using FoldsCUDA
+# using FoldsCUDA
 
 include("./borgefors.jl")
 include("./felzenszwalb.jl")
