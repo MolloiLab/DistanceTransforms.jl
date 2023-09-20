@@ -1,7 +1,5 @@
-
 using FLoops
 using CUDA
-using FoldsThreads
 
 """
 ## Felzenszwalb
@@ -180,37 +178,6 @@ function transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; output=similar(vol, Fl
     end
 	# 3
     @floop CUDAEx() for k in CartesianIndices(@view(vol[:,:,1]))
-        @views transform(output2[k, :], tfm; output=output[k, :], v=fill!(v[k, :], 1), z=fill!(z[k, :], 1))
-    end
-    return output
-end
-
-function transform(img::AbstractMatrix, tfm::Felzenszwalb, ex; output=similar(img, Float32), v=ones(size(img)), z=ones(size(img) .+ 1))
-	# 1
-	@floop ex for k in CartesianIndices(@view(img[:, 1]))
-	    @views transform(img[k,:], tfm; output=output[k,:], v=v[k,:], z=z[k,:])
-	end
-	output2 = similar(output)
-	# 2
-	@floop ex for k in CartesianIndices(@view(img[1, :]))
-	    @views transform(output[:,k], tfm; output=output2[:,k], v=fill!(v[:,k], 1), z=fill!(z[:,k], 1))
-	end
-	# end
-	return output2
-end
-
-function transform(vol::AbstractArray, tfm::Felzenszwalb, ex; output=similar(vol, Float32), v=ones(size(vol)), z=ones(size(vol) .+ 1))
-	# 1
-    @floop ex for k in CartesianIndices(@view(vol[1,:,:]))
-        @views transform(vol[:, k], tfm; output=output[:, k], v=v[:, k], z=z[:, k])
-    end
-	output2 = similar(output)
-	# 2
-    @floop ex for k in CartesianIndices(@view(vol[:,1,:]))
-        @views transform(output[k[1], :, k[2]], tfm; output=output2[k[1], :, k[2]], v=fill!(v[k[1], :, k[2]], 1), z=fill!(z[k[1], :, k[2]], 1))
-    end
-	# 3
-    @floop ex for k in CartesianIndices(@view(vol[:,:,1]))
         @views transform(output2[k, :], tfm; output=output[k, :], v=fill!(v[k, :], 1), z=fill!(z[k, :], 1))
     end
     return output

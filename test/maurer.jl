@@ -11,8 +11,6 @@
 	@test test == answer
 end;
 
-
-
 @testset "Maurer 2D" begin
 	x = [
 		1 1 0 0
