@@ -16,3 +16,5 @@ function boolean_indicator(f::BitArray)
 	end
 	return f_new
 end
+
+export boolean_indicator

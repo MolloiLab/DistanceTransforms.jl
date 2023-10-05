@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.26
 
 #> [frontmatter]
 #> title = "Deep Learning Usage"
@@ -43,10 +43,10 @@ Below we will show how one might set this up, without actually training on anyth
 """
 
 # ╔═╡ 18003aaf-fadb-4c13-8d86-8efb47135cde
-y = rand([0, 1], 5, 5, 3)
+ground_truth = rand([0, 1], 5, 5, 3)
 
 # ╔═╡ a23b92c1-ceb9-4943-8916-42fd3e43cc29
-ŷ = copy(y)
+prediction = copy(ground_truth)
 
 # ╔═╡ ded6a37c-bfde-42cf-b075-87289694d6fd
 md"""
@@ -57,13 +57,13 @@ Given some fake three dimensional array, lets apply a distance transform to this
 tfm = Felzenszwalb()
 
 # ╔═╡ 135f2c9a-a3d9-4477-b5af-3c95154b48f2
-y_dtm = transform(boolean_indicator(y), tfm)
+ground_truth_dtm = transform(boolean_indicator(ground_truth), tfm)
 
 # ╔═╡ 2daa28b5-ddf1-4c2a-bf1e-e273a7f8fad0
-ŷ_dtm = transform(boolean_indicator(ŷ), tfm)
+prediction_dtm = transform(boolean_indicator(prediction), tfm)
 
 # ╔═╡ bcc150cf-ab58-4f69-90bc-db72660805d7
-hausdorff(ŷ, y, ŷ_dtm, y_dtm)
+hausdorff(ground_truth, prediction, ground_truth_dtm, prediction_dtm)
 
 # ╔═╡ 3e59daab-e71c-46df-896b-764dce9f2b42
 md"""
@@ -72,15 +72,15 @@ As one would expect, the difference between two identical arrays is zero. Below 
 
 # ╔═╡ ea235007-1fab-4ed4-bf60-b77e04d38460
 begin
-	y2 = rand([0, 1], 5, 5, 3)
-	ŷ2 = rand([0, 1], 5, 5, 3)
+	prediction2 = rand([0, 1], 5, 5, 3)
+	ground_truth2 = rand([0, 1], 5, 5, 3)
 
-	y2_dtm = transform(boolean_indicator(y2), tfm)
-	ŷ2_dtm = transform(boolean_indicator(ŷ2), tfm)
+	prediction2_dtm = transform(boolean_indicator(prediction2), tfm)
+	ground_truth2_dtm = transform(boolean_indicator(ground_truth2), tfm)
 end
 
 # ╔═╡ ba878e0d-1102-488a-a9e5-b2e12ab4358d
-hausdorff(ŷ2, y2, ŷ2_dtm, y2_dtm)
+hausdorff(prediction2, ground_truth2, prediction2_dtm, ground_truth2_dtm)
 
 # ╔═╡ f9ca3701-f897-4c93-b694-41a6e5134bfb
 md"""

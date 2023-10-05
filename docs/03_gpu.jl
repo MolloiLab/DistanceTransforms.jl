@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.26
 
 #> [frontmatter]
 #> title = "GPU"
@@ -66,7 +66,7 @@ if has_cuda_gpu()
 	z = CUDA.zeros(Float32, size(array) .+ 1)
 	tfm = Felzenszwalb()
 	
-	transform!(array, tfm; output=dt, v=v, z=z)
+	transform(array, tfm; output=dt, v=v, z=z)
 else
 	array = boolean_indicator(
 		[
@@ -84,7 +84,7 @@ else
 	z = zeros(Float32, size(array) .+ 1)
 	tfm = Felzenszwalb()
 	
-	transform!(array, tfm; output=dt, v=v, z=z)
+	transform(array, tfm; output=dt, v=v, z=z)
 end
 
 # ╔═╡ 8488fa03-8ad4-4b81-8877-4ec75018a84f

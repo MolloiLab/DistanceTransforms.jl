@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.26
 
 #> [frontmatter]
 #> title = "Multi-threading"
@@ -64,7 +64,7 @@ bool_array = boolean_indicator(array)
 tfm = Felzenszwalb()
 
 # ╔═╡ e38b8b56-a2cb-46a8-b5c8-9577a846ae1f
-sq_euc_transform = transform!(bool_array, tfm, threads)
+sq_euc_transform = transform(bool_array, tfm, threads)
 
 # ╔═╡ 6001d3d3-a067-4df3-a613-873fb4168c11
 md"""
@@ -75,7 +75,7 @@ md"""
 array3D = rand([0, 1], 5, 5, 3)
 
 # ╔═╡ 86c7fa96-b05d-42c8-b86b-331993df95fc
-sq_euc_transform3D = transform!(boolean_indicator(array3D), tfm, threads)
+sq_euc_transform3D = transform(boolean_indicator(array3D), tfm, threads)
 
 # ╔═╡ b7651361-7332-4215-84dd-5cf55c61768d
 md"""
@@ -85,13 +85,13 @@ Let's compare the time difference between the regular `SquaredEuclidean` distanc
 
 # ╔═╡ 95410494-f9f4-43e3-a5aa-6f0a22f767ef
 begin
-	sedt_mean = []
-	sedt_std = []
+	sedt_mean = Float32[]
+	sedt_std = Float32[]
 	
-	sedtP_mean = []
-	sedtP_std = []
+	sedtP_mean = Float32[]
+	sedtP_std = Float32[]
 
-	sizes = []
+	sizes = Float32[]
 	for n in 1:50:200
 		_size = n*n
 		append!(sizes, _size)
@@ -105,7 +105,7 @@ begin
 		
 		# Squared Euclidean DT threaded
 		x3 = boolean_indicator(rand([0, 1], n, n))
-		sedtP = @benchmark transform!($x3, $tfm, $threads)
+		sedtP = @benchmark transform($x3, $tfm, $threads)
 		
 		append!(sedtP_mean, BenchmarkTools.mean(sedtP).time)
 		append!(sedtP_std, BenchmarkTools.std(sedtP).time)
@@ -121,10 +121,10 @@ let
     ax1.title = "Distance Transforms (2D)"
 
 	
-    sc1 = scatter!(ax1, Float64.(sizes), Float64.(sedt_mean))
+    sc1 = scatterlines!(ax1, sizes, sedt_mean)
     # errorbars!(ax1, Float64.(sizes), Float64.(sedt_mean), Float64.(sedt_std))
 
-	sc2 = scatter!(ax1, Float64.(sizes), Float64.(sedtP_mean))
+	sc2 = scatterlines!(ax1, sizes, sedtP_mean)
     # errorbars!(ax1, Float64.(sizes), Float64.(sedtP_mean), Float64.(sedtP_std))
 
 	f[1, 2] = Legend(
@@ -157,6 +157,6 @@ One might wonder why, if multi-threading is so beneficial, GPUs wouldn't be util
 # ╠═ae31df46-a7c8-41f3-b8e3-d5eeb1ba317c
 # ╠═86c7fa96-b05d-42c8-b86b-331993df95fc
 # ╟─b7651361-7332-4215-84dd-5cf55c61768d
-# ╠═95410494-f9f4-43e3-a5aa-6f0a22f767ef
+# ╟─95410494-f9f4-43e3-a5aa-6f0a22f767ef
 # ╟─4d7c4515-1dd6-4ce3-b8f8-371066a99ed7
 # ╟─5a1a3cb3-2073-45fb-9fd5-69bebbdd20fd

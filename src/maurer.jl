@@ -10,6 +10,8 @@ Wrapper function for `ImageMorphology.feature_transform` and `ImageMorphology.di
 """
 struct Maurer <: DistanceTransform end
 
+export Maurer
+
 """
 ## transform (Felzenszwalb)
 

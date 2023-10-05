@@ -11,6 +11,7 @@ struct Felzenszwalb <: DistanceTransform end
 Squared euclidean algorithm laid out in 'Distance Transforms of Sampled Functions' [Felzenszwalb and Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 """
 struct Felzenszwalb <: DistanceTransform end
+export Felzenszwalb
 
 """
 ## transform (Felzenszwalb)
@@ -182,3 +183,5 @@ function transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; output=similar(vol, Fl
     end
     return output
 end
+
+export transform

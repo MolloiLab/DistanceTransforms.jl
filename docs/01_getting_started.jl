@@ -75,35 +75,14 @@ heatmap(transform(array1, Maurer()); colormap=:grays)
 
 # ╔═╡ 01752ec8-9917-4254-8c92-daed39aeea39
 md"""
-## `transform`s
+# `transform`s
 The rest of the DistanceTransform.jl library is built around a common `transform` interface. Users can apply various distance transform algorithms to arrays all under one unified interface.
 Let's examine two different options:
 """
 
-# ╔═╡ be063896-415a-4178-8362-10073feadadf
-md"""
-### `Borgefors`
-This algorithm is based on the 3-4 chamfer distance transform, as described by [Gunilla Borgefors](https://studentportalen.uu.se/uusp-filearea-tool/download.action?nodeId=214320&toolAttachmentId=64777)
-To get started we need to initialize the type of algorithm or `tfm` we want to use, then we run this through the `transform` function. We can again use `array1` for this task.
-"""
-
-# ╔═╡ 37ed41d1-793d-4ec3-99e7-0b0a387b76f3
-tfm = Borgefors()
-
-# ╔═╡ d9857001-e4e4-4bc9-b211-a7ed21fd685f
-dt = zeros(size(array1))
-
-# ╔═╡ 90cef7f0-5437-4bc7-b0cc-78c89030351f
-borgefors_transform = transform(array1, dt, tfm)
-
-# ╔═╡ c7c26a02-bad1-43b5-a119-3f8c4e53180c
-md"""
-Notice that the distance computed to the nearest backgroun `0` element is no longer a Euclidean distance, but instead follows the rules of the 3-4 Chamfer distance transform.
-"""
-
 # ╔═╡ bf546f09-7604-4f11-8676-34a7ac571780
 md"""
-### `Felzenszwalb`
+## `Felzenszwalb`
 This algorithm is based on the squared Euclidean distance transform, as described by [Felzenszwalb and
 Huttenlocher] (DOI: 10.4086/toc.2012.v008a019)
 We will use a similar approach to get started, with one extra step; the array must either be designated as a boolean indicator (meaning zeros correspond to background and ones correspond to foreground) or ignored. Most of the time the array should be considered a boolean indicator:
@@ -148,11 +127,6 @@ euc_transform ≈ transform(array2, Maurer())
 # ╠═d3498bb0-6f8f-470a-b1de-b1760229cc1c
 # ╠═ec3a90f1-f2d7-4d5a-8785-476073ee0079
 # ╟─01752ec8-9917-4254-8c92-daed39aeea39
-# ╟─be063896-415a-4178-8362-10073feadadf
-# ╠═37ed41d1-793d-4ec3-99e7-0b0a387b76f3
-# ╠═d9857001-e4e4-4bc9-b211-a7ed21fd685f
-# ╠═90cef7f0-5437-4bc7-b0cc-78c89030351f
-# ╟─c7c26a02-bad1-43b5-a119-3f8c4e53180c
 # ╟─bf546f09-7604-4f11-8676-34a7ac571780
 # ╠═77de39d7-5d30-410f-baa5-460ae2d8a4a3
 # ╠═7c557d32-2bb8-47a2-8216-e18755d258c7
