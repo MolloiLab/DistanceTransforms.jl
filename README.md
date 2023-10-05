@@ -47,7 +47,3 @@ result = transform(array1, Maurer())
 ## Transforms
 
 The library is built around a common `transform` interface, allowing users to apply various distance transform algorithms to arrays using a unified approach.
-
-### Maurer
-
-The `Maurer` transform is one of the primary functions in
