@@ -1,7 +1,7 @@
 name = "DistanceTransforms"
 uuid = "71182807-4d06-4237-8dd0-bdafe4d097e2"
 authors = ["Dale <djblack@uci.edu> and contributors"]
-version = "0.2.0"
+version = "0.3.0"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
