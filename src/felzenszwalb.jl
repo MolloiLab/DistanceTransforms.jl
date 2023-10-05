@@ -35,15 +35,8 @@ output=zeros(size(vol)), v=ones(Int32, size(vol)), z=ones(size(vol) .+ 1))
 transform(img::CuArray{T, 2}, tfm::Felzenszwalb; 
 output=CUDA.zeros(size(img)), v=CUDA.ones(size(img)), z=CUDA.ones(size(img) .+ 1))
 
-transform!(vol::CuArray{T, 3}, tfm::Felzenszwalb; 
+transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; 
 output=CUDA.zeros(size(vol)), v=CUDA.ones(size(vol)), z=CUDA.ones(size(vol) .+ 1)) where T
-
-transform(img::AbstractMatrix, tfm::Felzenszwalb, ex; 
-output=zeros(size(img)), v=ones(size(img)), z=ones(size(img) .+ 1))
-
-transform!(vol::AbstractArray, tfm::Felzenszwalb, ex; 
-output=zeros(size(vol)), v=ones(size(vol)), z=ones(size(vol) .+ 1))
-
 ```
 
 Applies a squared euclidean distance transform to an input image.
@@ -52,17 +45,11 @@ elements.
 
 Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
-elements. Multi-Threaded version of `transform!(..., tfm::Felzenszwalb)`
+elements. Multi-Threaded version of `transform(..., tfm::Felzenszwalb)`
 
 Applies a squared euclidean distance transform to an input image.
 Returns an array with spatial information embedded in the array 
-elements. GPU version of `transform!(..., tfm::Felzenszwalb)`
-
-Applies a squared euclidean distance transform to an input image.
-Returns an array with spatial information embedded in the array 
-elements. Multi-Threaded version of `transform!(..., tfm::Felzenszwalb)` 
-but utilizes FoldsThreads.jl for different threaded executors. 
-`ex`=(FoldsThreads.DepthFirstEx(), FoldsThreads.NonThreadedEx(), FoldsThreads.WorkStealingEx())
+elements. GPU version of `transform(..., tfm::Felzenszwalb)`
 """
 function transform(f::AbstractVector, tfm::Felzenszwalb; output=similar(f, Float32), v=ones(Int32, length(f)), z=ones(Float32, length(f)+1))
 	z[1] = -1f10
