@@ -6,4 +6,6 @@ include("./felzenszwalb.jl")
 include("./maurer.jl")
 include("./utils.jl")
 
+export transform
+
 end

@@ -170,5 +170,3 @@ function transform(vol::CuArray{T, 3}, tfm::Felzenszwalb; output=similar(vol, Fl
     end
     return output
 end
-
-export transform
