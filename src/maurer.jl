@@ -1,7 +1,7 @@
 using ImageMorphology
 
 """
-## Maurer
+## `Maurer`
 
 ```julia
 struct Maurer <: DistanceTransform end
@@ -13,7 +13,7 @@ struct Maurer <: DistanceTransform end
 export Maurer
 
 """
-## transform (Felzenszwalb)
+## `transform` (Felzenszwalb)
 
 ```julia
 transform(img, tfm::Maurer)

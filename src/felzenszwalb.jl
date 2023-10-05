@@ -2,7 +2,7 @@ using FLoops
 using CUDA
 
 """
-## Felzenszwalb
+## `Felzenszwalb`
 
 ```julia
 struct Felzenszwalb <: DistanceTransform end
@@ -14,7 +14,7 @@ struct Felzenszwalb <: DistanceTransform end
 export Felzenszwalb
 
 """
-## transform (Felzenszwalb)
+## `transform` (Felzenszwalb)
 
 ```julia
 transform(f::AbstractVector, tfm::Felzenszwalb; 
