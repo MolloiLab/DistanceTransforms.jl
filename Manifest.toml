@@ -2,7 +2,7 @@
 
 julia_version = "1.9.3"
 manifest_format = "2.0"
-project_hash = "62cc065d9ce3fc481c81ac4d3d119b555258e024"
+project_hash = "fecb58f769f57c6f9d87834ff0bb4c2cd949127b"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -19,10 +19,10 @@ version = "1.5.0"
     Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.Accessors]]
-deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "LinearAlgebra", "MacroTools", "Requires", "Test"]
-git-tree-sha1 = "954634616d5846d8e216df1298be2298d55280b2"
+deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "LinearAlgebra", "MacroTools", "Test"]
+git-tree-sha1 = "a7055b939deae2455aa8a67491e034f735dd08d3"
 uuid = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
-version = "0.1.32"
+version = "0.1.33"
 
     [deps.Accessors.extensions]
     AccessorsAxisKeysExt = "AxisKeys"
@@ -33,6 +33,7 @@ version = "0.1.32"
     [deps.Accessors.weakdeps]
     AxisKeys = "94b1ba4f-4ee9-5380-92f1-94cde586c3c5"
     IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+    Requires = "ae029012-a4dd-5104-9daa-d747884805df"
     StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
     StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 
@@ -205,9 +206,9 @@ version = "0.12.10"
 
 [[deps.Compat]]
 deps = ["UUIDs"]
-git-tree-sha1 = "e460f044ca8b99be31d35fe54fc33a5c33dd8ed7"
+git-tree-sha1 = "8a62af3e248a8c4bad6b32cbbe663ae02275e32c"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.9.0"
+version = "4.10.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -359,9 +360,9 @@ version = "0.1.5"
 
 [[deps.GPUCompiler]]
 deps = ["ExprTools", "InteractiveUtils", "LLVM", "Libdl", "Logging", "Scratch", "TimerOutputs", "UUIDs"]
-git-tree-sha1 = "fa7dcf83344770adde87b256784155b194e05c9a"
+git-tree-sha1 = "5e4487558477f191c043166f8301dd0b4be4e2b2"
 uuid = "61eb1bfa-7361-4325-ad38-22787b887f55"
-version = "0.24.4"
+version = "0.24.5"
 
 [[deps.HostCPUFeatures]]
 deps = ["BitTwiddlingConvenienceFunctions", "IfElse", "Libdl", "Static"]
@@ -449,15 +450,15 @@ version = "0.9.8"
 
 [[deps.LLVM]]
 deps = ["CEnum", "LLVMExtra_jll", "Libdl", "Printf", "Unicode"]
-git-tree-sha1 = "a9d2ce1d5007b1e8f6c5b89c5a31ff8bd146db5c"
+git-tree-sha1 = "4ea2928a96acfcf8589e6cd1429eff2a3a82c366"
 uuid = "929cbde3-209d-540e-8aea-75f648917ca0"
-version = "6.2.1"
+version = "6.3.0"
 
 [[deps.LLVMExtra_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl", "TOML"]
-git-tree-sha1 = "7ca6850ae880cc99b59b88517545f91a52020afa"
+git-tree-sha1 = "e7c01b69bcbcb93fd4cbc3d0fea7d229541e18d2"
 uuid = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
-version = "0.0.25+0"
+version = "0.0.26+0"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "f2355693d6778a178ade15952b7ac47a4ff97996"
@@ -645,9 +646,9 @@ version = "1.2.0"
 
 [[deps.Preferences]]
 deps = ["TOML"]
-git-tree-sha1 = "7eb1686b4f04b82f96ed7a4ea5890a4f0c7a09f1"
+git-tree-sha1 = "00805cd429dcb4870060ff49ef443486c262e38e"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.4.0"
+version = "1.4.1"
 
 [[deps.PrettyPrint]]
 git-tree-sha1 = "632eb4abab3449ab30c5e1afaa874f0b98b586e4"
@@ -781,9 +782,9 @@ weakdeps = ["OffsetArrays", "StaticArrays"]
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore"]
-git-tree-sha1 = "51621cca8651d9e334a659443a74ce50a3b6dfab"
+git-tree-sha1 = "0adf069a2a490c47273727e029371b31d44b72b2"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.6.3"
+version = "1.6.5"
 weakdeps = ["Statistics"]
 
     [deps.StaticArrays.extensions]
