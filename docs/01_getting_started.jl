@@ -11,15 +11,9 @@ using InteractiveUtils
 # ╔═╡ 26b9d680-1004-4440-a392-16c178230066
 # ╠═╡ show_logs = false
 begin
-	let
-		using Pkg
-		Pkg.activate(mktempdir())
-		Pkg.Registry.update()
-		Pkg.add("PlutoUI")
-		Pkg.add("CairoMakie")
-		Pkg.add("BenchmarkTools")
-		Pkg.add(url="https://github.com/Dale-Black/DistanceTransforms.jl")
-	end
+	using Pkg
+	Pkg.activate(".")
+	Pkg.instantiate()
 	
 	using PlutoUI
 	using CairoMakie

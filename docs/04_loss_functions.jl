@@ -11,14 +11,9 @@ using InteractiveUtils
 # ╔═╡ d9f9bd70-508d-11ec-1d5d-b3592d653992
 # ╠═╡ show_logs = false
 begin
-	let
-		using Pkg
-		Pkg.activate(mktempdir())
-		Pkg.Registry.update()
-		Pkg.add("PlutoUI")
-		Pkg.add(url="https://github.com/Dale-Black/DistanceTransforms.jl")
-		Pkg.add(url="https://github.com/Dale-Black/Losers.jl")
-	end
+	using Pkg
+	Pkg.activate(".")
+	Pkg.instantiate()
 	
 	using PlutoUI
 	using DistanceTransforms

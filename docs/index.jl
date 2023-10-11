@@ -8,108 +8,164 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ a73b3508-903c-4863-ad05-6966cb055102
-using HypertextLiteral
+# ╔═╡ 8a70f0c0-c70e-4022-8a06-ea8fec31a7c7
+# ╠═╡ show_logs = false
+begin
+	using Pkg
+	Pkg.activate(".")
+	Pkg.instantiate()
 
-# ╔═╡ b07dcdc1-495e-45f7-b298-dcb61172c84b
-html"""
-<head>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,700;1,400&family=Vollkorn:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.4/dist/full.css" rel="stylesheet" type="text/css" />
-	<script src="https://cdn.tailwindcss.com"></script>
-</head>
+	using HTMLStrings: to_html, head, link, script, divv, h1, img, p, span, a, figure, hr
+	using PlutoUI
+end
 
-<div data-theme="pastel" class="bg-transparent dark:bg-[#1f1f1f]">
-	<div id="ComputerVisionMetricsHeader" class="flex justify-center items-center">
-		<div class="card card-bordered border-accent text-center w-full">
-			<div class="card-body flex flex-col justify-center items-center">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" width="150px" height="150px" xml:space="preserve">
-					<path style="fill:#303030" d="M128 122.674H28.697L0 104.398V5.235h99.305L128 23.511v99.163zm-91.264-8.028h73.413l-17.851-10.043.132-.206H36.736v10.249zm-23.038-10.248 14.999 8.234v-8.234H13.698zm85.607-4.861 20.656 13.094V31.539H99.305v67.998zM36.736 96.37h54.53V31.539h-54.53V96.37zm-28.697 0h20.658V29.647L8.039 16.551V96.37zm91.266-72.859h14.919l-14.919-8.949v8.949zm-65.745 0h57.706V13.262H17.851l15.841 10.043-.132.206z"/>
-				</svg>
-				<h1 class="card-title text-5xl font-serif">DistanceTransforms.jl</h1>
-				<p class="card-text text-lg font-serif">Fast Distance Transforms in Julia</p>
-			</div>
-		</div>
-	</div>
-</div>
+# ╔═╡ 004581e8-01a7-43c3-8e27-cd7cedcc31fa
+md"""
+## QuickStart
 """
 
-# ╔═╡ b8e3330c-a384-4091-98db-82646f080f40
-function ArticleTile(article)
-	@htl("""
-	<a href="$(article.path)" data-theme="pastel" class="card card-bordered bg-transparent border-primary hover:shadow-lg">
-		<div class="card-body">
-			<h2 class="card-title">$(article.title)</h2>
-			<p>Click to open the notebook.</p>
-		</div>
-		<figure>
-			<img src="$(article.image_url)" alt="$(article.title)">
-		</figure>
-	</a>
-	""")
+# ╔═╡ 5e70dc3d-85b6-4149-9962-70215d3c7f1e
+md"""
+## Tutorials
+"""
+
+# ╔═╡ 71604c4c-6d3a-4b22-bb47-8144604148be
+md"""
+## Benchmarks
+"""
+
+# ╔═╡ b3349485-1a5f-4da6-be79-965fec5fbc13
+md"""
+## API
+"""
+
+# ╔═╡ d0ec67d4-26bd-4960-b4d9-75d9c0b740b0
+to_html(hr())
+
+# ╔═╡ 4195fc74-92a0-4ad4-8c36-9d652ac36fd5
+TableOfContents()
+
+# ╔═╡ febd9959-70d6-409d-b216-762ec0b751dc
+data_theme = "cupcake";
+
+# ╔═╡ 0af240e8-ccf7-4bf8-b21c-08e2972d2459
+function index_title_card(title::String, subtitle::String, image_url::String; data_theme::String = "pastel", border_color::String = "primary")
+	return to_html(
+	    divv(
+	        head(
+				link(:href => "https://cdn.jsdelivr.net/npm/daisyui@3.7.4/dist/full.css", :rel => "stylesheet", :type => "text/css"),
+	            script(:src => "https://cdn.tailwindcss.com")
+	        ),
+			divv(:data_theme => "$data_theme", :class => "card card-bordered flex justify-center items-center border-$border_color text-center w-full dark:text-[#e6e6e6]",
+				divv(:class => "card-body flex flex-col justify-center items-center",
+					img(:src => "$image_url", :class => "h-24 w-24 md:h-40 md:w-40 rounded-md", :alt => "$title Logo"),
+					divv(:class => "text-5xl font-bold bg-gradient-to-r from-accent to-primary inline-block text-transparent bg-clip-text py-10", "$title"),
+					p(:class => "card-text text-md font-serif", "$subtitle"
+					)
+				)
+			)
+	    )
+	)
 end;
 
-# ╔═╡ f6f7f39c-d9b3-4f9a-9ba3-4833e2f5419f
+# ╔═╡ 18be66cd-28c4-4137-b16b-428430b7f996
+index_title_card(
+	"DistanceTransforms.jl",
+	"Fast Distance Transforms in Julia",
+	"https://img.freepik.com/free-vector/global-communication-background-business-network-vector-design_53876-151122.jpg";
+	data_theme = data_theme
+)
+
+# ╔═╡ 09b3d1e1-b44f-461d-abaf-2e5a1f6f6cc2
 struct Article
 	title::String
 	path::String
 	image_url::String
 end
 
-# ╔═╡ c230bcc0-f1bf-4530-a5ec-d23b76770b01
-article_list = Article[
-	Article("Getting Started", "01_getting_started.jl", "https://images.pexels.com/photos/45718/pexels-photo-45718.jpeg?auto=compress&cs=tinysrgb&w=800"),
+# ╔═╡ b7c92fa4-ed51-495d-ba82-5ae61b3de194
+article_list_quickstart = Article[
+	Article("Getting Started", "01_getting_started.jl", "https://img.freepik.com/free-photo/futuristic-spaceship-takes-off-into-purple-galaxy-fueled-by-innovation-generated-by-ai_24640-100023.jpg"),
+];
+
+# ╔═╡ 0d222d9d-7576-40a7-acb4-b0e27f9a9ef8
+article_list_tutorials = Article[
 	Article("Multi-threading", "02_multi_threading.jl", "https://images.pexels.com/photos/3091200/pexels-photo-3091200.jpeg?auto=compress&cs=tinysrgb&w=800"),
 	Article("GPU", "03_gpu.jl", "https://images.pexels.com/photos/8622911/pexels-photo-8622911.jpeg?auto=compress&cs=tinysrgb&w=800"),
 	Article("Deep Learning Usage", "04_loss_functions.jl", "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800"),
-	Article("Benchmarks", "05_benchmarks.jl", "https://images.pexels.com/photos/39396/hourglass-time-hours-sand-39396.jpeg?auto=compress&cs=tinysrgb&w=800"),
-	Article("API", "06_api.jl", "https://images.unsplash.com/photo-1503789146722-cf137a3c0fea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2562&q=80"),
 ];
 
-# ╔═╡ e62bfcc3-4745-43c2-9bae-d356d2148beb
-@htl("""
-<div class="grid grid-cols-2 gap-4">
-	$([ArticleTile(article) for article in article_list])
-</div>
-""")
+# ╔═╡ 6cf265a0-5b72-4e5d-bb16-77ff69de566e
+article_list_benchmarks = Article[
+	Article("Benchmarks", "05_benchmarks.jl", "https://images.pexels.com/photos/39396/hourglass-time-hours-sand-39396.jpeg?auto=compress&cs=tinysrgb&w=800"),
+];
 
-# ╔═╡ 00000000-0000-0000-0000-000000000001
-PLUTO_PROJECT_TOML_CONTENTS = """
-[deps]
-HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+# ╔═╡ 8d11bae1-d232-4c03-981a-cd9f1db24e6b
+article_list_api = Article[
+	Article("API", "06_api.jl", "https://img.freepik.com/free-photo/modern-technology-workshop-creativity-innovation-communication-development-generated-by-ai_188544-24548.jpg"),
+];
 
-[compat]
-HypertextLiteral = "~0.9.4"
-"""
+# ╔═╡ 3bcd40f0-e8dd-48bd-8249-51b89f5766de
+function article_card(article::Article, color::String; data_theme = "pastel")
+    a(:href => article.path, :class => "w-1/2 p-2",
+		divv(:data_theme => "$data_theme", :class => "card card-bordered border-$color text-center dark:text-[#e6e6e6]",
+			divv(:class => "card-body justify-center items-center",
+				p(:class => "card-title", article.title),
+				p("Click to open the notebook")
+			),
+			figure(
+				img(:src => article.image_url, :alt => article.title)
+			)
+        )
+    )
+end;
 
-# ╔═╡ 00000000-0000-0000-0000-000000000002
-PLUTO_MANIFEST_TOML_CONTENTS = """
-# This file is machine-generated - editing it directly is not advised
+# ╔═╡ 9f5666d8-b86b-46d1-a97a-f7f708fdedb6
+to_html(
+    divv(:class => "flex flex-wrap justify-center items-start",
+        [article_card(article, "accent"; data_theme = data_theme) for article in article_list_quickstart]...
+    )
+)
 
-julia_version = "1.9.3"
-manifest_format = "2.0"
-project_hash = "fc304fba520d81fb78ea25b98f5762b4591b1182"
+# ╔═╡ ace65d98-fe6b-45b7-990d-df8f59f6a5b3
+to_html(
+    divv(:class => "flex flex-wrap justify-center items-start",
+        [article_card(article, "secondary"; data_theme = data_theme) for article in article_list_tutorials]...
+    )
+)
 
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.4"
+# ╔═╡ 1198c970-07a0-464a-b853-aa737634c0e5
+to_html(
+    divv(:class => "flex flex-wrap justify-center items-start",
+        [article_card(article, "primary"; data_theme = data_theme) for article in article_list_benchmarks]...
+    )
+)
 
-[[deps.Tricks]]
-git-tree-sha1 = "aadb748be58b492045b4f56166b5188aa63ce549"
-uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.7"
-"""
+# ╔═╡ 0c5f21fe-80fc-4810-b4a8-bb1c290c5d81
+to_html(
+    divv(:class => "flex flex-wrap justify-center items-start",
+        [article_card(article, "secondary"; data_theme = data_theme) for article in article_list_api]...
+    )
+)
 
 # ╔═╡ Cell order:
-# ╟─b07dcdc1-495e-45f7-b298-dcb61172c84b
-# ╟─e62bfcc3-4745-43c2-9bae-d356d2148beb
-# ╟─c230bcc0-f1bf-4530-a5ec-d23b76770b01
-# ╟─b8e3330c-a384-4091-98db-82646f080f40
-# ╟─f6f7f39c-d9b3-4f9a-9ba3-4833e2f5419f
-# ╟─a73b3508-903c-4863-ad05-6966cb055102
-# ╟─00000000-0000-0000-0000-000000000001
-# ╟─00000000-0000-0000-0000-000000000002
+# ╟─18be66cd-28c4-4137-b16b-428430b7f996
+# ╟─004581e8-01a7-43c3-8e27-cd7cedcc31fa
+# ╟─9f5666d8-b86b-46d1-a97a-f7f708fdedb6
+# ╟─5e70dc3d-85b6-4149-9962-70215d3c7f1e
+# ╟─ace65d98-fe6b-45b7-990d-df8f59f6a5b3
+# ╟─71604c4c-6d3a-4b22-bb47-8144604148be
+# ╟─1198c970-07a0-464a-b853-aa737634c0e5
+# ╟─b3349485-1a5f-4da6-be79-965fec5fbc13
+# ╟─0c5f21fe-80fc-4810-b4a8-bb1c290c5d81
+# ╠═d0ec67d4-26bd-4960-b4d9-75d9c0b740b0
+# ╠═4195fc74-92a0-4ad4-8c36-9d652ac36fd5
+# ╠═febd9959-70d6-409d-b216-762ec0b751dc
+# ╠═8a70f0c0-c70e-4022-8a06-ea8fec31a7c7
+# ╠═0af240e8-ccf7-4bf8-b21c-08e2972d2459
+# ╠═09b3d1e1-b44f-461d-abaf-2e5a1f6f6cc2
+# ╠═b7c92fa4-ed51-495d-ba82-5ae61b3de194
+# ╠═0d222d9d-7576-40a7-acb4-b0e27f9a9ef8
+# ╠═6cf265a0-5b72-4e5d-bb16-77ff69de566e
+# ╠═8d11bae1-d232-4c03-981a-cd9f1db24e6b
+# ╠═3bcd40f0-e8dd-48bd-8249-51b89f5766de
