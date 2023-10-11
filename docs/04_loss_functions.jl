@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> title = "Deep Learning Usage"
-#> category = "Deep Learning"
+#> category = "Tutorials"
 
 using Markdown
 using InteractiveUtils

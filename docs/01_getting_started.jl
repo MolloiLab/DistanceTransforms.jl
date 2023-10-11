@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> title = "Getting Started"
-#> category = "Tutorials"
+#> category = "Quick Start"
 
 using Markdown
 using InteractiveUtils
