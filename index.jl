@@ -12,7 +12,7 @@ using InteractiveUtils
 # ╠═╡ show_logs = false
 begin
 	using Pkg
-	Pkg.activate(".")
+	Pkg.activate(joinpath(pwd(), "docs"))
 	Pkg.instantiate()
 
 	using HTMLStrings: to_html, head, link, script, divv, h1, img, p, span, a, figure, hr
@@ -85,24 +85,24 @@ end
 
 # ╔═╡ b7c92fa4-ed51-495d-ba82-5ae61b3de194
 article_list_quickstart = Article[
-	Article("Getting Started", "01_getting_started.jl", "https://img.freepik.com/free-photo/futuristic-spaceship-takes-off-into-purple-galaxy-fueled-by-innovation-generated-by-ai_24640-100023.jpg"),
+	Article("Getting Started", "docs/01_getting_started.jl", "https://img.freepik.com/free-photo/futuristic-spaceship-takes-off-into-purple-galaxy-fueled-by-innovation-generated-by-ai_24640-100023.jpg"),
 ];
 
 # ╔═╡ 0d222d9d-7576-40a7-acb4-b0e27f9a9ef8
 article_list_tutorials = Article[
-	Article("Multi-threading", "02_multi_threading.jl", "https://images.pexels.com/photos/3091200/pexels-photo-3091200.jpeg?auto=compress&cs=tinysrgb&w=800"),
-	Article("GPU", "03_gpu.jl", "https://images.pexels.com/photos/8622911/pexels-photo-8622911.jpeg?auto=compress&cs=tinysrgb&w=800"),
-	Article("Deep Learning Usage", "04_loss_functions.jl", "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800"),
+	Article("Multi-threading", "docs/02_multi_threading.jl", "https://images.pexels.com/photos/3091200/pexels-photo-3091200.jpeg?auto=compress&cs=tinysrgb&w=800"),
+	Article("GPU", "docs/03_gpu.jl", "https://images.pexels.com/photos/8622911/pexels-photo-8622911.jpeg?auto=compress&cs=tinysrgb&w=800"),
+	Article("Deep Learning Usage", "docs/04_loss_functions.jl", "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800"),
 ];
 
 # ╔═╡ 6cf265a0-5b72-4e5d-bb16-77ff69de566e
 article_list_benchmarks = Article[
-	Article("Benchmarks", "05_benchmarks.jl", "https://images.pexels.com/photos/39396/hourglass-time-hours-sand-39396.jpeg?auto=compress&cs=tinysrgb&w=800"),
+	Article("Benchmarks", "docs/05_benchmarks.jl", "https://images.pexels.com/photos/39396/hourglass-time-hours-sand-39396.jpeg?auto=compress&cs=tinysrgb&w=800"),
 ];
 
 # ╔═╡ 8d11bae1-d232-4c03-981a-cd9f1db24e6b
 article_list_api = Article[
-	Article("API", "06_api.jl", "https://img.freepik.com/free-photo/modern-technology-workshop-creativity-innovation-communication-development-generated-by-ai_188544-24548.jpg"),
+	Article("API", "docs/06_api.jl", "https://img.freepik.com/free-photo/modern-technology-workshop-creativity-innovation-communication-development-generated-by-ai_188544-24548.jpg"),
 ];
 
 # ╔═╡ 3bcd40f0-e8dd-48bd-8249-51b89f5766de
