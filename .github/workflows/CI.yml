@@ -12,11 +12,10 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - "1.8"
           - "1.9"
         os:
           - ubuntu-latest
-          - macOS-latest
+          # - macOS-latest (can't use until GitHub upgrades to m-series macs)
           - windows-latest
         arch:
           - x64
