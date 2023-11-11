@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.32
 
 #> [frontmatter]
 #> title = "Benchmarks"
@@ -14,12 +14,41 @@ begin
 	using Pkg
 	Pkg.activate(".")
 	Pkg.instantiate()
-	
-	using PlutoUI
+
+	# Import Comparison Distance Transforms
+	using DistanceTransformsPy: pytransform # Scipy 
+	using ImageMorphology: distance_transform, feature_transform # ImageMorphology
+
+	# Import Packages
+	using PlutoUI, BenchmarkTools, CairoMakie, Random
+
+	# Import Various GPU packages
+	using KernelAbstractions
+	using CUDA, AMDGPU, Metal
+
 	using DistanceTransforms
-	using BenchmarkTools
-	using CairoMakie
-	using CUDA
+end
+
+# ╔═╡ 7f3a06bd-195f-4732-8844-3bdafff90cce
+if CUDA.functional()
+	@info "Using CUDA"
+	CUDA.versioninfo()
+	backend = CUDABackend()
+	dev = CuArray
+elseif AMDGPU.functional()
+	@info "Using AMD"
+	AMDGPU.versioninfo()
+	backend = ROCBackend()
+	dev = ROCArray
+elseif Metal.functional()
+	@info "Using Metal"
+	Metal.versioninfo()
+	backend = MetalBackend()
+	dev = MtlArray
+else
+    @info "No GPU is available. Using CPU."
+	backend = CPU()
+	dev = Array
 end
 
 # ╔═╡ 4cd108b6-ec51-446a-b8e1-c52078a9e13d
@@ -30,71 +59,45 @@ md"""
 ## 2D Benchmarks
 """
 
-# ╔═╡ 32029509-72ed-4f84-9c87-08d5046633f7
-num_range = range(1, 200, 4)
-
 # ╔═╡ 967518da-7718-4f11-a5c2-8b65b9d5f8a3
-threads = Threads.nthreads()
+Threads.nthreads()
+
+# ╔═╡ 32029509-72ed-4f84-9c87-08d5046633f7
+num_range = collect(10:200:1010)
 
 # ╔═╡ 75b7c7c5-baa0-43cd-a6c4-d69a6fa75b6a
 begin
-	edt_mean_2D = Float32[]
-	edt_std_2D = Float32[]
-	
-	sedt_mean_2D = Float32[]
-	sedt_std_2D = Float32[]
-
-	sedt_threaded_mean_2D = Float32[]
-	sedt_threaded_std_2D = Float32[]
-	
-	sedt_gpu_mean = Float32[]
-	sedt_gpu_std = Float32[]
+	distance_transforms_2D = Float32[]
+	distance_transforms_gpu_2D = Float32[]
+	image_morphology_2D = Float32[]
+	scipy_2D = Float32[]
 
 	sizes_2D = Float32[]
-	
 	for n in num_range
-		n = Int(round(n))
 		@info n
-		_size = n^2
-		append!(sizes_2D, _size)
-		
-		# EDT
-		f = Bool.(rand([0, 1], n, n))
-		edt = @benchmark transform($f, $Maurer())
-		
-		append!(edt_mean_2D, BenchmarkTools.mean(edt).time)
-		append!(edt_std_2D, BenchmarkTools.std(edt).time)
-		
-		# SEDT
-		f = Bool.(rand([0, 1], n, n))
-		b_f = boolean_indicator(f)
-		tfm = Felzenszwalb()
-		sedt = @benchmark transform($b_f, $tfm)
-		
-		append!(sedt_mean_2D, BenchmarkTools.mean(sedt).time)
-		append!(sedt_std_2D, BenchmarkTools.std(sedt).time)
-		
-		# SEDT Threaded
-		f = Bool.(rand([0, 1], n, n))
-		b_f = boolean_indicator(f)
-		sedt_threaded = @benchmark transform($b_f, $tfm, $threads)
-		
-		append!(sedt_threaded_mean_2D, BenchmarkTools.mean(sedt_threaded).time)
-		append!(sedt_threaded_std_2D, BenchmarkTools.std(sedt_threaded).time)
+		append!(sizes_2D, n^2)
+		f = Bool.(rand([0f0, 1f0], n, n))
 
-		if has_cuda_gpu()
-			# SEDT GPU
-			f = Bool.(rand([0, 1], n, n))
-			b_f = CuArray(boolean_indicator(f))
-			output, v, z = CUDA.zeros(size(f)), CUDA.ones(Int32, size(f)), CUDA.ones(size(f) .+ 1)
-			sedt_gpu = @benchmark transform($b_f, $tfm; output=$output, v=$v, z=$z)
-			
-			append!(sedt_gpu_mean, BenchmarkTools.mean(sedt_gpu).time)
-			append!(sedt_gpu_std, BenchmarkTools.std(sedt_gpu).time)
+		# DistanceTransforms.jl
+		tfm = @benchmark transform($boolean_indicator($f))
+		append!(distance_transforms_2D, BenchmarkTools.mean(tfm).time)
+
+		# DistanceTransforms.jl GPU
+		if backend != CPU()
+			f_gpu = dev(rand([0f0, 1f0], n, n))
+			tfm = @benchmark transform($f_gpu)
+			append!(distance_transforms_gpu_2D, BenchmarkTools.mean(tfm).time)
 		end
+		
+		# ImageMorphology.jl
+		tfm = @benchmark distance_transform($feature_transform($f))
+		append!(image_morphology_2D, BenchmarkTools.mean(tfm).time)
+		
+		# Scipy
+		tfm = @benchmark pytransform($f)
+		append!(scipy_2D, BenchmarkTools.mean(tfm).time)
 	end
 end
-
 
 # ╔═╡ deb92c24-d289-41e2-b013-533dc636bfe9
 let 
@@ -106,13 +109,12 @@ let
 		ylabel = "Time (ns)"
 	)
 	
-    scatterlines!(sizes_2D, edt_mean_2D, label = "Maurer")
-	scatterlines!(sizes_2D, sedt_mean_2D, label = "Felzenszwalb")
-	scatterlines!(sizes_2D, sedt_threaded_mean_2D, label = "Felzenszwalb Threaded")
-
-	if has_cuda_gpu()
-		scatter!(sizes_2D, sedt_gpu_mean, label = "Felzenszwalb GPU")
+    scatterlines!(sizes_2D, distance_transforms_2D, label = "DistanceTransforms.jl")
+	if backend != CPU()
+		scatterlines!(sizes_2D, distance_transforms_gpu_2D, label = "DistanceTransforms.jl (GPU)")
 	end
+	scatterlines!(sizes_2D, image_morphology_2D, label = "ImageMorphology.jl")
+	scatterlines!(sizes_2D, scipy_2D, label = "Scipy")
 
 	axislegend(ax; position = :lt)
 	
@@ -124,69 +126,71 @@ md"""
 ## 3D Benchmarks
 """
 
+# ╔═╡ f00f036e-a9e3-48c0-a278-26636b89944c
+collect(10:20:110)
+
 # ╔═╡ 63223fd0-b173-4f3b-ba80-12cbf52fe035
-num_range2 = range(1, 100, 4)
+num_range2 = collect(10:20:110)
 
-# ╔═╡ 5a93c54e-7afe-4fa9-8923-7f9e127932ea
+# ╔═╡ 6a4e4d88-b7d8-4b7b-8237-94ca6a7bce6b
 begin
-	edt_mean_3D = Float32[]
-	edt_std_3D = Float32[]
-	
-	sedt_mean_3D = Float32[]
-	sedt_std_3D = Float32[]
-
-	sedt_threaded_mean_3D = Float32[]
-	sedt_threaded_std_3D = Float32[]
-
-	sedt_gpu_mean_3D = Float32[]
-	sedt_gpu_std_3D = Float32[]
+	distance_transforms_3D = Float32[]
+	distance_transforms_gpu_3D = Float32[]
+	image_morphology_3D = Float32[]
+	scipy_3D = Float32[]
 
 	sizes_3D = Float32[]
-	
 	for n in num_range2
-		n = Int(round(n))
 		@info n
-		_size = n^3
-		append!(sizes_3D, _size)
-		
-		# EDT
-		f = Bool.(rand([0, 1], n, n, n))
-		edt = @benchmark transform($f, $Maurer())
-		
-		append!(edt_mean_3D, BenchmarkTools.mean(edt).time)
-		append!(edt_std_3D, BenchmarkTools.std(edt).time)
-		
-		# SEDT
-		f = Bool.(rand([0, 1], n, n, n))
-		b_f = boolean_indicator(f)
-		tfm = Felzenszwalb()
-		sedt = @benchmark transform($b_f, $tfm)
-		
-		append!(sedt_mean_3D, BenchmarkTools.mean(sedt).time)
-		append!(sedt_std_3D, BenchmarkTools.std(sedt).time)
-		
-		# SEDT Threaded
-		f = Bool.(rand([0, 1], n, n, n))
-		b_f = boolean_indicator(f)
-		sedt_threaded = @benchmark transform($b_f, $tfm, $threads)
-		
-		append!(sedt_threaded_mean_3D, BenchmarkTools.mean(sedt_threaded).time)
-		append!(sedt_threaded_std_3D, BenchmarkTools.std(sedt_threaded).time)
+		append!(sizes_3D, n^3) # Changed to n^3 for 3D
+		f = Bool.(rand([0f0, 1f0], n, n, n)) # 3D array
 
-		if has_cuda_gpu()
-			# SEDT GPU
-			f = Bool.(rand([0, 1], n, n, n))
-			b_f = CuArray(boolean_indicator(f))
-			output, v, z = CUDA.zeros(size(f)), CUDA.ones(Int32, size(f)), CUDA.ones(size(f) .+ 1)
-			sedt_gpu_3D = @benchmark transform($b_f, $tfm; output=$output, v=$v, z=$z)
-			
-			append!(sedt_gpu_mean_3D, BenchmarkTools.mean(sedt_gpu_3D).time)
-			append!(sedt_gpu_std_3D, BenchmarkTools.std(sedt_gpu_3D).time)
-		end
+		# DistanceTransforms.jl
+		tfm = @benchmark transform($boolean_indicator($f))
+		append!(distance_transforms_3D, BenchmarkTools.mean(tfm).time)
+
+		# # DistanceTransforms.jl GPU
+		# if backend != CPU()
+		# 	f_gpu = dev(rand([0f0, 1f0], n, n, n)) # 3D array for GPU
+		# 	tfm = @benchmark transform($f_gpu)
+		# 	append!(distance_transforms_gpu_3D, BenchmarkTools.mean(tfm).time)
+		# end
+		
+		# ImageMorphology.jl
+		tfm = @benchmark distance_transform($feature_transform($f))
+		append!(image_morphology_3D, BenchmarkTools.mean(tfm).time)
+		
+		# Scipy
+		tfm = @benchmark pytransform($f)
+		append!(scipy_3D, BenchmarkTools.mean(tfm).time)
 	end
 end
 
+# ╔═╡ 42578312-87f1-4091-80c7-046f398dd767
+let 
+    f = Figure()
+    ax = Axis(
+		f[1, 1],
+		title = "Distance Transforms (3D)",
+		xlabel = "Number of Elements",
+		ylabel = "Time (ns)"
+	)
+	
+    scatterlines!(sizes_3D, distance_transforms_3D, label = "DistanceTransforms.jl")
+	# if backend != CPU()
+	# 	scatterlines!(sizes_3D, distance_transforms_gpu_3D, label = "DistanceTransforms.jl (GPU)")
+	# end
+	scatterlines!(sizes_3D, image_morphology_3D, label = "ImageMorphology.jl")
+	scatterlines!(sizes_3D, scipy_3D, label = "Scipy")
+
+	axislegend(ax; position = :lt)
+	
+	f
+end
+
 # ╔═╡ adaae214-221e-419e-97ac-09fbb06e66a3
+# ╠═╡ disabled = true
+#=╠═╡
 let 
     f = Figure()
     ax = Axis(
@@ -208,16 +212,20 @@ let
 	
 	f
 end
+  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╠═39846dfe-2bcf-11ed-1ec9-11cd75a2608e
+# ╠═7f3a06bd-195f-4732-8844-3bdafff90cce
 # ╠═4cd108b6-ec51-446a-b8e1-c52078a9e13d
 # ╟─6f771ea0-dcf7-4528-84d5-e29da66de753
-# ╠═32029509-72ed-4f84-9c87-08d5046633f7
 # ╠═967518da-7718-4f11-a5c2-8b65b9d5f8a3
+# ╠═32029509-72ed-4f84-9c87-08d5046633f7
 # ╠═75b7c7c5-baa0-43cd-a6c4-d69a6fa75b6a
 # ╟─deb92c24-d289-41e2-b013-533dc636bfe9
 # ╟─169156d8-2188-44eb-8cdb-97f6ed582cce
+# ╠═f00f036e-a9e3-48c0-a278-26636b89944c
 # ╠═63223fd0-b173-4f3b-ba80-12cbf52fe035
-# ╠═5a93c54e-7afe-4fa9-8923-7f9e127932ea
+# ╠═6a4e4d88-b7d8-4b7b-8237-94ca6a7bce6b
+# ╠═42578312-87f1-4091-80c7-046f398dd767
 # ╟─adaae214-221e-419e-97ac-09fbb06e66a3

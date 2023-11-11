@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.32
 
 #> [frontmatter]
 #> title = "DistanceTransforms.jl"
@@ -58,7 +58,7 @@ function index_title_card(title::String, subtitle::String, image_url::String; da
 	        ),
 			divv(:data_theme => "$data_theme", :class => "card card-bordered flex justify-center items-center border-$border_color text-center w-full dark:text-[#e6e6e6]",
 				divv(:class => "card-body flex flex-col justify-center items-center",
-					img(:src => "$image_url", :class => "h-24 w-24 md:h-40 md:w-40 rounded-md", :alt => "$title Logo"),
+					img(:src => "$image_url", :class => "h-24 w-24 md:h-52 md:w-52 rounded-md", :alt => "$title Logo"),
 					divv(:class => "text-5xl font-bold bg-gradient-to-r from-accent to-primary inline-block text-transparent bg-clip-text py-10", "$title"),
 					p(:class => "card-text text-md font-serif", "$subtitle"
 					)
@@ -114,7 +114,7 @@ function article_card(article::Article, color::String; data_theme = "pastel")
 				p("Click to open the notebook")
 			),
 			figure(
-				img(:src => article.image_url, :alt => article.title)
+				img(:class =>"w-full", :src => article.image_url, :alt => article.title)
 			)
         )
     )
