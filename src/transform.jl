@@ -19,14 +19,14 @@ In-place squared Euclidean distance transforms. These functions apply the transf
 
 The intermediate arrays `v` and `z` (and `temp` for 3D arrays) are used for computation. The `threaded` parameter enables parallel computation on the CPU.
 
-# Arguments
+#### Arguments
 - `f`: Input vector, matrix, or 3D array.
 - `output`: Preallocated array to store the result.
 - `v`: Preallocated array for indices, matching the dimensions of `f`.
 - `z`: Preallocated array for intermediate values, one element larger than `f`.
 - `temp`: Preallocated array for intermediate values when transforming 3D arrays, matching the dimensions of `output`.
 
-# Examples
+#### Examples
 ```julia
 f = rand([0f0, 1f0], 10)
 f_bool = boolean_indicator(f)
@@ -62,12 +62,14 @@ function transform!(f::AbstractVector, output, v, z)
     end
 end
 
+# 2D
 function transform!(img::AbstractMatrix, output, v, z; threaded=true)
     if threaded
         Threads.@threads for i in CartesianIndices(@view(img[:, 1]))
             @views transform!(img[i, :], output[i, :], v[i, :], z[i, :])
         end
 
+        copyto!(img, output)
         Threads.@threads for j in CartesianIndices(@view(img[1, :]))
             @views transform!(
                 output[:, j], output[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1)
@@ -78,6 +80,7 @@ function transform!(img::AbstractMatrix, output, v, z; threaded=true)
             @views transform!(img[i, :], output[i, :], v[i, :], z[i, :])
         end
 
+        copyto!(img, output)
         for j in CartesianIndices(@view(img[1, :]))
             @views transform!(
                 output[:, j], output[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1)
@@ -86,6 +89,81 @@ function transform!(img::AbstractMatrix, output, v, z; threaded=true)
     end
 end
 
+@kernel function first_pass_kernel!(f, out, s2)
+    row, col = @index(Global, NTuple)
+
+    if f[row, col] < 0.5f0
+        ct = 1
+        curr_l = min(col-1, s2-col)
+        finished = false
+        while !finished && ct <= curr_l
+            if f[row, col-ct] > 0.5f0 || f[row, col+ct] > 0.5f0
+                out[row, col] = ct*ct
+                finished = true
+            end
+            ct += 1
+        end
+        while !finished && ct < col
+            if f[row, col-ct] > 0.5f0
+                out[row, col] = ct*ct
+                finished = true
+            end
+            ct += 1
+        end
+        while !finished && col+ct <= s2
+            if f[row, col+ct] > 0.5f0
+                out[row, col] = ct*ct
+                finished = true
+            end
+            ct += 1
+        end
+        if !finished
+            out[row, col] = 1f10
+        end
+    else
+        out[row, col] = 0f0
+    end
+end
+
+@kernel function second_pass_kernel!(org, out, s1, s2)
+    row, col = @index(Global, NTuple)
+
+    ct = 1
+    curr_l = sqrt(out[row, col])
+    while ct < curr_l && row+ct <= s1
+        temp = muladd(ct, ct, org[row+ct, col])
+        if temp < out[row, col]
+            out[row, col] = temp
+            curr_l = sqrt(temp)
+        end
+        ct += 1
+    end
+
+    ct = 1
+    while ct < curr_l && row > ct
+        temp = muladd(ct, ct, org[row-ct, col])
+        if temp < out[row, col]
+            out[row, col] = temp
+            curr_l = sqrt(temp)
+        end
+        ct += 1
+    end
+end
+
+function transform!(img::AbstractGPUMatrix, output, v, z)
+    s1, s2 = size(img)
+    backend = get_backend(img)
+	kernel1! = first_pass_kernel!(backend)
+	kernel2! = second_pass_kernel!(backend)
+	
+    kernel1!(img, output, s2, ndrange = (s1, s2))
+    copyto!(img, output)
+    kernel2!(img, output, s1, s2, ndrange = (s1, s2))
+	
+    KernelAbstractions.synchronize(backend)
+end
+
+# 3D
 function transform!(vol::AbstractArray{<:Real,3}, output, v, z, temp; threaded=true)
     if threaded
         Threads.@threads for i in CartesianIndices(@view(vol[:, :, 1]))
@@ -94,12 +172,14 @@ function transform!(vol::AbstractArray{<:Real,3}, output, v, z, temp; threaded=t
             )
         end
 
+        copyto!(vol, output)
         Threads.@threads for j in CartesianIndices(@view(vol[1, :, :]))
             @views transform!(
                 output[:, j], temp[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1)
             )
         end
 
+        copyto!(output, temp)
         Threads.@threads for k in CartesianIndices(@view(vol[:, 1, :]))
             @views transform!(
                 temp[k[1], :, k[2]], output[k[1], :, k[2]], fill!(v[k[1], :, k[2]], 1), fill!(z[k[1], :, k[2]], 1)
@@ -112,41 +192,20 @@ function transform!(vol::AbstractArray{<:Real,3}, output, v, z, temp; threaded=t
             )
         end
 
+        copyto!(vol, output)
         for j in CartesianIndices(@view(vol[1, :, :]))
             @views transform!(
                 output[:, j], temp[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1)
             )
         end
 
+        copyto!(output, temp)
         for k in CartesianIndices(@view(vol[:, 1, :]))
             @views transform!(
                 temp[k[1], :, k[2]], output[k[1], :, k[2]], fill!(v[k[1], :, k[2]], 1), fill!(z[k[1], :, k[2]], 1)
             )
         end
     end
-end
-
-@kernel function transform_kernel_cols!(img, output, v, z)
-    i = @index(Global)
-    @views transform!(img[i, :], output[i, :], v[i, :], z[i, :])
-end
-
-@kernel function transform_kernel_rows!(img, output, v, z)
-    j = @index(Global)
-    @views transform!(img[:, j], output[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1))
-end
-
-function transform!(img::AbstractGPUMatrix, output, v, z)
-    backend = get_backend(img)
-    kernel_cols = transform_kernel_cols!(backend)
-    kernel_cols(img, output, v, z, ndrange=size(img, 1))
-
-    B = similar(output)
-    copyto!(B, output)
-
-    kernel_rows = transform_kernel_rows!(backend)
-    kernel_rows(B, output, v, z, ndrange=size(img, 2))
-    KernelAbstractions.synchronize(backend)
 end
 
 export transform!
@@ -170,10 +229,10 @@ Non-in-place squared Euclidean distance transforms that return a new array with 
 
 The `threaded` parameter can be used to enable or disable parallel computation on the CPU.
 
-# Arguments
+#### Arguments
 - `f/img/vol`: Input vector, matrix, or 3D array to be transformed.
 
-# Examples
+#### Examples
 ```julia
 f = rand([0f0, 1f0], 10)
 f_bool = boolean_indicator(f)
@@ -189,6 +248,7 @@ function transform(f::AbstractVector)
     return output
 end
 
+# 2D
 function transform(img::AbstractMatrix; threaded=true)
     output = similar(img, eltype(img))
     v = ones(Int32, size(img))
@@ -196,6 +256,16 @@ function transform(img::AbstractMatrix; threaded=true)
 
     transform!(img, output, v, z; threaded=threaded)
     return output
+end
+
+function transform(img::AbstractGPUMatrix)
+	backend = KernelAbstractions.get_backend(img)
+	output = similar(img, Float32)
+	v = KernelAbstractions.ones(backend, Int32, size(img))
+	z = KernelAbstractions.ones(backend, Float32, size(img) .+ 1)
+
+	transform!(img, output, v, z)
+	return output
 end
 
 function transform(vol::AbstractArray{<:Real,3}; threaded=true)
@@ -206,16 +276,6 @@ function transform(vol::AbstractArray{<:Real,3}; threaded=true)
 
     transform!(vol, output, v, z, temp; threaded=threaded)
     return output
-end
-
-function transform(img::AbstractGPUMatrix)
-	backend = KernelAbstractions.get_backend(img)
-	output = similar(img, Float32)
-	v = KernelAbstractions.ones(backend, Int32, size(img))
-	z = KernelAbstractions.ones(backend, Float32, size(img) .+ 1)
-	transform!(img, output, v, z)
-	
-	return output
 end
 
 export transform

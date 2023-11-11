@@ -16,9 +16,9 @@ AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ImageMorphology = "787d08f9-d448-5407-9aad-5290dd7ab264"
 Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
-oneAPI = "8f75cd03-7ff8-4ecb-9b8f-daf728133b1b"
+# oneAPI = "8f75cd03-7ff8-4ecb-9b8f-daf728133b1b"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["AMDGPU", "CUDA", "ImageMorphology", "Metal", "oneAPI", "Random", "Test"]
+test = ["AMDGPU", "CUDA", "ImageMorphology", "Metal", "Random", "Test"]
