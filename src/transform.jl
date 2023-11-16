@@ -72,7 +72,7 @@ function transform!(img::AbstractMatrix, output, v, z; threaded = true)
 		copyto!(img, output)
 		Threads.@threads for j in CartesianIndices(@view(img[1, :]))
 			@views transform!(
-				output[:, j], output[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1),
+				img[:, j], output[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1),
 			)
 		end
 	else
@@ -83,12 +83,42 @@ function transform!(img::AbstractMatrix, output, v, z; threaded = true)
 		copyto!(img, output)
 		for j in CartesianIndices(@view(img[1, :]))
 			@views transform!(
-				output[:, j], output[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1),
+				img[:, j], output[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1),
 			)
 		end
 	end
 end
 
+# 3D
+function transform!(vol::AbstractArray{<:Real, 3}, output, v, z; threaded = true)
+	if threaded
+		Threads.@threads for i in CartesianIndices(@view(vol[:, 1, 1]))
+			@views transform!(vol[i, :, :], output[i, :, :], v[i, :, :], z[i, :, :])
+		end
+
+		copyto!(vol, output)
+		Threads.@threads for idx in CartesianIndices(@view(vol[1, :, :]))
+			j, k = Tuple(idx)
+			@views transform!(
+				vol[:, j, k], output[:, j, k], fill!(v[:, j, k], 1), fill!(z[:, j, k], 1),
+			)
+		end
+	else
+		for i in CartesianIndices(@view(vol[:, 1, 1]))
+			@views transform!(vol[i, :, :], output[i, :, :], v[i, :, :], z[i, :, :])
+		end
+
+		copyto!(vol, output)
+		for idx in CartesianIndices(@view(vol[1, :, :]))
+			j, k = Tuple(idx)
+			@views transform!(
+				vol[:, j, k], output[:, j, k], fill!(v[:, j, k], 1), fill!(z[:, j, k], 1),
+			)
+		end
+	end
+end
+
+# GPU (2D)
 @kernel function _first_pass_2D!(f, out, s2)
 	row, col = @index(Global, NTuple)
 
@@ -158,56 +188,12 @@ function transform!(img::AbstractGPUMatrix, output)
 
 	kernel1!(img, output, s2, ndrange = (s1, s2))
 	copyto!(img, output)
-	kernel2!(img, output, s1, s2, ndrange = (s1, s2))
 
+	kernel2!(img, output, s1, s2, ndrange = (s1, s2))
 	KernelAbstractions.synchronize(backend)
 end
 
-# 3D
-function transform!(vol::AbstractArray{<:Real, 3}, output, v, z, temp; threaded = true)
-	if threaded
-		Threads.@threads for i in CartesianIndices(@view(vol[:, :, 1]))
-			@views transform!(
-				vol[i, :], output[i, :], v[i, :], z[i, :],
-			)
-		end
-
-		copyto!(vol, output)
-		Threads.@threads for j in CartesianIndices(@view(vol[1, :, :]))
-			@views transform!(
-				output[:, j], temp[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1),
-			)
-		end
-
-		copyto!(output, temp)
-		Threads.@threads for k in CartesianIndices(@view(vol[:, 1, :]))
-			@views transform!(
-				temp[k[1], :, k[2]], output[k[1], :, k[2]], fill!(v[k[1], :, k[2]], 1), fill!(z[k[1], :, k[2]], 1),
-			)
-		end
-	else
-		for i in CartesianIndices(@view(vol[:, :, 1]))
-			@views transform!(
-				vol[i, :], output[i, :], v[i, :], z[i, :],
-			)
-		end
-
-		copyto!(vol, output)
-		for j in CartesianIndices(@view(vol[1, :, :]))
-			@views transform!(
-				output[:, j], temp[:, j], fill!(v[:, j], 1), fill!(z[:, j], 1),
-			)
-		end
-
-		copyto!(output, temp)
-		for k in CartesianIndices(@view(vol[:, 1, :]))
-			@views transform!(
-				temp[k[1], :, k[2]], output[k[1], :, k[2]], fill!(v[k[1], :, k[2]], 1), fill!(z[k[1], :, k[2]], 1),
-			)
-		end
-	end
-end
-
+# GPU (3D)
 @kernel function _first_pass_3D!(f, out, s2)
 	dim1, dim2, dim3 = @index(Global, NTuple)
 	# 1D along dimension 2
@@ -293,7 +279,7 @@ end
 end
 
 function transform!(img::AbstractGPUArray, output)
-    backend = get_backend(img)
+	backend = get_backend(img)
 	s1, s2, s3 = size(img)
 	kernel1! = _first_pass_3D!(backend)
 	kernel2! = _second_pass_3D!(backend)
@@ -360,24 +346,24 @@ function transform(img::AbstractMatrix; threaded = true)
 	return output
 end
 
+# 3D
+function transform(vol::AbstractArray{<:Real, 3}; threaded = true)
+	output = similar(vol, eltype(vol))
+	v = ones(Int32, size(vol))
+	z = ones(eltype(vol), size(vol) .+ 1)
+
+	transform!(vol, output, v, z; threaded = threaded)
+	return output
+end
+
+# GPU (2D)
 function transform(img::AbstractGPUMatrix)
 	output = similar(img, Float32)
 	transform!(img, output)
 	return output
 end
 
-# 3D
-
-function transform(vol::AbstractArray{<:Real, 3}; threaded = true)
-	output = similar(vol, eltype(vol))
-	v = ones(Int32, size(vol))
-	z = ones(eltype(vol), size(vol) .+ 1)
-	temp = similar(output)
-
-	transform!(vol, output, v, z, temp; threaded = threaded)
-	return output
-end
-
+# GPU (3D)
 function transform(img::AbstractGPUArray)
 	output = similar(img, Float32)
 	transform!(img, output)
