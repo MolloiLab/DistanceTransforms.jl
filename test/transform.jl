@@ -87,36 +87,39 @@ test_transform(img) = distance_transform(feature_transform(Bool.(img)))
 		end
 	end
 
-	@testset "2D GPU transform!" begin
-		for n in [10, 50, 100]
-			for test_idx in 1:20
-				img = rand([0f0, 1f0], n, n)
-				
-				img_gpu = dev(copy(img))
-				output = similar(img_gpu)
-				
-				transform!(img_gpu, output)
-				img_test = test_transform(img) .^ 2
-				
-				@test Array(output) ≈ img_test
+	if dev != Array
+		@testset "2D GPU transform!" begin
+			for n in [10, 50, 100]
+				for test_idx in 1:20
+					img = rand([0f0, 1f0], n, n)
+					
+					img_gpu = dev(copy(img))
+					output = similar(img_gpu)
+					
+					transform!(img_gpu, output)
+					img_test = test_transform(img) .^ 2
+					
+					@test Array(output) ≈ img_test
+				end
 			end
 		end
-	end
-
-	@testset "3D GPU transform!" begin
-		for n in [10, 50, 100]
-			for test_idx in 1:20
-				img = rand([0f0, 1f0], n, n, n)
-				
-				img_gpu = dev(copy(img))
-				output = similar(img_gpu)
-				
-				transform!(img_gpu, output)
-				img_test = test_transform(img) .^ 2
-				
-				@test Array(output) ≈ img_test
+		@testset "3D GPU transform!" begin
+			for n in [10, 50, 100]
+				for test_idx in 1:20
+					img = rand([0f0, 1f0], n, n, n)
+					
+					img_gpu = dev(copy(img))
+					output = similar(img_gpu)
+					
+					transform!(img_gpu, output)
+					img_test = test_transform(img) .^ 2
+					
+					@test Array(output) ≈ img_test
+				end
 			end
 		end
+	else
+		@info "No GPU available, skipping tests"
 	end
 end
 
@@ -175,27 +178,31 @@ end
 		end
 	end
 	
-	@testset "2D GPU transform" begin
-		for n in [10, 50, 100]
-			for test_idx in 1:20
-				img = rand([0.0f0, 1.0f0], n, n)
-				img_gpu = dev(img)
-				output = transform(img_gpu)
-				img_test = test_transform(img) .^ 2
-				@test Array(output) ≈ img_test
+	if dev != Array
+		@testset "2D GPU transform" begin
+			for n in [10, 50, 100]
+				for test_idx in 1:20
+					img = rand([0.0f0, 1.0f0], n, n)
+					img_gpu = dev(img)
+					output = transform(img_gpu)
+					img_test = test_transform(img) .^ 2
+					@test Array(output) ≈ img_test
+				end
 			end
 		end
-	end
-	
-	@testset "3D GPU transform" begin
-		for n in [10, 50, 100]
-			for test_idx in 1:20
-				img = rand([0.0f0, 1.0f0], n, n, n)
-				img_gpu = dev(img)
-				output = transform(img_gpu)
-				img_test = test_transform(img) .^ 2
-				@test Array(output) ≈ img_test
+		
+		@testset "3D GPU transform" begin
+			for n in [10, 50, 100]
+				for test_idx in 1:20
+					img = rand([0.0f0, 1.0f0], n, n, n)
+					img_gpu = dev(img)
+					output = transform(img_gpu)
+					img_test = test_transform(img) .^ 2
+					@test Array(output) ≈ img_test
+				end
 			end
 		end
+	else
+		@info "No GPU available, skipping tests"
 	end
 end
