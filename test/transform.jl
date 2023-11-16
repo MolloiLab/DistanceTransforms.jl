@@ -16,7 +16,7 @@ test_transform(img) = distance_transform(feature_transform(Bool.(img)))
 				transform!(img_bool, output, v, z)
 				img_test = test_transform(img) .^ 2
 				
-				@test round.(Int, Array(output)) ≈ round.(Int, img_test)
+				@test Array(output) ≈ img_test
 			end
 		end
 	end
@@ -34,7 +34,7 @@ test_transform(img) = distance_transform(feature_transform(Bool.(img)))
 				transform!(img_bool, output, v, z)
 				img_test = test_transform(img) .^ 2
 				
-				@test round.(Int, Array(output)) ≈ round.(Int, img_test)
+				@test Array(output) ≈ img_test
 			end
 
 			# non-threaded
@@ -49,7 +49,7 @@ test_transform(img) = distance_transform(feature_transform(Bool.(img)))
 				transform!(img_bool, output, v, z; threaded = false)
 				img_test = test_transform(img) .^ 2
 				
-				@test round.(Int, Array(output)) ≈ round.(Int, img_test)
+				@test Array(output) ≈ img_test
 			end
 		end
 	end
@@ -67,7 +67,7 @@ test_transform(img) = distance_transform(feature_transform(Bool.(img)))
 				transform!(img_bool, output, v, z)
 				img_test = test_transform(img) .^ 2
 				
-				@test round.(Int, Array(output)) ≈ round.(Int, img_test)
+				@test Array(output) ≈ img_test
 			end
 			
 			# non-threaded
@@ -82,7 +82,7 @@ test_transform(img) = distance_transform(feature_transform(Bool.(img)))
 				transform!(img_bool, output, v, z; threaded = false)
 				img_test = test_transform(img) .^ 2
 				
-				@test round.(Int, Array(output)) ≈ round.(Int, img_test)
+				@test Array(output) ≈ img_test
 			end
 		end
 	end
