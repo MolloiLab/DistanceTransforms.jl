@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.32
 
 #> [frontmatter]
 #> title = "Multi-threading"
@@ -32,7 +32,7 @@ TableOfContents()
 # ╔═╡ ede39bd3-1e20-4426-a518-abe2f574aa91
 md"""
 ## Multi-threaded distance transforms
-One of the advantages of a Julia-based distance transform library is how accessible something like multi-threading is for complex algorithms. The `Felzenszwalb` distance transform is highly parallelizable and is set up to take advantage of multi-threaded hardware.
+One of the advantages of a Julia-based distance transform library is how accessible something like multi-threading is for complex algorithms. The felzenszwalb distance transform algorithm is highly parallelizable, which is what the CPU approach is based on, and is set up to take advantage of multi-threaded hardware by default.
 """
 
 # ╔═╡ 735aa1eb-2ce8-4ae2-8181-76056aa560de
@@ -54,11 +54,8 @@ array = [
 # ╔═╡ c8bd961f-14d7-4724-92f0-3d8cb24b239d
 bool_array = boolean_indicator(array)
 
-# ╔═╡ a0b300ff-2835-4440-a34d-cd1d3e5ed346
-tfm = Felzenszwalb()
-
 # ╔═╡ e38b8b56-a2cb-46a8-b5c8-9577a846ae1f
-sq_euc_transform = transform(bool_array, tfm, threads)
+sq_euc_transform = transform(bool_array)
 
 # ╔═╡ 6001d3d3-a067-4df3-a613-873fb4168c11
 md"""
@@ -69,7 +66,7 @@ md"""
 array3D = rand([0, 1], 5, 5, 3)
 
 # ╔═╡ 86c7fa96-b05d-42c8-b86b-331993df95fc
-sq_euc_transform3D = transform(boolean_indicator(array3D), tfm, threads)
+sq_euc_transform3D = transform(boolean_indicator(array3D))
 
 # ╔═╡ b7651361-7332-4215-84dd-5cf55c61768d
 md"""
@@ -92,14 +89,14 @@ begin
 		
 		# Squared Euclidean DT
 		x2 = boolean_indicator(rand([0, 1], n, n))
-		sedt = @benchmark transform($x2, $tfm)
+		sedt = @benchmark transform($x2; threaded = false)
 		
 		append!(sedt_mean, BenchmarkTools.mean(sedt).time)
 		append!(sedt_std, BenchmarkTools.std(sedt).time)
 		
 		# Squared Euclidean DT threaded
 		x3 = boolean_indicator(rand([0, 1], n, n))
-		sedtP = @benchmark transform($x3, $tfm, $threads)
+		sedtP = @benchmark transform($x3; threaded = true)
 		
 		append!(sedtP_mean, BenchmarkTools.mean(sedtP).time)
 		append!(sedtP_std, BenchmarkTools.std(sedtP).time)
@@ -145,7 +142,6 @@ One might wonder why, if multi-threading is so beneficial, GPUs wouldn't be util
 # ╟─5104bf97-e5bf-463e-a68a-cf1a9a7f77e8
 # ╠═c7914c8a-5c30-482d-9776-1121c1268b81
 # ╠═c8bd961f-14d7-4724-92f0-3d8cb24b239d
-# ╠═a0b300ff-2835-4440-a34d-cd1d3e5ed346
 # ╠═e38b8b56-a2cb-46a8-b5c8-9577a846ae1f
 # ╟─6001d3d3-a067-4df3-a613-873fb4168c11
 # ╠═ae31df46-a7c8-41f3-b8e3-d5eeb1ba317c

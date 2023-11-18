@@ -29,6 +29,11 @@ md"""
 ## Tutorials
 """
 
+# ╔═╡ 8b5d431a-f91c-422b-86cf-3ace891e742f
+md"""
+## Python
+"""
+
 # ╔═╡ 71604c4c-6d3a-4b22-bb47-8144604148be
 md"""
 ## Benchmarks
@@ -83,6 +88,11 @@ struct Article
 	image_url::String
 end
 
+# ╔═╡ e0ef1b4d-0076-410c-b325-32a7a274f487
+article_list_python = Article[
+	Article("Python", "https://colab.research.google.com/drive/1-CDqQgrBHoxNqs2IbMebMRxsp0m21jSa?usp=sharing", "https://img.freepik.com/free-vector/code-typing-concept-illustration_114360-3581.jpg?size=626&ext=jpg&ga=GA1.1.1694943658.1700350224&semt=sph"),
+];
+
 # ╔═╡ b7c92fa4-ed51-495d-ba82-5ae61b3de194
 article_list_quickstart = Article[
 	Article("Getting Started", "docs/01_getting_started.jl", "https://img.freepik.com/free-photo/futuristic-spaceship-takes-off-into-purple-galaxy-fueled-by-innovation-generated-by-ai_24640-100023.jpg"),
@@ -134,6 +144,13 @@ to_html(
     )
 )
 
+# ╔═╡ 75f02433-7ef3-45f4-ad2a-d610923824af
+to_html(
+    divv(:class => "flex flex-wrap justify-center items-start",
+        [article_card(article, "secondary"; data_theme = data_theme) for article in article_list_python]...
+    )
+)
+
 # ╔═╡ 1198c970-07a0-464a-b853-aa737634c0e5
 to_html(
     divv(:class => "flex flex-wrap justify-center items-start",
@@ -154,6 +171,8 @@ to_html(
 # ╟─9f5666d8-b86b-46d1-a97a-f7f708fdedb6
 # ╟─5e70dc3d-85b6-4149-9962-70215d3c7f1e
 # ╟─ace65d98-fe6b-45b7-990d-df8f59f6a5b3
+# ╟─8b5d431a-f91c-422b-86cf-3ace891e742f
+# ╟─75f02433-7ef3-45f4-ad2a-d610923824af
 # ╟─71604c4c-6d3a-4b22-bb47-8144604148be
 # ╟─1198c970-07a0-464a-b853-aa737634c0e5
 # ╟─b3349485-1a5f-4da6-be79-965fec5fbc13
@@ -166,6 +185,7 @@ to_html(
 # ╟─09b3d1e1-b44f-461d-abaf-2e5a1f6f6cc2
 # ╟─b7c92fa4-ed51-495d-ba82-5ae61b3de194
 # ╟─0d222d9d-7576-40a7-acb4-b0e27f9a9ef8
+# ╟─e0ef1b4d-0076-410c-b325-32a7a274f487
 # ╟─6cf265a0-5b72-4e5d-bb16-77ff69de566e
 # ╟─8d11bae1-d232-4c03-981a-cd9f1db24e6b
 # ╟─3bcd40f0-e8dd-48bd-8249-51b89f5766de

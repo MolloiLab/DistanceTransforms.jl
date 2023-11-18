@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.26
+# v0.19.32
 
 #> [frontmatter]
 #> title = "GPU"
@@ -91,6 +91,6 @@ One such example can be seen in the next tutorial on using distance transforms w
 # ╟─ed7fea36-60ca-47e0-9046-bf2565fdd41d
 # ╠═22cec81f-c503-43de-8297-ec0591e4e6c5
 # ╠═afeb0802-60c1-40e0-a9e5-b13ad6af27bc
-# ╟─b370e3a1-37ec-48aa-86e4-d053bf9bce3b
+# ╠═b370e3a1-37ec-48aa-86e4-d053bf9bce3b
 # ╠═b885869b-985e-4d73-acd9-b381e6272540
 # ╟─8488fa03-8ad4-4b81-8877-4ec75018a84f

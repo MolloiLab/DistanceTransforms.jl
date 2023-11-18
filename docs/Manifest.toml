@@ -397,11 +397,11 @@ version = "1.15.1"
 
 [[deps.DistanceTransforms]]
 deps = ["GPUArraysCore", "KernelAbstractions", "LoopVectorization"]
-git-tree-sha1 = "78d24c6fabfa651c61bc3c85ea724beb7620d01f"
+git-tree-sha1 = "6e6e2569aea7e4470c251f713c103f3593a679fb"
 repo-rev = "master"
 repo-url = "https://github.com/Dale-Black/DistanceTransforms.jl.git"
 uuid = "71182807-4d06-4237-8dd0-bdafe4d097e2"
-version = "0.2.0"
+version = "0.2.1"
 
 [[deps.DistanceTransformsPy]]
 deps = ["CondaPkg", "PythonCall"]
