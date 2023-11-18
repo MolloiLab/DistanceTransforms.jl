@@ -13,6 +13,7 @@ DistanceTransforms.jl is a Julia package that provides efficient distance transf
 - [Getting Started](#getting-started)
 - [Quick Start](#quick-start)
 - [Transforms](#transforms)
+- [Python](#python)
 
 ## Getting Started
 
@@ -47,3 +48,9 @@ result = transform(array1, Maurer())
 ## Transforms
 
 The library is built around a common `transform` interface, allowing users to apply various distance transform algorithms to arrays using a unified approach.
+
+## Python
+
+Check out the Colab notebook to see how to utilize this distance transform in Python
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-CDqQgrBHoxNqs2IbMebMRxsp0m21jSa?usp=sharing]
+
