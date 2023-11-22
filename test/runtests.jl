@@ -3,7 +3,7 @@ using Test
 
 using KernelAbstractions
 using CUDA, AMDGPU, Metal
-# using oneAPI
+using oneAPI
 using Random
 
 if CUDA.functional()
@@ -16,11 +16,11 @@ elseif AMDGPU.functional()
 	AMDGPU.versioninfo()
 	backend = ROCBackend()
 	dev = ROCArray
-# elseif oneAPI.functional() ## not well supported
-# 	@info "Using oneAPI"
-# 	oneAPI.versioninfo()
-# 	backend = oneBackend()
-# 	dev = oneArray
+elseif oneAPI.functional() ## not well supported
+	@info "Using oneAPI"
+	oneAPI.versioninfo()
+	backend = oneBackend()
+	dev = oneArray
 elseif Metal.functional()
 	@info "Using Metal"
 	Metal.versioninfo()

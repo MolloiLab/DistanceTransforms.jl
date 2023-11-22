@@ -39,13 +39,13 @@ For example, to use the quintessential distance transform operation:
 ```julia
 using DistanceTransforms
 
-array1 = [
+arr = [
     0 1 1 0
     0 0 0 0
     1 1 0 0
 ]
 
-result = transform(array1, Maurer())
+result = transform(arr)
 ```
 
 ## Transforms
