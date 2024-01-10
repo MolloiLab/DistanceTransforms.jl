@@ -2,8 +2,7 @@
 # v0.19.36
 
 #> [frontmatter]
-#> title = "DistanceTransforms.jl"
-#> sidebar = "false"
+#> title = "Home"
 
 using Markdown
 using InteractiveUtils
