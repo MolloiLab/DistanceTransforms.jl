@@ -13,6 +13,7 @@ jobs:
       matrix:
         version:
           - "1.9"
+          - "1.10"
         os:
           - ubuntu-latest
           # - macOS-latest (can't use until GitHub upgrades to m-series macs)
