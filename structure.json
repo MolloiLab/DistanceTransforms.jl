@@ -1,0 +1,34 @@
+{
+    "sidebar": {
+      "title": "DistanceTransforms.jl",
+      "elements": [
+        {
+          "type": "notebook",
+          "path": "index.jl",
+          "title": "Home"
+        },
+        {
+          "type": "folder",
+          "title": "Documentation",
+          "defaultOpened": false,
+          "elements": [
+            {
+              "type": "notebook",
+              "path": "docs/01_getting_started.jl",
+              "title": "Getting Started"
+            },
+            {
+              "type": "notebook",
+              "path": "docs/02_advanced_usage.jl",
+              "title": "Advanced Usage"
+            },
+            {
+              "type": "notebook",
+              "path": "docs/99_api.jl",
+              "title": "API"
+            }
+          ]
+        }
+      ]
+    }
+  }
