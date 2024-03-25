@@ -4,7 +4,7 @@
 [![CI Stable](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml)
 [![CI Nightly](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml)
 [![Coverage](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?authuser=2)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?usp=sharing)
 
 
 
@@ -55,4 +55,4 @@ The library is built around a common `transform` interface, allowing users to ap
 ## Python
 
 Check out the Colab notebook to see how to utilize this distance transform in Python
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?authuser=2)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?usp=sharing)
