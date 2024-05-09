@@ -4,10 +4,7 @@
 [![CI Stable](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml)
 [![CI Nightly](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml)
 [![Coverage](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-CDqQgrBHoxNqs2IbMebMRxsp0m21jSa?usp=sharing)
-
-
-
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?usp=sharing)
 
 DistanceTransforms.jl is a Julia package that provides efficient distance transform operations on arrays.
 
@@ -16,6 +13,7 @@ DistanceTransforms.jl is a Julia package that provides efficient distance transf
 - [Getting Started](#getting-started)
 - [Quick Start](#quick-start)
 - [Transforms](#transforms)
+- [Advanced Usage](#advanced-usage)
 - [Python](#python)
 
 ## Getting Started
@@ -28,7 +26,7 @@ using DistanceTransforms
 
 The most up-to-date version of DistanceTransforms.jl can be found on the main/master branch of the [GitHub repository](https://github.com/Dale-Black/DistanceTransforms.jl). If you're using an unregistered version, you may need to add the package explicitly.
 
-For detailed documentation and tutorials, you can refer to the [official notebook](#).
+For detailed documentation and tutorials, you can refer to the [official notebook](https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl).
 
 ## Quick Start
 
@@ -45,14 +43,39 @@ arr = [
     1 1 0 0
 ]
 
-result = transform(arr)
+result = transform(boolean_indicator(arr))
 ```
 
 ## Transforms
 
 The library is built around a common `transform` interface, allowing users to apply various distance transform algorithms to arrays using a unified approach.
 
+## Advanced Usage
+
+DistanceTransforms.jl offers advanced features such as multi-threading and GPU acceleration. These capabilities significantly enhance performance, especially for large data sets and high-resolution images.
+
+### Multi-threading
+
+DistanceTransforms.jl efficiently utilizes multi-threading, particularly in its Felzenszwalb distance transform algorithm. This parallelization improves performance for large data sets and high-resolution images.
+
+```julia
+x = boolean_indicator(rand([0f0, 1f0], 100, 100))
+single_threaded = @benchmark transform($x; threaded = false)
+multi_threaded = @benchmark transform($x; threaded = true)
+```
+
+### GPU Acceleration
+
+DistanceTransforms.jl extends its performance capabilities by embracing GPU acceleration. The same `transform` function used for CPU computations automatically adapts to leverage GPU resources when available.
+
+```julia
+x_gpu = CUDA.CuArray(boolean_indicator(rand([0, 1], 100, 100)))
+gpu_transformed = transform(x_gpu)
+```
+
+For benchmarks and more details on advanced usage, refer to the [advanced usage notebook](https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl).
+
 ## Python
 
-Check out the Colab notebook to see how to utilize this distance transform in Python
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-CDqQgrBHoxNqs2IbMebMRxsp0m21jSa?usp=sharing)
+Check out the Colab notebook to see how to utilize this distance transform in Python:
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?usp=sharing)
