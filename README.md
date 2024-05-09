@@ -77,5 +77,5 @@ For benchmarks and more details on advanced usage, refer to the [advanced usage 
 
 ## Python
 
-Check out the Colab notebook to see how to utilize this distance transform in Python:
+Check out the Colab notebook to see how to utilize this distance transform in Python
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?usp=sharing)

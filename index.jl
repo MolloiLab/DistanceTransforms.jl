@@ -85,7 +85,7 @@ article_list_tutorials = Article[
 
 # ╔═╡ e0ef1b4d-0076-410c-b325-32a7a274f487
 article_list_python = Article[
-	Article("Python", "https://colab.research.google.com/drive/1-CDqQgrBHoxNqs2IbMebMRxsp0m21jSa?usp=sharing", "https://img.freepik.com/free-vector/code-typing-concept-illustration_114360-3581.jpg?size=626&ext=jpg&ga=GA1.1.1694943658.1700350224&semt=sph"),
+	Article("Python", "https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?authuser=2", "https://img.freepik.com/free-vector/code-typing-concept-illustration_114360-3581.jpg?size=626&ext=jpg&ga=GA1.1.1694943658.1700350224&semt=sph"),
 ];
 
 # ╔═╡ 8d11bae1-d232-4c03-981a-cd9f1db24e6b
