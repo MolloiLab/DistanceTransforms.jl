@@ -4,7 +4,6 @@
 [![CI Stable](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml)
 [![CI Nightly](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml)
 [![Coverage](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1moYjSiGEA4GoYD_8BeSw69fBPv2MtROZ?usp=sharing)
 
 DistanceTransforms.jl is a Julia package that provides efficient distance transform operations on arrays.
 
