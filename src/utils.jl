@@ -1,6 +1,5 @@
 using KernelAbstractions
 using GPUArraysCore: AbstractGPUArray
-using LoopVectorization
 
 """
 ## `boolean_indicator`
@@ -49,7 +48,7 @@ end
 
 function boolean_indicator(f::BitArray)
     f_new = similar(f, Float32)
-    @turbo warn_check_args = false for i in CartesianIndices(f_new)
+    for i in CartesianIndices(f_new)
         @inbounds f_new[i] = f[i] ? 0.0f0 : 1.0f10
     end
     return f_new
