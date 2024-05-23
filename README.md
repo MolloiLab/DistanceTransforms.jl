@@ -79,5 +79,5 @@ For benchmarks and more details on advanced usage, refer to the [advanced usage 
 
 Check out the corresponding Python (wrapper) package: [py-distance-transforms](https://github.com/MolloiLab/py-distance-transforms)
 
-[buildkite-img]: https://badge.buildkite.com/1509baa1122772e8ec377463a6c188753d35b8fcec300a658e.svg?branch=main
+[buildkite-img]: https://badge.buildkite.com/1509baa1122772e8ec377463a6c188753d35b8fcec300a658e.svg?branch=master
 [buildkite-url]: https://buildkite.com/julialang/distancetransforms-dot-jl
