@@ -1,10 +1,9 @@
 # DistanceTransforms
 
-[![Glass Notebook](https://img.shields.io/badge/Docs-Glass%20Notebook-aquamarine.svg)](https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl)
-[![CI Stable](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml)
+[![Glass Notebook][glassnotebook-img]][glassnotebook-url]
+[![CI Stable][ci-img]][ci-url]
 [![Build status][buildkite-img]][buildkite-url]
-[![CI Nightly](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master)](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml)
-[![Coverage](https://codecov.io/gh/MolloiLab/DistanceTransforms.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MolloiLab/DistanceTransforms.jl)
+[![Coverage][cov-img]][cov-url]
 
 DistanceTransforms.jl is a Julia package that provides efficient distance transform operations on arrays.
 
@@ -79,5 +78,18 @@ For benchmarks and more details on advanced usage, refer to the [advanced usage 
 
 Check out the corresponding Python (wrapper) package: [py-distance-transforms](https://github.com/MolloiLab/py-distance-transforms)
 
+
+[glassnotebook-img]: https://img.shields.io/badge/Docs-Glass%20Notebook-aquamarine.svg
+[glassnotebook-url]: https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl
+
+[ci-img]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master
+[ci-url]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml
+
 [buildkite-img]: https://badge.buildkite.com/1509baa1122772e8ec377463a6c188753d35b8fcec300a658e.svg?branch=master
 [buildkite-url]: https://buildkite.com/julialang/distancetransforms-dot-jl
+
+[cov-img]: https://codecov.io/gh/MolloiLab/DistanceTransforms.jl/branch/master/graph/badge.svg
+[cov-url]: https://codecov.io/gh/MolloiLab/DistanceTransforms.jl
+
+[nightly-img]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master
+[nightly-url]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml
