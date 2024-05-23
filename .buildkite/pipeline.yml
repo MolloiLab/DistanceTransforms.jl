@@ -1,0 +1,78 @@
+env:
+  SECRET_CODECOV_TOKEN: "..." # Replace with your encrypted token
+
+steps:
+  - label: "CUDA Julia 1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1.10"
+    command: |
+      julia -e 'println("--- :julia: Instantiating project")
+                using Pkg
+                Pkg.develop(; path=pwd())
+                Pkg.add("CUDA")' || exit 3
+
+      julia -e 'println("+++ :julia: Running tests")
+                using Pkg
+                Pkg.test(; coverage=true)'
+    agents:
+      queue: "juliagpu"
+      cuda: "*"
+    timeout_in_minutes: 60
+
+  - label: "Metal Julia 1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1.10"
+    command: |
+      julia -e 'println("--- :julia: Instantiating project")
+                using Pkg
+                Pkg.develop(; path=pwd())
+                Pkg.add("Metal")' || exit 3
+
+      julia -e 'println("+++ :julia: Running tests")
+                using Pkg
+                Pkg.test(; coverage=true)'
+    agents:
+      queue: "juliaecosystem"
+      os: "macos"
+      arch: "aarch64"
+    timeout_in_minutes: 60
+
+  - label: "oneAPI Julia 1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1.10"
+    command: |
+      julia -e 'println("--- :julia: Instantiating project")
+                using Pkg
+                Pkg.develop(; path=pwd())
+                Pkg.add("oneAPI")' || exit 3
+
+      julia -e 'println("+++ :julia: Running tests")
+                using Pkg
+                Pkg.test(; coverage=true)'
+    agents:
+      queue: "juliagpu"
+      intel: "*"
+    timeout_in_minutes: 60
+
+  - label: "AMDGPU Julia 1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "1.10"
+    command: |
+      julia -e 'println("--- :julia: Instantiating project")
+                using Pkg
+                Pkg.develop(; path=pwd())
+                Pkg.add("AMDGPU")' || exit 3
+
+      julia -e 'println("+++ :julia: Running tests")
+                using Pkg
+                Pkg.test(; coverage=true)'
+    agents:
+      queue: "juliagpu"
+      rocm: "*"
+    timeout_in_minutes: 60
+    env:
+      JULIA_NUM_THREADS: 4
