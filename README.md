@@ -1,10 +1,10 @@
 # DistanceTransforms
 
 [![Glass Notebook](https://img.shields.io/badge/Docs-Glass%20Notebook-aquamarine.svg)](https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl)
-[![CI Stable](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/CI.yml)
+[![CI Stable](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml)
 [![Build status][buildkite-img]][buildkite-url]
-[![CI Nightly](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master)](https://github.com/Dale-Black/DistanceTransforms.jl/actions/workflows/Nightly.yml)
-[![Coverage](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/Dale-Black/DistanceTransforms.jl)
+[![CI Nightly](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master)](https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml)
+[![Coverage](https://codecov.io/gh/MolloiLab/DistanceTransforms.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MolloiLab/DistanceTransforms.jl)
 
 DistanceTransforms.jl is a Julia package that provides efficient distance transform operations on arrays.
 
