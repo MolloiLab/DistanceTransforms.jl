@@ -5,7 +5,7 @@
 [![Build status][buildkite-img]][buildkite-url]
 [![Coverage][cov-img]][cov-url]
 
-DistanceTransforms.jl is a Julia package that provides efficient distance transform operations on arrays.
+DistanceTransforms.jl is a Julia package that provides efficient distance transform operations on arrays (CPU & GPU).
 
 ## Table of Contents
 
