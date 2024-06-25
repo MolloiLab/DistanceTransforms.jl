@@ -6,8 +6,6 @@ using CUDA, AMDGPU, Metal
 using oneAPI
 using Random
 
-using BenchmarkTools
-
 if CUDA.functional()
     @info "Using CUDA"
     CUDA.versioninfo()
