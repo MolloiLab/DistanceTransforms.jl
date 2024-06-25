@@ -1,5 +1,5 @@
 steps:
-  - label: "CUDA Julia {{matrix.version}}"
+  - label: "CUDA Tests Julia {{matrix.version}}"
     matrix:
       setup:
         version:
@@ -24,6 +24,32 @@ steps:
     timeout_in_minutes: 120
     soft_fail:
       - exit_status: 3
+
+  - label: "CUDA Benchmarks Julia {{matrix.version}}"
+    matrix:
+      setup:
+        version:
+          - "1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "{{matrix.version}}"
+    command: |
+      julia -e 'println("--- :julia: Instantiating project")
+                using Pkg
+                Pkg.develop(; path=pwd())
+                Pkg.develop(; name="CUDA")' || exit 3
+
+      julia -e 'println("+++ :julia: Running benchmarks")
+                include("benchmarks.jl")'
+    agents:
+      queue: "juliagpu"
+      cuda: "*"
+    timeout_in_minutes: 120
+    soft_fail:
+      - exit_status: 3
+
+  - label: "Upload Benchmark Results"
+    command: buildkite-agent artifact upload benchmark_results/*
 
   - label: "Metal Julia {{matrix.version}}"
     matrix:
