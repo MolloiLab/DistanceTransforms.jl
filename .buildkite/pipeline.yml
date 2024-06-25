@@ -49,7 +49,7 @@ steps:
       - exit_status: 3
 
   - label: "Upload Benchmark Results"
-    command: buildkite-agent artifact upload benchmark_results/*
+    command: buildkite-agent artifact upload test/benchmark_results/*
 
   - label: "Metal Julia {{matrix.version}}"
     matrix:
