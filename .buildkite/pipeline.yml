@@ -18,38 +18,18 @@ steps:
       julia -e 'println("+++ :julia: Running tests")
                 using Pkg
                 Pkg.test("CUDA"; coverage=true, test_args=["base/kernelabstractions"])'
-    agents:
-      queue: "juliagpu"
-      cuda: "*"
-    timeout_in_minutes: 120
-    soft_fail:
-      - exit_status: 3
-
-  - label: "CUDA Benchmarks Julia {{matrix.version}}"
-    matrix:
-      setup:
-        version:
-          - "1.10"
-    plugins:
-      - JuliaCI/julia#v1:
-          version: "{{matrix.version}}"
-    command: |
-      julia -e 'println("--- :julia: Instantiating project")
-                using Pkg
-                Pkg.develop(; path=pwd())
-                Pkg.develop(; name="CUDA")' || exit 3
 
       julia -e 'println("+++ :julia: Running benchmarks")
                 include("test/benchmarks.jl")'
+
+      buildkite-agent artifact upload test/benchmark_results/*
+
     agents:
       queue: "juliagpu"
       cuda: "*"
     timeout_in_minutes: 120
     soft_fail:
       - exit_status: 3
-
-  - label: "Upload Benchmark Results"
-    command: buildkite-agent artifact upload test/benchmark_results/*
 
   - label: "Metal Julia {{matrix.version}}"
     matrix:
