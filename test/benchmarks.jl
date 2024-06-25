@@ -1,39 +1,52 @@
-using DistanceTransforms
-
-using KernelAbstractions
-using CUDA, AMDGPU, Metal
-using oneAPI
-using Random
-
 using BenchmarkTools
-using CSV
-using DataFrames
 
-s = 10 # number of samples
-e = 1 # number of evals
+@testset "Benchmarks" begin
+    s = 10 # number of samples
+    e = 1 # number of evals
 
-# Create an array of input sizes to benchmark
-sizes = [10, 50, 100]
+    # Create an array of input sizes to benchmark for 2D
+    sizes_2D = [2^i for i in 3:4]
 
-# Create a DataFrame to store the benchmark results
-df = DataFrame(size = Int[], dt = Float64[])
+    # Create DataFrames to store the benchmark results
+    df_dt_2D = DataFrame(
+        os_info = os_info,
+        gpu_info = gpu_info,
+        sizes = sizes_2D,
+        dt_proposed = Float64[]
+    )
 
-# Benchmark for each input size
-for n in sizes
-    f = Float32.(rand([0, 1], n, n))
+    for n in sizes_2D
+        f = Float32.(rand([0, 1], n, n))
 
-    # Proposed-CUDA (DistanceTransforms.jl)
-    if CUDA.functional()
-        f_cuda = CuArray(f)
-        dt = @benchmark(transform($boolean_indicator($f_cuda)), samples=s, evals=e)
-        
-        # Append the benchmark result to the DataFrame
-        push!(df, (n, minimum(dt).time))
+        if dev != Array
+            f_dev = dev(f)
+            dt = @benchmark(transform($boolean_indicator($f_dev)); samples=s, evals=e)
+            push!(df_dt_2D, [os_info, gpu_info, n, minimum(dt).time])
+        end
     end
+
+    # Create an array of input sizes to benchmark for 3D
+    sizes_3D = [2^i for i in 0:2]
+
+    # Create DataFrames to store the benchmark results
+    df_dt_3D = DataFrame(
+        os_info = os_info,
+        gpu_info = gpu_info,
+        sizes = sizes_3D,
+        dt_proposed = Float64[]
+    )
+
+    for n in sizes_3D
+        f = Float32.(rand([0, 1], n, n, n))
+
+        if dev != Array
+            f_dev = dev(f)
+            dt = @benchmark(transform($boolean_indicator($f_dev)); samples=s, evals=e)
+            push!(df_dt_3D, [os_info, gpu_info, n, minimum(dt).time])
+        end
+    end
+
+    # Show the dataframes
+    @info df_dt_2D
+    @info df_dt_3D
 end
-
-# Create a directory to store the benchmark results
-mkpath("benchmark_results")
-
-# Save the DataFrame to a CSV file
-CSV.write("benchmark_results/cuda_benchmarks.csv", df)
