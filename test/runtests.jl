@@ -53,13 +53,13 @@ include("utils.jl")
         dt_proposed = Float64[]
     )
 
-    for size in sizes_2D
-        f = Float32.(rand([0, 1], size, size))
+    for n in sizes_2D
+        f = Float32.(rand([0, 1], n, n))
 
         if dev != Array
             f_dev = dev(f)
             dt = @benchmark(transform($boolean_indicator($f_dev)); samples=s, evals=e)
-            push!(df_dt_2D, [os_info, gpu_info, size, minimum(dt).time])
+            push!(df_dt_2D, [os_info, gpu_info, n, minimum(dt).time])
         end
     end
 
@@ -74,13 +74,13 @@ include("utils.jl")
         dt_proposed = Float64[]
     )
 
-    for size in sizes_3D
-        f = Float32.(rand([0, 1], size, size, size))
+    for n in sizes_3D
+        f = Float32.(rand([0, 1], n, n, n))
 
         if dev != Array
             f_dev = dev(f)
             dt = @benchmark(transform($boolean_indicator($f_dev)); samples=s, evals=e)
-            push!(df_dt_3D, [os_info, gpu_info, size, minimum(dt).time])
+            push!(df_dt_3D, [os_info, gpu_info, n, minimum(dt).time])
         end
     end
 
