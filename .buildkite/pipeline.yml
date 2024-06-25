@@ -40,7 +40,7 @@ steps:
                 Pkg.develop(; name="CUDA")' || exit 3
 
       julia -e 'println("+++ :julia: Running benchmarks")
-                include("benchmarks.jl")'
+                include("test/benchmarks.jl")'
     agents:
       queue: "juliagpu"
       cuda: "*"
