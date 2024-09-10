@@ -37,7 +37,6 @@ f_float_gpu = boolean_indicator(f_gpu)
 
 #### Notes
 - The choice of `1.0f10` as the large number is arbitrary and can be adjusted if needed for specific applications.
-- The `@turbo` macro from LoopVectorization.jl is used when `f` is a `BitArray` to unroll and vectorize the loop for optimal performance.
 - When `f` is an `AbstractGPUArray`, the `boolean_indicator_kernel` kernel function is used to perform the operation in parallel on the GPU.
 - The `KernelAbstractions.synchronize(backend)` call ensures that all GPU operations are completed before returning the result.
 
@@ -49,7 +48,7 @@ end
 function boolean_indicator(f::BitArray)
     f_new = similar(f, Float32)
     for i in CartesianIndices(f_new)
-        @inbounds f_new[i] = f[i] ? 1.0f10 : 0.0f0
+        @inbounds f_new[i] = f[i] ? 0.0f0 : 1.0f10
     end
     return f_new
 end
