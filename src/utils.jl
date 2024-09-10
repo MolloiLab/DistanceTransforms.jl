@@ -49,7 +49,7 @@ end
 function boolean_indicator(f::BitArray)
     f_new = similar(f, Float32)
     for i in CartesianIndices(f_new)
-        @inbounds f_new[i] = f[i] ? 0.0f0 : 1.0f10
+        @inbounds f_new[i] = f[i] ? 1.0f10 : 0.0f0
     end
     return f_new
 end
