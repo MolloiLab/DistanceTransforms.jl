@@ -1,0 +1,31 @@
+steps:
+  - group: ":racehorse: Benchmarks"
+    steps:
+      - label: "CPU: Run Benchmarks with {{matrix.threads}} thread(s)"
+        matrix:
+          setup:
+            threads:
+              - "1"
+              - "2"
+              - "4"
+              - "8"
+        plugins:
+          - JuliaCI/julia#v1:
+              version: "1"
+        command: |
+          julia --project=benchmarks -e 'println("--- :julia: Instantiating project")
+              using Pkg
+              Pkg.develop([PackageSpec(path=pwd())])'
+
+          julia --project=benchmarks -e 'println("--- :julia: Run Benchmarks")
+              include("benchmarks/runbenchmarks.jl")'
+        artifact_paths:
+          - "benchmarks/results/*"
+        agents:
+          arch: "aarch64"  # these ones tend to be more free
+          queue: "juliaecosystem"
+          num_cpus: "4"
+        env:
+          BENCHMARK_GROUP: CPU
+          JULIA_NUM_THREADS: "{{matrix.threads}}"
+        timeout_in_minutes: 120
