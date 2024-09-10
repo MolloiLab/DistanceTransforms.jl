@@ -106,3 +106,9 @@ steps:
       - exit_status: 3
     env:
       JULIA_NUM_THREADS: 4
+
+  - label: "Triggering Pipelines (Main Branch / Tag)"
+    agents:
+      queue: "juliagpu"
+    command: |
+      buildkite-agent pipeline upload .buildkite/benchmarks.yml
