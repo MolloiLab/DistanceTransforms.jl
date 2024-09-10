@@ -1,4 +1,4 @@
-using BenchmarkTools: BenchmarkTools, BenchmarkGroup, @benchmark, @benchmarkable
+using BenchmarkTools: BenchmarkTools, BenchmarkGroup, @benchmark, @benchmarkable, minimum, std
 using InteractiveUtils: versioninfo
 using ImageMorphology: distance_transform, feature_transform
 using DistanceTransforms: boolean_indicator, transform
