@@ -23,7 +23,6 @@ end
 # range_names_2D = [L"2^3", L"2^4", L"2^5", L"2^6", L"2^7", L"2^8", L"2^9", L"2^{10}", L"2^{11}", L"2^{12}"]
 
 range_size_2D = [2^i for i in 3:4]
-range_names_2D = [L"2^3", L"2^4"]
 
 begin
     sizes = Float64[]
