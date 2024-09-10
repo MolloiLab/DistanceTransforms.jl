@@ -6,6 +6,8 @@ const BENCHMARK_GROUP = get(ENV, "BENCHMARK_GROUP", "CPU")
 @info sprint(versioninfo)
 @info "Number of threads: $(Threads.nthreads())"
 
+
+const BENCHMARK_CPU_THREADS = Threads.nthreads()
 # Number of CPU threads to benchmarks on
 if BENCHMARK_CPU_THREADS > Threads.nthreads()
     @error """
