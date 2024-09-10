@@ -1,6 +1,7 @@
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 DistanceTransforms = "71182807-4d06-4237-8dd0-bdafe4d097e2"
+ImageMorphology = "787d08f9-d448-5407-9aad-5290dd7ab264"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
