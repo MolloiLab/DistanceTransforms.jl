@@ -5,9 +5,8 @@ AVAILABLE_GPU_BACKENDS = ["CUDA", "AMDGPU", "Metal", "oneAPI"]
 TEST_BACKENDS = filter(x->x in [AVAILABLE_GPU_BACKENDS; "CPU"], ARGS)
 
 if isempty(TEST_BACKENDS)
-    using Preferences
-    TEST_BACKENDS = [load_preference(KomaMRICore, "test_backend", "CPU")]
-    @info "Using [preferences.KomaMRICore]." backend=first(TEST_BACKENDS)
+    TEST_BACKENDS = ["CPU"]
+    @info "Using $(backend=first(TEST_BACKENDS))"
 else
     @info "Using test_args" backend=first(TEST_BACKENDS)
 end
@@ -35,6 +34,7 @@ elseif "oneAPI" in TEST_BACKENDS
     backend = oneBackend()
     dev = oneArray
 else
+    using KernelAbstractions: CPU
     @info "CPU using $(Threads.nthreads()) thread(s)" maxlog=1
     backend = CPU()
     dev = Array
