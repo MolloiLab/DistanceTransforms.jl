@@ -5,6 +5,7 @@
 *.DS_Store
 
 *Manifest.toml
+Manifest.toml
 .CondaPkg
 
 *.ipynb
