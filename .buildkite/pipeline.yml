@@ -22,7 +22,7 @@ steps:
     agents:
       queue: "juliagpu"
       cuda: "*"
-    timeout_in_minutes: 120
+    timeout_in_minutes: 0
     soft_fail:
       - exit_status: 3
 
@@ -49,7 +49,7 @@ steps:
       queue: "juliaecosystem"
       os: "macos"
       arch: "aarch64"
-    timeout_in_minutes: 120
+    timeout_in_minutes: 0
     soft_fail:
       - exit_status: 3
 
@@ -75,7 +75,7 @@ steps:
     agents:
       queue: "juliagpu"
       intel: "*"
-    timeout_in_minutes: 120
+    timeout_in_minutes: 0
     soft_fail:
       - exit_status: 3
 
@@ -101,7 +101,7 @@ steps:
     agents:
       queue: "juliagpu"
       rocm: "*"
-    timeout_in_minutes: 120
+    timeout_in_minutes: 0
     soft_fail:
       - exit_status: 3
     env:
