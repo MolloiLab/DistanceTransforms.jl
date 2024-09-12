@@ -1,9 +1,9 @@
 steps:
-  - label: "CPU: Run tests on v{{matrix.version}}"
+  - label: "CPU: Julia v{{matrix.version}}"
     matrix:
       setup:
         version:
-          - "1.0"
+          - "1.10"
     plugins:
       - JuliaCI/julia#v1:
           version: "{{matrix.version}}"
@@ -21,7 +21,7 @@ steps:
       queue: "juliagpu"
     timeout_in_minutes: 2
 
-  - label: "CUDA Tests Julia {{matrix.version}}"
+  - label: "CUDA: Julia {{matrix.version}}"
     matrix:
       setup:
         version:
@@ -48,7 +48,7 @@ steps:
     soft_fail:
       - exit_status: 3
 
-  - label: "Metal Julia {{matrix.version}}"
+  - label: "Metal: Julia {{matrix.version}}"
     matrix:
       setup:
         version:
@@ -75,7 +75,7 @@ steps:
     soft_fail:
       - exit_status: 3
 
-  - label: "oneAPI Julia {{matrix.version}}"
+  - label: "oneAPI: Julia {{matrix.version}}"
     matrix:
       setup:
         version:
@@ -101,7 +101,7 @@ steps:
     soft_fail:
       - exit_status: 3
 
-  - label: "AMDGPU Julia {{matrix.version}}"
+  - label: "AMDGPU: Julia {{matrix.version}}"
     matrix:
       setup:
         version:
