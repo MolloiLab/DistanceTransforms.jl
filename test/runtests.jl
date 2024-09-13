@@ -1,5 +1,7 @@
 using DistanceTransforms
 using Test
+using KernelAbstractions
+using Random
 
 AVAILABLE_GPU_BACKENDS = ["CUDA", "AMDGPU", "Metal", "oneAPI"]
 TEST_BACKENDS = filter(x->x in [AVAILABLE_GPU_BACKENDS; "CPU"], ARGS)
@@ -39,9 +41,6 @@ else
     backend = CPU()
     dev = Array
 end
-
-using KernelAbstractions
-using Random
 
 include("transform.jl")
 include("utils.jl")

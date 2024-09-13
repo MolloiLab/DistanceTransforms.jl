@@ -26,7 +26,7 @@ steps:
           queue: "benchmark"
         env:
           BENCHMARK_GROUP: CPU
-        timeout_in_minutes: 5
+        timeout_in_minutes: 12
 
       - label: "CUDA: Run Benchmarks"
         key: "cuda-benchmarks"
@@ -48,7 +48,7 @@ steps:
           cuda: "*"
         env:
           BENCHMARK_GROUP: CUDA
-        timeout_in_minutes: 5
+        timeout_in_minutes: 12
 
       - label: "AMDGPU: Run Benchmarks"
         key: "amdgpu-benchmarks"
@@ -70,7 +70,7 @@ steps:
           rocm: "*"
         env:
           BENCHMARK_GROUP: AMDGPU
-        timeout_in_minutes: 5
+        timeout_in_minutes: 12
 
       - label: "oneAPI: Run Benchmarks"
         key: "oneapi-benchmarks"
@@ -92,7 +92,7 @@ steps:
           intel: "*"
         env:
           BENCHMARK_GROUP: oneAPI
-        timeout_in_minutes: 5
+        timeout_in_minutes: 12
 
       - label: "Metal: Run Benchmarks"
         key: "metal-benchmarks"
@@ -115,7 +115,7 @@ steps:
           arch: "arm64"
         env:
           BENCHMARK_GROUP: Metal
-        timeout_in_minutes: 5
+        timeout_in_minutes: 12
 
       - wait: ~  # Wait for all benchmarks to finish
 
