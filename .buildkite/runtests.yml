@@ -35,11 +35,11 @@ steps:
       julia -e 'println("--- :julia: Instantiating project")
                 using Pkg
                 Pkg.develop(; path=pwd())
-                Pkg.develop(; name="CUDA")' || exit 3
+                Pkg.add("CUDA")' || exit 3
 
-      julia -e 'println("+++ :julia: Running tests")
+      julia -e 'println("--- :julia: Running tests")
                 using Pkg
-                Pkg.test("CUDA"; coverage=true, test_args=["kernelabstractions"])'
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["CUDA"])'
     agents:
       queue: "juliagpu"
       cuda: "*"
@@ -59,11 +59,11 @@ steps:
       julia -e 'println("--- :julia: Instantiating project")
                 using Pkg
                 Pkg.develop(; path=pwd())
-                Pkg.develop(; name="Metal")' || exit 3
+                Pkg.add("Metal")' || exit 3
 
       julia -e 'println("+++ :julia: Running tests")
                 using Pkg
-                Pkg.test("Metal"; coverage=true, test_args=["kernelabstractions"])'
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["Metal"])'
     agents:
       queue: "juliaecosystem"
       os: "macos"
@@ -84,11 +84,11 @@ steps:
       julia -e 'println("--- :julia: Instantiating project")
                 using Pkg
                 Pkg.develop(; path=pwd())
-                Pkg.develop(; name="oneAPI")' || exit 3
+                Pkg.add("oneAPI")' || exit 3
 
       julia -e 'println("+++ :julia: Running tests")
                 using Pkg
-                Pkg.test("oneAPI"; coverage=true, test_args=["kernelabstractions"])'
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["oneAPI"])'
     agents:
       queue: "juliagpu"
       intel: "*"
@@ -108,11 +108,11 @@ steps:
       julia -e 'println("--- :julia: Instantiating project")
                 using Pkg
                 Pkg.develop(; path=pwd())
-                Pkg.develop(; name="AMDGPU")' || exit 3
+                Pkg.add("AMDGPU")' || exit 3
 
       julia -e 'println("+++ :julia: Running tests")
                 using Pkg
-                Pkg.test("AMDGPU"; coverage=true, test_args=["kernelabstractions"])'
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["AMDGPU"])'
     agents:
       queue: "juliagpu"
       rocm: "*"
