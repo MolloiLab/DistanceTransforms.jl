@@ -3,18 +3,25 @@ using DistanceTransforms
 using ImageMorphology: distance_transform, feature_transform
 using KernelAbstractions
 using Random
+import InteractiveUtils
 
 const BENCHMARK_GROUP = get(ENV, "BENCHMARK_GROUP", "CPU")
+
+InteractiveUtils.versioninfo()
 
 # Only load the selected backend to avoid unnecessary initializations
 if BENCHMARK_GROUP == "Metal"
     using Metal
+    Metal.versioninfo()
 elseif BENCHMARK_GROUP == "CUDA"
     using CUDA
+    CUDA.versioninfo()
 elseif BENCHMARK_GROUP == "AMDGPU"
     using AMDGPU
+    AMDGPU.versioninfo()
 elseif BENCHMARK_GROUP == "oneAPI"
     using oneAPI
+    oneAPI.versioninfo()
 end
 
 function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_threads::Int64)
