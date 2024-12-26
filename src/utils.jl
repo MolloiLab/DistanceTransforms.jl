@@ -1,4 +1,3 @@
-using KernelAbstractions
 using GPUArraysCore: AbstractGPUArray
 import AcceleratedKernels as AK
 
