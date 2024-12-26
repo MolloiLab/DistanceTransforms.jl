@@ -8,20 +8,24 @@ permissions:
 on: 
   pull_request:
     branches:
-      - master
+      - main
     paths:
+      - "src/**/*"
+      - "ext/**/*"
+      - "Project.toml"
       - "benchmarks/**/*"
       - ".buildkite/**/*"
-      - "Project.toml"
-      - ".github/Benchmark.yml"
+      - ".github/workflows/Benchmark.yml"
   push:
     branches:
-      - master
+      - main
     paths:
+      - "src/**/*"
+      - "ext/**/*"
+      - "Project.toml"
       - "benchmarks/**/*"
       - ".buildkite/**/*"
-      - "Project.toml"
-      - ".github/Benchmark.yml"
+      - ".github/workflows/Benchmark.yml"
 
 jobs:
   benchmark:
@@ -29,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Download Buildkite Artifacts
         id: download
         uses: EnricoMi/download-buildkite-artifact-action@v1
@@ -47,12 +52,11 @@ jobs:
         if: ${{ steps.locate.outputs.path != '' }}
         uses: benchmark-action/github-action-benchmark@v1
         with:
-          name: DistanceTransforms Benchmarks
+          name: Package Benchmarks
           tool: 'julia'
           output-file-path: ${{ steps.locate.outputs.path }}
           benchmark-data-dir-path: "benchmarks"
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # comment-on-alert: true
           comment-always: true
           summary-always: true
           alert-threshold: "150%"
