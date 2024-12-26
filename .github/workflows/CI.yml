@@ -12,8 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - "1.9"
           - "1.10"
+          - "1.11"
         os:
           - ubuntu-latest
           # - macOS-latest (can't use until GitHub upgrades to m-series macs)
@@ -26,7 +26,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:

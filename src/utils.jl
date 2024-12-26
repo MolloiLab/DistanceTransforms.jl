@@ -1,5 +1,7 @@
-using KernelAbstractions
 using GPUArraysCore: AbstractGPUArray
+import AcceleratedKernels as AK
+
+export boolean_indicator
 
 """
 ## `boolean_indicator`
@@ -46,25 +48,17 @@ function boolean_indicator(f)
 end
 
 function boolean_indicator(f::BitArray)
-    f_new = similar(f, Float32)
-    for i in CartesianIndices(f_new)
-        @inbounds f_new[i] = f[i] ? 0.0f0 : 1.0f10
-    end
-    return f_new
-end
-
-@kernel function boolean_indicator_kernel(f, output)
-    i = @index(Global)
-    output[i] = ifelse(f[i] == 0, 1.0f10, 0.0f0)
+	f_new = similar(f, Float32)
+	for i in eachindex(f)
+		@inbounds f_new[i] = f[i] ? 0.0f0 : 1.0f10
+	end
+	return f_new
 end
 
 function boolean_indicator(f::AbstractGPUArray)
-    backend = get_backend(f)
-    output = similar(f, Float32)
-    kernel = boolean_indicator_kernel(backend)
-    kernel(f, output, ndrange=size(f))
-    KernelAbstractions.synchronize(backend)
-    return output
+    f_new = similar(f, Float32)
+    AK.foreachindex(f) do i
+        @inbounds f_new[i] = f[i] == false ? 1.0f10 : 0.0f0
+    end
+    return f_new
 end
-
-export boolean_indicator

@@ -3,6 +3,14 @@ using Test
 using KernelAbstractions
 using Random
 
+#= 
+To run the tests locally, and still test a GPU backend (e.g. Metal), use the following command:
+```
+using Pkg
+Pkg.test("DistanceTransforms", test_args=["Metal"])
+```
+=#
+
 AVAILABLE_GPU_BACKENDS = ["CUDA", "AMDGPU", "Metal", "oneAPI"]
 TEST_BACKENDS = filter(x->x in [AVAILABLE_GPU_BACKENDS; "CPU"], ARGS)
 
