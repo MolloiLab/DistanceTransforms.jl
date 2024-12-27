@@ -124,9 +124,9 @@ steps:
         depends_on:
           - "cpu-benchmarks"
           - "cuda-benchmarks"
-          - "amdgpu-benchmarks"
+          # - "amdgpu-benchmarks"
           - "oneapi-benchmarks"
-          - "metal-benchmarks"
+          # - "metal-benchmarks"
         plugins:
           - JuliaCI/julia#v1:
               version: "1.10"
