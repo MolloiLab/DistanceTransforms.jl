@@ -50,27 +50,27 @@ steps:
           BENCHMARK_GROUP: CUDA
         timeout_in_minutes: 12
 
-      - label: "AMDGPU: Run Benchmarks"
-        key: "amdgpu-benchmarks"
-        plugins:
-          - JuliaCI/julia#v1:
-              version: "1.10"
-        command: |
-          julia --project=benchmarks -e '
-              using Pkg;
-              Pkg.instantiate();
-              Pkg.develop(path=pwd());
-              Pkg.add("AMDGPU");
-          '
-          julia --project=benchmarks benchmarks/runbenchmarks.jl
-        artifacts:
-          - "benchmarks/results/AMDGPUbenchmarks.json"
-        agents:
-          queue: "juliagpu"
-          rocm: "*"
-        env:
-          BENCHMARK_GROUP: AMDGPU
-        timeout_in_minutes: 12
+      # - label: "AMDGPU: Run Benchmarks"
+      #   key: "amdgpu-benchmarks"
+      #   plugins:
+      #     - JuliaCI/julia#v1:
+      #         version: "1.10"
+      #   command: |
+      #     julia --project=benchmarks -e '
+      #         using Pkg;
+      #         Pkg.instantiate();
+      #         Pkg.develop(path=pwd());
+      #         Pkg.add("AMDGPU");
+      #     '
+      #     julia --project=benchmarks benchmarks/runbenchmarks.jl
+      #   artifacts:
+      #     - "benchmarks/results/AMDGPUbenchmarks.json"
+      #   agents:
+      #     queue: "juliagpu"
+      #     rocm: "*"
+      #   env:
+      #     BENCHMARK_GROUP: AMDGPU
+      #   timeout_in_minutes: 12
 
       - label: "oneAPI: Run Benchmarks"
         key: "oneapi-benchmarks"
