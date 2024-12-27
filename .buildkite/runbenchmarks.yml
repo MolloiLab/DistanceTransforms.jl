@@ -21,7 +21,7 @@ steps:
           '
           julia --project=benchmarks --threads={{matrix.threads}} benchmarks/runbenchmarks.jl
         artifacts:
-          - "benchmarks/results/CPUbenchmarks{{matrix.threads}}threads.json"
+          - "benchmarks/results/CPUbenchmarks${matrix.threads}threads.json"
         agents:
           queue: "benchmark"
         env:
