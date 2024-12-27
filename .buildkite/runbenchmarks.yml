@@ -131,6 +131,9 @@ steps:
           - JuliaCI/julia#v1:
               version: "1.10"
         command: |
+          julia --project=benchmarks -e '
+            using Pkg
+            Pkg.instantiate()'
           buildkite-agent artifact download "benchmarks/results/*benchmarks*.json" .
           julia --project=benchmarks benchmarks/aggregate.jl
         artifacts:
