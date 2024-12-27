@@ -1,6 +1,7 @@
 using BenchmarkTools
 
-const GPU_BACKENDS = ["AMDGPU", "CUDA", "Metal", "oneAPI"]
+# const GPU_BACKENDS = ["AMDGPU", "CUDA", "Metal", "oneAPI"]
+const GPU_BACKENDS = ["CUDA", "oneAPI"]
 const NUM_CPU_THREADS = [1, 2, 4, 8]
 
 const RESULTS = BenchmarkGroup()
