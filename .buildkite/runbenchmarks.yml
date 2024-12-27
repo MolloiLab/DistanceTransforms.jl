@@ -1,15 +1,8 @@
 steps:
   - group: ":racehorse: Benchmarks"
     steps:
-      - label: "CPU: Run Benchmarks with {{matrix.threads}} thread(s)"
-        key: "cpu-benchmarks"
-        matrix:
-          setup:
-            threads:
-              - "1"
-              - "2"
-              - "4"
-              - "8"
+      - label: "CPU: Run Benchmarks (1 thread)"
+        key: "cpu-benchmarks-1"
         plugins:
           - JuliaCI/julia#v1:
               version: "1.10"
@@ -19,13 +12,77 @@ steps:
               Pkg.instantiate();
               Pkg.develop(path=pwd());
           '
-          julia --project=benchmarks --threads={{matrix.threads}} benchmarks/runbenchmarks.jl
+          julia --project=benchmarks --threads=1 benchmarks/runbenchmarks.jl
         artifacts:
-          - "benchmarks/results/CPUbenchmarks${matrix.threads}threads.json"
+          - "benchmarks/results/CPUbenchmarks1threads.json"
         agents:
           queue: "benchmark"
         env:
           BENCHMARK_GROUP: CPU
+          JULIA_NUM_THREADS: 1
+        timeout_in_minutes: 12
+
+      - label: "CPU: Run Benchmarks (2 threads)"
+        key: "cpu-benchmarks-2"
+        plugins:
+          - JuliaCI/julia#v1:
+              version: "1.10"
+        command: |
+          julia --project=benchmarks -e '
+              using Pkg;
+              Pkg.instantiate();
+              Pkg.develop(path=pwd());
+          '
+          julia --project=benchmarks --threads=2 benchmarks/runbenchmarks.jl
+        artifacts:
+          - "benchmarks/results/CPUbenchmarks2threads.json"
+        agents:
+          queue: "benchmark"
+        env:
+          BENCHMARK_GROUP: CPU
+          JULIA_NUM_THREADS: 2
+        timeout_in_minutes: 12
+
+      - label: "CPU: Run Benchmarks (4 threads)"
+        key: "cpu-benchmarks-4"
+        plugins:
+          - JuliaCI/julia#v1:
+              version: "1.10"
+        command: |
+          julia --project=benchmarks -e '
+              using Pkg;
+              Pkg.instantiate();
+              Pkg.develop(path=pwd());
+          '
+          julia --project=benchmarks --threads=4 benchmarks/runbenchmarks.jl
+        artifacts:
+          - "benchmarks/results/CPUbenchmarks4threads.json"
+        agents:
+          queue: "benchmark"
+        env:
+          BENCHMARK_GROUP: CPU
+          JULIA_NUM_THREADS: 4
+        timeout_in_minutes: 12
+
+      - label: "CPU: Run Benchmarks (8 threads)"
+        key: "cpu-benchmarks-8"
+        plugins:
+          - JuliaCI/julia#v1:
+              version: "1.10"
+        command: |
+          julia --project=benchmarks -e '
+              using Pkg;
+              Pkg.instantiate();
+              Pkg.develop(path=pwd());
+          '
+          julia --project=benchmarks --threads=8 benchmarks/runbenchmarks.jl
+        artifacts:
+          - "benchmarks/results/CPUbenchmarks8threads.json"
+        agents:
+          queue: "benchmark"
+        env:
+          BENCHMARK_GROUP: CPU
+          JULIA_NUM_THREADS: 8
         timeout_in_minutes: 12
 
       - label: "CUDA: Run Benchmarks"
@@ -117,15 +174,18 @@ steps:
       #     BENCHMARK_GROUP: Metal
       #   timeout_in_minutes: 12
 
-      - wait: ~  # Wait for all benchmarks to finish
+      - wait: ~ # Wait for all benchmarks to finish
 
       - label: "Combine Benchmarks"
         key: "combine-benchmarks"
         depends_on:
-          - "cpu-benchmarks"
+          - "cpu-benchmarks-1"  # Update these
+          - "cpu-benchmarks-2"
+          - "cpu-benchmarks-4"
+          - "cpu-benchmarks-8"
           - "cuda-benchmarks"
-          # - "amdgpu-benchmarks"
           - "oneapi-benchmarks"
+          # - "amdgpu-benchmarks"
           # - "metal-benchmarks"
         plugins:
           - JuliaCI/julia#v1:
