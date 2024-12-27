@@ -94,28 +94,28 @@ steps:
           BENCHMARK_GROUP: oneAPI
         timeout_in_minutes: 12
 
-      - label: "Metal: Run Benchmarks"
-        key: "metal-benchmarks"
-        plugins:
-          - JuliaCI/julia#v1:
-              version: "1.10"
-        command: |
-          julia --project=benchmarks -e '
-              using Pkg;
-              Pkg.instantiate();
-              Pkg.develop(path=pwd());
-              Pkg.add("Metal");
-          '
-          julia --project=benchmarks benchmarks/runbenchmarks.jl
-        artifacts:
-          - "benchmarks/results/Metalbenchmarks.json"
-        agents:
-          queue: "juliaecosystem"
-          os: "macos"
-          arch: "arm64"
-        env:
-          BENCHMARK_GROUP: Metal
-        timeout_in_minutes: 12
+      # - label: "Metal: Run Benchmarks"
+      #   key: "metal-benchmarks"
+      #   plugins:
+      #     - JuliaCI/julia#v1:
+      #         version: "1.10"
+      #   command: |
+      #     julia --project=benchmarks -e '
+      #         using Pkg;
+      #         Pkg.instantiate();
+      #         Pkg.develop(path=pwd());
+      #         Pkg.add("Metal");
+      #     '
+      #     julia --project=benchmarks benchmarks/runbenchmarks.jl
+      #   artifacts:
+      #     - "benchmarks/results/Metalbenchmarks.json"
+      #   agents:
+      #     queue: "juliaecosystem"
+      #     os: "macos"
+      #     arch: "arm64"
+      #   env:
+      #     BENCHMARK_GROUP: Metal
+      #   timeout_in_minutes: 12
 
       - wait: ~  # Wait for all benchmarks to finish
 
