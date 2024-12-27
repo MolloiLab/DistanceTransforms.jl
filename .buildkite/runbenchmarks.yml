@@ -131,7 +131,7 @@ steps:
           - JuliaCI/julia#v1:
               version: "1.10"
         command: |
-          buildkite-agent artifact download "benchmarks/results/*" . --step "*-benchmarks"
+          buildkite-agent artifact download "benchmarks/results/*benchmarks*.json" .
           julia --project=benchmarks benchmarks/aggregate.jl
         artifacts:
           - "benchmarks/results/combinedbenchmarks.json"
