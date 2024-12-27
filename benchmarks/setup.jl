@@ -25,11 +25,8 @@ elseif BENCHMARK_GROUP == "oneAPI"
 end
 
 function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_threads::Int64)
-    # sizes_2D = [2^i for i in 3:12]
-    # sizes_3D = [2^i for i in 0:8]
-
-    sizes_2D = [2^i for i in 3:6]
-    sizes_3D = [2^i for i in 0:3]
+    sizes_2D = [2^i for i in 3:12]
+    sizes_3D = [2^i for i in 0:8]
 
     if backend == "CPU"
         # 2D benchmarks
