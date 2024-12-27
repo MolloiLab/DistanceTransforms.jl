@@ -12,13 +12,22 @@ for n in NUM_CPU_THREADS
     if ispath(filepath)
         nthreads_results = BenchmarkTools.load(filepath)[1]
         for benchmark in keys(nthreads_results)
-            RESULTS[benchmark] = RESULTS.get(benchmark, BenchmarkGroup())
+            if !haskey(RESULTS, benchmark)
+                RESULTS[benchmark] = BenchmarkGroup()
+            end
             for size in keys(nthreads_results[benchmark])
-                RESULTS[benchmark][size] = RESULTS[benchmark].get(size, BenchmarkGroup())
+                if !haskey(RESULTS[benchmark], size)
+                    RESULTS[benchmark][size] = BenchmarkGroup()
+                end
                 for algorithm in keys(nthreads_results[benchmark][size])
-                    RESULTS[benchmark][size][algorithm] = RESULTS[benchmark][size].get(algorithm, BenchmarkGroup())
-                    RESULTS[benchmark][size][algorithm]["CPU"] = RESULTS[benchmark][size][algorithm].get("CPU", BenchmarkGroup())
-                    RESULTS[benchmark][size][algorithm]["CPU"][string(n, " thread(s)")] = nthreads_results[benchmark][size][algorithm]["CPU"][string(n, " thread(s)")]
+                    if !haskey(RESULTS[benchmark][size], algorithm)
+                        RESULTS[benchmark][size][algorithm] = BenchmarkGroup()
+                    end
+                    if !haskey(RESULTS[benchmark][size][algorithm], "CPU")
+                        RESULTS[benchmark][size][algorithm]["CPU"] = BenchmarkGroup()
+                    end
+                    RESULTS[benchmark][size][algorithm]["CPU"][string(n, " thread(s)")] = 
+                        nthreads_results[benchmark][size][algorithm]["CPU"][string(n, " thread(s)")]
                 end
             end
         end
@@ -34,13 +43,22 @@ for backend in GPU_BACKENDS
     if ispath(filepath)
         backend_results = BenchmarkTools.load(filepath)[1]
         for benchmark in keys(backend_results)
-            RESULTS[benchmark] = RESULTS.get(benchmark, BenchmarkGroup())
+            if !haskey(RESULTS, benchmark)
+                RESULTS[benchmark] = BenchmarkGroup()
+            end
             for size in keys(backend_results[benchmark])
-                RESULTS[benchmark][size] = RESULTS[benchmark].get(size, BenchmarkGroup())
+                if !haskey(RESULTS[benchmark], size)
+                    RESULTS[benchmark][size] = BenchmarkGroup()
+                end
                 for algorithm in keys(backend_results[benchmark][size])
-                    RESULTS[benchmark][size][algorithm] = RESULTS[benchmark][size].get(algorithm, BenchmarkGroup())
-                    RESULTS[benchmark][size][algorithm]["GPU"] = RESULTS[benchmark][size][algorithm].get("GPU", BenchmarkGroup())
-                    RESULTS[benchmark][size][algorithm]["GPU"][backend] = backend_results[benchmark][size][algorithm]["GPU"][backend]
+                    if !haskey(RESULTS[benchmark][size], algorithm)
+                        RESULTS[benchmark][size][algorithm] = BenchmarkGroup()
+                    end
+                    if !haskey(RESULTS[benchmark][size][algorithm], "GPU")
+                        RESULTS[benchmark][size][algorithm]["GPU"] = BenchmarkGroup()
+                    end
+                    RESULTS[benchmark][size][algorithm]["GPU"][backend] = 
+                        backend_results[benchmark][size][algorithm]["GPU"][backend]
                 end
             end
         end
@@ -49,5 +67,5 @@ for backend in GPU_BACKENDS
     end
 end
 
-# Save the combined results
+mkpath(joinpath(@__DIR__, "results"))
 BenchmarkTools.save(joinpath(@__DIR__, "results", "combinedbenchmarks.json"), RESULTS)
