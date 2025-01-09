@@ -133,8 +133,8 @@ steps:
           rocmgpu: "*"
         env:
           BENCHMARK_GROUP: AMDGPU
-          if: build.message !~ /\[skip benchmarks\]/
-          timeout_in_minutes: 12
+        if: build.message !~ /\[skip benchmarks\]/
+        timeout_in_minutes: 12
 
       - label: "oneAPI: Run Benchmarks"
         key: "oneapi-benchmarks"
@@ -156,8 +156,8 @@ steps:
           intel: "*"
         env:
           BENCHMARK_GROUP: oneAPI
-          if: build.message !~ /\[skip benchmarks\]/
-          timeout_in_minutes: 12
+        if: build.message !~ /\[skip benchmarks\]/
+        timeout_in_minutes: 12
 
       - label: "Metal: Run Benchmarks"
         key: "metal-benchmarks"
@@ -180,8 +180,8 @@ steps:
           arch: "aarch64"
         env:
           BENCHMARK_GROUP: Metal
-          if: build.message !~ /\[skip benchmarks\]/
-          timeout_in_minutes: 12
+        if: build.message !~ /\[skip benchmarks\]/
+        timeout_in_minutes: 12
 
       - wait: ~ # Wait for all benchmarks to finish
 

@@ -41,7 +41,7 @@ elseif "Metal" in TEST_BACKENDS
 elseif "oneAPI" in TEST_BACKENDS
     using oneAPI
     oneAPI.versioninfo()
-    backend = oneBackend()
+    backend = oneAPI.oneBackend()
     dev = oneArray
 else
     using KernelAbstractions: CPU
