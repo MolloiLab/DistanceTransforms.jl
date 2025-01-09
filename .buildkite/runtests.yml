@@ -1,0 +1,125 @@
+steps:
+  - label: "CPU: Julia v{{matrix.version}}"
+    matrix:
+      setup:
+        version:
+          - "1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "{{matrix.version}}"
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+    command: |
+      julia -e 'using Pkg
+
+                println("--- :julia: Instantiating environment")
+                Pkg.develop(path=".")
+
+                println("+++ :julia: Running tests")
+                Pkg.test("DistanceTransforms"; coverage=true, julia_args=`--threads=auto`)'
+    agents:
+      queue: "juliagpu"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 10
+
+  - label: "CUDA: Julia {{matrix.version}}"
+    matrix:
+      setup:
+        version:
+          - "1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "{{matrix.version}}"
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+    command: |
+      julia -e 'using Pkg
+
+                println("--- :julia: Instantiating environment")
+                Pkg.add("CUDA")
+                Pkg.develop(path=".")
+
+                println("+++ :julia: Running tests")
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["CUDA"])'
+    agents:
+      queue: "juliagpu"
+      cuda: "*"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 10
+
+  - label: "Metal: Julia {{matrix.version}}"
+    matrix:
+      setup:
+        version:
+          - "1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "{{matrix.version}}"
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+    command: |
+      julia -e 'using Pkg
+
+                println("--- :julia: Instantiating environment")
+                Pkg.add("Metal")
+                Pkg.develop(path=".")
+
+                println("+++ :julia: Running tests")
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["Metal"])'
+    agents:
+      queue: "juliaecosystem"
+      os: "macos"
+      arch: "aarch64"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 10
+
+  - label: "oneAPI: Julia {{matrix.version}}"
+    matrix:
+      setup:
+        version:
+          - "1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "{{matrix.version}}"
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+    command: |
+      julia -e 'using Pkg
+
+                println("--- :julia: Instantiating environment")
+                Pkg.add("oneAPI")
+                Pkg.develop(path=".")
+
+                println("+++ :julia: Running tests")
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["oneAPI"])'
+    agents:
+      queue: "juliagpu"
+      intel: "*"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 10
+
+  - label: "AMDGPU: Julia {{matrix.version}}"
+    matrix:
+      setup:
+        version:
+          - "1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "{{matrix.version}}"
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+    command: |
+      julia -e 'using Pkg
+
+                println("--- :julia: Instantiating environment")
+                Pkg.add("AMDGPU")
+                Pkg.develop(path=".")
+
+                println("+++ :julia: Running tests")
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["AMDGPU"])'
+    agents:
+      queue: "juliagpu"
+      rocm: "*"
+      rocmgpu: "*"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 10 
