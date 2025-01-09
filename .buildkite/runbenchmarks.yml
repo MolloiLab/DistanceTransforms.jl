@@ -157,13 +157,14 @@ steps:
           - JuliaCI/julia#v1:
               version: "1.10"
         command: |
-          julia --project=benchmarks -e '
+          julia --project=benchmarks -e 'println("--- :julia: Instantiating project")
               using Pkg;
               Pkg.instantiate();
               Pkg.develop(path=pwd());
               Pkg.add("Metal");
           '
-          julia --project=benchmarks benchmarks/runbenchmarks.jl
+          julia --project=benchmarks -e 'println("--- :julia: Run Benchmarks")
+              include("benchmarks/runbenchmarks.jl")'
         artifacts:
           - "benchmarks/results/Metalbenchmarks.json"
         agents:
@@ -172,6 +173,7 @@ steps:
           arch: "arm64"
         env:
           BENCHMARK_GROUP: Metal
+          JULIA_NUM_THREADS: "1"
         timeout_in_minutes: 12
 
       - wait: ~ # Wait for all benchmarks to finish
