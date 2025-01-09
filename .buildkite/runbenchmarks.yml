@@ -188,7 +188,7 @@ steps:
       - label: "Combine Benchmarks"
         key: "combine-benchmarks"
         depends_on:
-          - "cpu-benchmarks-1"
+          - "cpu-benchmarks-1"  # Update these
           - "cpu-benchmarks-2"
           - "cpu-benchmarks-4"
           - "cpu-benchmarks-8"
@@ -209,5 +209,6 @@ steps:
           - "benchmarks/results/combinedbenchmarks.json"
         agents:
           queue: "benchmark"
+        env:
           if: build.message !~ /\[skip benchmarks\]/
-          timeout_in_minutes: 15
+          timeout_in_minutes: 12
