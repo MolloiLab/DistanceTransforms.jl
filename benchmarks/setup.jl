@@ -104,13 +104,13 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f = Float32.(rand([0, 1], n, n))
             bool_f = Bool.(f)
             suite["2D"]["Size_$n"]["Maurer"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> distance_transform(feature_transform(bool_f)), backend)
+                benchmark_with_memory(() -> distance_transform(feature_transform(bool_f)), backend).benchmark
 
             suite["2D"]["Size_$n"]["Felzenszwalb"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f); threaded = false), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f); threaded = false), backend).benchmark
 
             suite["2D"]["Size_$n"]["Felzenszwalb_MT"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f)), backend).benchmark
         end
 
         # 3D benchmarks
@@ -118,13 +118,13 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f = Float32.(rand([0, 1], n, n, n))
             bool_f = Bool.(f)
             suite["3D"]["Size_$n"]["Maurer"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> distance_transform(feature_transform(bool_f)), backend)
+                benchmark_with_memory(() -> distance_transform(feature_transform(bool_f)), backend).benchmark
 
             suite["3D"]["Size_$n"]["Felzenszwalb"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f); threaded = false), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f); threaded = false), backend).benchmark
 
             suite["3D"]["Size_$n"]["Felzenszwalb_MT"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f)), backend).benchmark
         end
     elseif backend == "Metal"
         @info "Running Metal benchmarks"
@@ -132,14 +132,14 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f = Float32.(rand([0, 1], n, n))
             f_gpu = MtlArray(f)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = MtlArray(f)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
     elseif backend == "CUDA"
         @info "Running CUDA benchmarks"
@@ -147,14 +147,14 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f = Float32.(rand([0, 1], n, n))
             f_gpu = CUDA.CuArray(f)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = CUDA.CuArray(f)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
     elseif backend == "AMDGPU"
         @info "Running AMDGPU benchmarks"
@@ -162,14 +162,14 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f = Float32.(rand([0, 1], n, n))
             f_gpu = ROCArray(f)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = ROCArray(f)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
     elseif backend == "oneAPI"
         @info "Running oneAPI benchmarks"
@@ -177,14 +177,14 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f = Float32.(rand([0, 1], n, n))
             f_gpu = oneArray(f)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = oneArray(f)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
         end
     else
         @error "Unknown backend: $backend"
