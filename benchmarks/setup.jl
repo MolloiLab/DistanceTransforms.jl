@@ -19,7 +19,8 @@ function monitor_gpu_memory(backend::String, duration=0.1)
             device = Metal.device()
             return Float64(device.currentAllocatedSize) / (1024 * 1024)
         elseif backend == "oneAPI"
-            device = oneL0.device()
+            # Get the first device since that's what we're using
+            device = oneAPI.devices()[1]
             props = oneL0.memory_properties(device)
             return (props.totalSize - props.freeSize) / (1024 * 1024)
         elseif backend == "AMDGPU"
