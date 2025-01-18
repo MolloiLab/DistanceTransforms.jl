@@ -22,6 +22,7 @@ function monitor_gpu_memory(backend::String, duration=0.1)
             # Get the first device since that's what we're using
             device = oneAPI.devices()[1]
             props = oneL0.memory_properties(device)[1]
+            @info props
             return (props.totalSize - props.freeSize) / (1024 * 1024)
         elseif backend == "AMDGPU"
             free, total = AMDGPU.HIP.memory_info()
