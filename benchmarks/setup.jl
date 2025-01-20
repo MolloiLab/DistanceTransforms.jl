@@ -27,8 +27,8 @@ function monitor_gpu_memory(backend::String, duration=0.1)
             # For now, just return total memory since free memory isn't easily accessible
             return Float64(props.totalSize) / (1024 * 1024)
         elseif backend == "AMDGPU"
-            free_mem, total_mem = AMDGPU.Runtime.Mem.info()  # Use the correct memory info function
-            return Float64(total_mem - free_mem) / (1024 * 1024)
+            free, total = AMDGPU.info()
+            return (total - free) / (1024 * 1024)
         elseif backend == "CUDA"
             free, total = CUDA.memory_info()
             return (total - free) / (1024 * 1024)
@@ -92,6 +92,7 @@ elseif BENCHMARK_GROUP == "CUDA"
     CUDA.versioninfo()
 elseif BENCHMARK_GROUP == "AMDGPU"
     using AMDGPU
+    using AMDGPU.Runtime.Mem  # Add explicit import of Runtime.Mem
     AMDGPU.versioninfo()
 elseif BENCHMARK_GROUP == "oneAPI"
     using oneAPI
