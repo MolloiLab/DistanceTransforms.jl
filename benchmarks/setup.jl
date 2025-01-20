@@ -21,9 +21,11 @@ function monitor_gpu_memory(backend::String, duration=0.1)
         elseif backend == "oneAPI"
             # Get the first device since that's what we're using
             device = oneAPI.devices()[1]
-            props = oneL0.memory_properties(device)[1]
-            @info props
-            return (props.totalSize - props.freeSize) / (1024 * 1024)
+            # Get total memory from device properties
+            total_mem = oneAPI.oneL0.memory_properties(device)[1].totalSize
+            # Get free memory from device
+            free_mem = oneAPI.oneL0.memory_get_info(device).free
+            return Float64(total_mem - free_mem) / (1024 * 1024)
         elseif backend == "AMDGPU"
             free_mem, total_mem = AMDGPU.Runtime.Mem.info()  # Use the correct memory info function
             return Float64(total_mem - free_mem) / (1024 * 1024)
