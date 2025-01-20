@@ -25,8 +25,8 @@ function monitor_gpu_memory(backend::String, duration=0.1)
             @info props
             return (props.totalSize - props.freeSize) / (1024 * 1024)
         elseif backend == "AMDGPU"
-            free, total = AMDGPU.HIP.memory_info()
-            return (total - free) / (1024 * 1024)
+            free_mem, total_mem = AMDGPU.Runtime.Mem.info()  # Use the correct memory info function
+            return Float64(total_mem - free_mem) / (1024 * 1024)
         elseif backend == "CUDA"
             free, total = CUDA.memory_info()
             return (total - free) / (1024 * 1024)
