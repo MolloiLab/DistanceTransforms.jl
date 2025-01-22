@@ -151,8 +151,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
         
-        # Store memory info in a file with a different name to avoid conflicts
-        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+        # Create results directory if it doesn't exist
+        results_dir = joinpath(@__DIR__, "results")
+        mkpath(results_dir)
+        open(joinpath(results_dir, "$(backend)_memory_info.json"), "w") do io
             JSON.print(io, memory_info)
         end
     elseif backend == "CUDA"
@@ -174,7 +176,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
         
-        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+        # Create results directory if it doesn't exist
+        results_dir = joinpath(@__DIR__, "results")
+        mkpath(results_dir)
+        open(joinpath(results_dir, "$(backend)_memory_info.json"), "w") do io
             JSON.print(io, memory_info)
         end
     elseif backend == "AMDGPU"
@@ -196,7 +201,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
         
-        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+        # Create results directory if it doesn't exist
+        results_dir = joinpath(@__DIR__, "results")
+        mkpath(results_dir)
+        open(joinpath(results_dir, "$(backend)_memory_info.json"), "w") do io
             JSON.print(io, memory_info)
         end
     elseif backend == "oneAPI"
@@ -218,7 +226,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
         
-        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+        # Create results directory if it doesn't exist
+        results_dir = joinpath(@__DIR__, "results")
+        mkpath(results_dir)
+        open(joinpath(results_dir, "$(backend)_memory_info.json"), "w") do io
             JSON.print(io, memory_info)
         end
     else
