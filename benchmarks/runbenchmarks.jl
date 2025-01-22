@@ -2,7 +2,7 @@ using DistanceTransforms
 using Suppressor
 using BenchmarkTools
 using Random
-# using JSON
+using JSON
 
 const SUITE = BenchmarkGroup()
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 5   # Reduce this from 120 seconds
@@ -20,9 +20,16 @@ results = BenchmarkTools.run(SUITE; verbose=true)
 filepath = joinpath(@__DIR__, "results")
 mkpath(filepath)
 
+# Save timing benchmarks
 filename = BENCHMARK_GROUP == "CPU" ? 
     string("CPUbenchmarks", BENCHMARK_CPU_THREADS, "threads.json") : 
     string(BENCHMARK_GROUP, "benchmarks.json")
 
 BenchmarkTools.save(joinpath(filepath, filename), median(results))
 @info "Saved results to $(joinpath(filepath, filename))"
+
+# Ensure memory info file is also uploaded
+if BENCHMARK_GROUP != "CPU"
+    memory_filename = "$(BENCHMARK_GROUP)_memory_info.json"
+    @info "Memory info saved to $(joinpath(filepath, memory_filename))"
+end
