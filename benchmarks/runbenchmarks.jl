@@ -36,7 +36,8 @@ if BENCHMARK_GROUP != "CPU"
     # Print memory info to console for manual backup
     if isfile(memory_filepath)
         memory_data = JSON.parsefile(memory_filepath)
-        @info "Memory Info for $BENCHMARK_GROUP" memory_data
+        println("\nMemory Info for $BENCHMARK_GROUP:")
+        println(JSON.json(memory_data, 4))  # indent with 4 spaces
     end
     
     # Try to upload both files
