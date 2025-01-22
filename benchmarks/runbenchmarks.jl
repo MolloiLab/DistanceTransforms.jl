@@ -28,8 +28,18 @@ filename = BENCHMARK_GROUP == "CPU" ?
 BenchmarkTools.save(joinpath(filepath, filename), median(results))
 @info "Saved results to $(joinpath(filepath, filename))"
 
-# Ensure memory info file is also uploaded
+# Handle memory info
 if BENCHMARK_GROUP != "CPU"
     memory_filename = "$(BENCHMARK_GROUP)_memory_info.json"
-    @info "Memory info saved to $(joinpath(filepath, memory_filename))"
+    memory_filepath = joinpath(filepath, memory_filename)
+    
+    # Print memory info to console for manual backup
+    if isfile(memory_filepath)
+        memory_data = JSON.parsefile(memory_filepath)
+        @info "Memory Info for $BENCHMARK_GROUP" memory_data
+    end
+    
+    # Try to upload both files
+    run(`buildkite-agent artifact upload "benchmarks/results/$(filename)"`)
+    run(`buildkite-agent artifact upload "benchmarks/results/$(memory_filename)"`)
 end
