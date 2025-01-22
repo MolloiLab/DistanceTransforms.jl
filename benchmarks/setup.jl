@@ -4,6 +4,7 @@ using ImageMorphology: distance_transform, feature_transform
 using KernelAbstractions
 using Random, Statistics
 import InteractiveUtils
+using JSON
 
 const BENCHMARK_GROUP = get(ENV, "BENCHMARK_GROUP", "CPU")
 
@@ -138,11 +139,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = MtlArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
+                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -150,11 +150,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = MtlArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
+                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
     elseif backend == "CUDA"
         @info "Running CUDA benchmarks"
@@ -163,11 +162,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = CUDA.CuArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
+                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -175,11 +173,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = CUDA.CuArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
+                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
     elseif backend == "AMDGPU"
         @info "Running AMDGPU benchmarks"
@@ -188,11 +185,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = ROCArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
+                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -200,11 +196,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = ROCArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
+                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
     elseif backend == "oneAPI"
         @info "Running oneAPI benchmarks"
@@ -213,11 +208,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = oneArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
+                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -225,11 +219,10 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = oneArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
-                "peak_mb" => benchmark_result.peak_memory_mb,
-                "mean_mb" => benchmark_result.mean_memory_mb,
-                "current_mb" => benchmark_result.current_memory_mb
-            )
+            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
+                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
+            end
+            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
         end
     else
         @error "Unknown backend: $backend"
