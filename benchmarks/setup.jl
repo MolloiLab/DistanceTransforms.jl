@@ -4,7 +4,6 @@ using ImageMorphology: distance_transform, feature_transform
 using KernelAbstractions
 using Random, Statistics
 import InteractiveUtils
-using JSON
 
 const BENCHMARK_GROUP = get(ENV, "BENCHMARK_GROUP", "CPU")
 

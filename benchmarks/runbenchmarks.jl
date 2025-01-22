@@ -2,6 +2,7 @@ using DistanceTransforms
 using Suppressor
 using BenchmarkTools
 using Random
+# using JSON
 
 const SUITE = BenchmarkGroup()
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 5   # Reduce this from 120 seconds
