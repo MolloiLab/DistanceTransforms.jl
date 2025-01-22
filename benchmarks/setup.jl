@@ -136,60 +136,100 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = MtlArray(f)
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = MtlArray(f)
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
     elseif backend == "CUDA"
         @info "Running CUDA benchmarks"
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = CUDA.CuArray(f)
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = CUDA.CuArray(f)
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
     elseif backend == "AMDGPU"
         @info "Running AMDGPU benchmarks"
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = ROCArray(f)
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = ROCArray(f)
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
     elseif backend == "oneAPI"
         @info "Running oneAPI benchmarks"
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = oneArray(f)
-            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
 
         for n in sizes_3D
             f = Float32.(rand([0, 1], n, n, n))
             f_gpu = oneArray(f)
-            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend).benchmark
+            benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
+            suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU_Memory"][backend] = Dict(
+                "peak_mb" => benchmark_result.peak_memory_mb,
+                "mean_mb" => benchmark_result.mean_memory_mb,
+                "current_mb" => benchmark_result.current_memory_mb
+            )
         end
     else
         @error "Unknown backend: $backend"
