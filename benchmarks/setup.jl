@@ -4,6 +4,7 @@ using ImageMorphology: distance_transform, feature_transform
 using KernelAbstractions
 using Random, Statistics
 import InteractiveUtils
+using JSON
 
 const BENCHMARK_GROUP = get(ENV, "BENCHMARK_GROUP", "CPU")
 
@@ -133,15 +134,13 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
         end
     elseif backend == "Metal"
         @info "Running Metal benchmarks"
+        memory_info = Dict{String, Float64}()
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = MtlArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
-                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["2D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -149,22 +148,22 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = MtlArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
-                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
+        end
+        
+        # Store memory info in a file with a different name to avoid conflicts
+        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+            JSON.print(io, memory_info)
         end
     elseif backend == "CUDA"
         @info "Running CUDA benchmarks"
+        memory_info = Dict{String, Float64}()
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = CUDA.CuArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
-                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["2D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -172,22 +171,21 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = CUDA.CuArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
-                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
+        end
+        
+        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+            JSON.print(io, memory_info)
         end
     elseif backend == "AMDGPU"
         @info "Running AMDGPU benchmarks"
+        memory_info = Dict{String, Float64}()
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = ROCArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
-                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["2D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -195,22 +193,21 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = ROCArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
-                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
+        end
+        
+        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+            JSON.print(io, memory_info)
         end
     elseif backend == "oneAPI"
         @info "Running oneAPI benchmarks"
+        memory_info = Dict{String, Float64}()
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             f_gpu = oneArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["2D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["2D"]["Size_$n"]["Memory"], "GPU")
-                suite["2D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["2D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["2D_Size_$(n)"] = benchmark_result.peak_memory_mb
         end
 
         for n in sizes_3D
@@ -218,10 +215,11 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f_gpu = oneArray(f)
             benchmark_result = benchmark_with_memory(() -> transform(boolean_indicator(f_gpu)), backend)
             suite["3D"]["Size_$n"]["Felzenszwalb"]["GPU"][backend] = benchmark_result.benchmark
-            if !haskey(suite["3D"]["Size_$n"]["Memory"], "GPU")
-                suite["3D"]["Size_$n"]["Memory"]["GPU"] = BenchmarkGroup()
-            end
-            suite["3D"]["Size_$n"]["Memory"]["GPU"][backend] = benchmark_result.peak_memory_mb
+            memory_info["3D_Size_$(n)"] = benchmark_result.peak_memory_mb
+        end
+        
+        open(joinpath(@__DIR__, "results", "$(backend)_memory_info.json"), "w") do io
+            JSON.print(io, memory_info)
         end
     else
         @error "Unknown backend: $backend"
