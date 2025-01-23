@@ -105,18 +105,17 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
     sizes_3D = [2^i for i in 0:8]
 
     if backend == "CPU"
-        # 2D benchmarks
         for n in sizes_2D
             f = Float32.(rand([0, 1], n, n))
             bool_f = Bool.(f)
             suite["2D"]["Size_$n"]["Maurer"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> distance_transform(feature_transform(bool_f)), backend).benchmark
+                @benchmarkable distance_transform(feature_transform($bool_f)) setup=(GC.gc())
 
             suite["2D"]["Size_$n"]["Felzenszwalb"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f); threaded = false), backend).benchmark
+                @benchmarkable transform($boolean_indicator($f); threaded = false) setup=(GC.gc())
 
             suite["2D"]["Size_$n"]["Felzenszwalb_MT"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f)), backend).benchmark
+                @benchmarkable transform($boolean_indicator($f)) setup=(GC.gc())
         end
 
         # 3D benchmarks
@@ -124,13 +123,13 @@ function setup_benchmarks(suite::BenchmarkGroup, backend::String, num_cpu_thread
             f = Float32.(rand([0, 1], n, n, n))
             bool_f = Bool.(f)
             suite["3D"]["Size_$n"]["Maurer"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> distance_transform(feature_transform(bool_f)), backend).benchmark
+                @benchmarkable distance_transform(feature_transform($bool_f)) setup=(GC.gc())
 
             suite["3D"]["Size_$n"]["Felzenszwalb"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f); threaded = false), backend).benchmark
+                @benchmarkable transform($boolean_indicator($f); threaded = false) setup=(GC.gc())
 
             suite["3D"]["Size_$n"]["Felzenszwalb_MT"]["CPU"][string(num_cpu_threads, " thread(s)")] =
-                benchmark_with_memory(() -> transform(boolean_indicator(f)), backend).benchmark
+                @benchmarkable transform($boolean_indicator($f)) setup=(GC.gc())
         end
     elseif backend == "Metal"
         @info "Running Metal benchmarks"
