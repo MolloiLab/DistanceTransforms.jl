@@ -41,6 +41,6 @@ if BENCHMARK_GROUP != "CPU"
     end
     
     # Try to upload both files
-    run(`buildkite-agent artifact upload "benchmarks/results/$(filename)"`)
+    # run(`buildkite-agent artifact upload "benchmarks/results/$(filename)"`)
     run(`buildkite-agent artifact upload "benchmarks/results/$(memory_filename)"`)
 end
