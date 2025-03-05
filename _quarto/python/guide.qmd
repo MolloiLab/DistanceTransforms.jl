@@ -6,36 +6,32 @@ format:
     toc: true
 ---
 
-This guide covers both basic and advanced usage of the py-distance-transforms library.
+This guide covers both basic and advanced usage of the `distance_transforms` library.
 
 ## Getting Started
 
 ### Installation
 
 ```bash
-pip install py_distance_transforms
+pip install distance_transforms
 ```
 
-For GPU support, make sure you have PyTorch with CUDA installed:
-
-```bash
-pip install torch --extra-index-url https://download.pytorch.org/whl/cu118
-```
+For GPU support, make sure you have PyTorch with CUDA installed.
 
 ### Basic Usage
 
-The primary function in py_distance_transforms is `transform`. This function takes a binary array (with 0s and 1s) and calculates the squared Euclidean distance from each 0 pixel to the nearest 1 pixel.
+The primary function in `distance_transforms` is `transform`. This function takes a binary array (with 0s and 1s) and calculates the squared Euclidean distance from each 0 pixel to the nearest 1 pixel.
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from py_distance_transforms import transform
+import distance_transforms as dts
 
 # Create a random binary array
 arr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)
 
 # Apply distance transform
-result = transform(arr)
+result = dts.transform(arr)
 
 # Visualize
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
@@ -52,14 +48,14 @@ plt.show()
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from py_distance_transforms import transform
+import distance_transforms as dts
 from skimage import io, color, filters
 
 # Load image and process
 img = io.imread("sample.jpg")
 img_gray = color.rgb2gray(img)
 img_binary = img_gray > filters.threshold_otsu(img_gray)
-img_dist = transform(img_binary.astype(np.float32))
+img_dist = dts.transform(img_binary.astype(np.float32))
 
 # Visualize
 fig, axes = plt.subplots(1, 3, figsize=(15, 5))
@@ -69,33 +65,35 @@ axes[1].imshow(img_binary, cmap='gray')
 axes[1].set_title('Binary Image')
 axes[2].imshow(img_dist, cmap='viridis')
 axes[2].set_title('Distance Transform')
+plt.tight_layout()
+plt.show()
 ```
 
 ## Advanced Features
 
 ### GPU Acceleration
 
-py_distance_transforms supports GPU acceleration for NVIDIA GPUs using PyTorch tensors.
+`distance_transforms` provides a specific function for GPU acceleration using PyTorch tensors: `transform_cuda`.
 
 ```python
 import torch
-from py_distance_transforms import transform_cuda
+import distance_transforms as dts
 
 # Create a tensor on GPU
 x_gpu = torch.rand((100, 100), device='cuda')
-x_gpu = (x_gpu > 0.5).float()
+x_gpu = (x_gpu > 0.5).float()  # Convert to binary (0s and 1s)
 
 # Apply transform on GPU
-result_gpu = transform_cuda(x_gpu)
+result_gpu = dts.transform_cuda(x_gpu)
 ```
 
 ### Working with 3D Data
 
-py_distance_transforms supports 3D arrays as well:
+Both `transform` and `transform_cuda` support 3D arrays as well:
 
 ```python
 import numpy as np
-from py_distance_transforms import transform
+import distance_transforms as dts
 
 # Create a 3D binary array
 arr_3d = np.zeros((20, 20, 20), dtype=np.float32)
@@ -103,36 +101,75 @@ arr_3d[5, 5, 5] = 1
 arr_3d[15, 15, 15] = 1
 
 # Apply distance transform
-result_3d = transform(arr_3d)
+result_3d = dts.transform(arr_3d)
 ```
 
-## Performance Comparison
+## Performance Benchmarks
 
-py_distance_transforms generally outperforms other Python implementations, especially for large arrays and when using GPU acceleration:
+`distance_transforms` generally outperforms other Python implementations, especially for large arrays and when using GPU acceleration:
 
 | Implementation | 100×100 | 1000×1000 | 100×100×100 |
 |----------------|---------|-----------|-------------|
 | SciPy          | 2.5 ms  | 250 ms    | 1200 ms     |
-| py_distance_transforms (CPU) | 1.2 ms | 120 ms    | 500 ms      |
-| py_distance_transforms (GPU) | 0.8 ms | 25 ms     | 120 ms      |
+| distance_transforms (CPU) | 1.2 ms | 120 ms    | 500 ms      |
+| distance_transforms (GPU) | 0.8 ms | 25 ms     | 120 ms      |
 
 *Times are approximate and may vary based on hardware.*
 
+### Benchmarking Code Example
+
+You can benchmark the performance yourself:
+
+```python
+import numpy as np
+import torch
+import time
+import distance_transforms as dts
+from scipy.ndimage import distance_transform_edt
+
+# Create test data
+size = (224, 224)
+arr = np.random.choice([0, 1], size=size).astype(np.float32)
+tensor = torch.tensor(arr, device='cuda')
+
+# Benchmark distance_transforms (CPU)
+start = time.time()
+result_cpu = dts.transform(arr)
+cpu_time = time.time() - start
+
+# Benchmark distance_transforms (GPU)
+start = time.time()
+result_gpu = dts.transform_cuda(tensor)
+gpu_time = time.time() - start
+
+# Benchmark SciPy
+start = time.time()
+result_scipy = distance_transform_edt(arr == 0) ** 2
+scipy_time = time.time() - start
+
+print(f"CPU time: {cpu_time:.4f}s")
+print(f"GPU time: {gpu_time:.4f}s")
+print(f"SciPy time: {scipy_time:.4f}s")
+print(f"GPU speedup vs. CPU: {cpu_time/gpu_time:.1f}x")
+print(f"GPU speedup vs. SciPy: {scipy_time/gpu_time:.1f}x")
+```
+
 ## Integration with Deep Learning
 
-py_distance_transforms can be used in deep learning workflows, particularly for tasks like computing Hausdorff distance loss:
+`distance_transforms` can be integrated with deep learning workflows, particularly for tasks like computing Hausdorff distance loss:
 
 ```python
 import torch
-from py_distance_transforms import transform_cuda
+import torch.nn.functional as F
+import distance_transforms as dts
 
 def hausdorff_loss(pred, target):
     # Convert predictions to binary
     pred_binary = (pred > 0.5).float()
     
     # Calculate distance transforms
-    pred_dt = transform_cuda(pred_binary)
-    target_dt = transform_cuda(target)
+    pred_dt = dts.transform_cuda(pred_binary)
+    target_dt = dts.transform_cuda(target)
     
     # Compute Hausdorff distances
     d_pt = torch.mean(target * pred_dt)
@@ -141,6 +178,92 @@ def hausdorff_loss(pred, target):
     return d_pt + d_tp
 ```
 
+### Example in a PyTorch Training Loop
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import distance_transforms as dts
+
+# Define a simple model
+model = nn.Sequential(
+    nn.Conv2d(1, 16, 3, padding=1),
+    nn.ReLU(),
+    nn.Conv2d(16, 1, 3, padding=1),
+    nn.Sigmoid()
+)
+
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Training loop with Hausdorff loss
+def train(model, dataloader, epochs=10):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.to(device)
+    
+    for epoch in range(epochs):
+        for inputs, targets in dataloader:
+            inputs, targets = inputs.to(device), targets.to(device)
+            
+            # Forward pass
+            outputs = model(inputs)
+            
+            # Calculate loss
+            dice_loss = F.binary_cross_entropy(outputs, targets)
+            
+            # Add Hausdorff distance loss
+            outputs_binary = (outputs > 0.5).float()
+            targets_binary = (targets > 0.5).float()
+            
+            pred_dt = dts.transform_cuda(outputs_binary)
+            target_dt = dts.transform_cuda(targets_binary)
+            
+            hausdorff = torch.mean(targets_binary * pred_dt) + torch.mean(outputs_binary * target_dt)
+            
+            # Combine losses
+            loss = dice_loss + 0.5 * hausdorff
+            
+            # Backward pass and optimize
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+        print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+```
+
+## First-Time Import Note
+
+The first time you import `distance_transforms`, it may take a while (up to 8 minutes) as it sets up the Julia environment and precompiles the necessary Julia packages. Subsequent imports will be much faster.
+
+```python
+# First import may be slow
+import distance_transforms as dts  # May take up to 8 minutes
+
+# Create a small test array to verify everything works
+import numpy as np
+test_arr = np.random.choice([0, 1], size=(5, 5)).astype(np.float32)
+result = dts.transform(test_arr)
+print(result)
+```
+
+## Implementation Details
+
+### How it Works
+
+`distance_transforms` is a Python wrapper around the Julia package `DistanceTransforms.jl`. The package uses the following approach:
+
+1. For CPU operations:
+   - Takes a NumPy array and converts it to a Julia array
+   - Applies the boolean indicator function to prepare the data
+   - Computes the distance transform in Julia
+   - Converts the result back to a NumPy array
+
+2. For GPU operations:
+   - Takes a PyTorch CUDA tensor and shares it with Julia using DLPack (no copying)
+   - Applies the boolean indicator function in Julia
+   - Computes the distance transform in Julia using GPU acceleration
+   - Shares the result back to PyTorch using DLPack
+
 ## Next Steps
 
-For more advanced usage examples and detailed API information, refer to the [API Reference](api.qmd).
+For detailed API information and function signatures, refer to the [API Reference](api.qmd).

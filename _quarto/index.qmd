@@ -3,17 +3,6 @@ title: "Distance Transforms"
 format:
   html:
     toc: true
-    css: |
-      .column {
-        padding: 0 15px;
-      }
-      pre {
-        margin: 1em 0;
-      }
-      .columns pre {
-        overflow-x: auto;
-        max-width: 100%;
-      }
 ---
 
 <style>
@@ -40,6 +29,15 @@ format:
 | 🐍 **Python Integration** | Full Python support via `distance_transforms` |
 | 📏 **Versatile Dimensions** | Works with 1D, 2D, and 3D arrays |
 | 📚 **Well Documented** | Comprehensive guides and examples |
+
+## Acknowledgements
+
+This project would not be possible without several excellent Julia packages:
+
+- **KernelAbstractions.jl**: Provides hardware-agnostic GPU code that runs across different GPU platforms
+- **AcceleratedKernels.jl**: Makes it dead simple to write GPU kernels with normal Julia code
+- **PythonCall.jl**: Powers the Python interoperability layer for seamless integration
+- **DLPack.jl**: Enables zero-copy tensor sharing with PyTorch for efficient GPU operations
 
 ## Why This Library?
 
@@ -75,9 +73,9 @@ result = transform(boolean_indicator(arr))
 
 ```python
 import numpy as np
-from py_distance_transforms import transform
+import distance_transforms as dts
 arr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)
-result = transform(arr)
+result = dts.transform(arr)
 ```
 
 [Get started with Python →](python/index.qmd)
@@ -100,7 +98,7 @@ Pkg.add("DistanceTransforms")
 ::: {.column width="50%" .add-space-l}
 ### Python
 ```bash
-pip install py_distance_transforms
+pip install distance_transforms
 ```
 :::
 

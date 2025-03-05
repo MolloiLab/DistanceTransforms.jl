@@ -6,168 +6,98 @@ format:
     toc: true
 ---
 
-This page documents all the exported functions in py-distance-transforms.
+This page documents all the exported functions in the `distance_transforms` Python package.
 
 ## Core Functions
 
-### transform
+### `transform`
 
 ```python
-transform(arr)
+import distance_transforms as dts
+
+result = dts.transform(arr)
 ```
 
-Computes the squared Euclidean distance transform of a binary array.
+Computes the squared Euclidean distance transform of a binary array using NumPy arrays.
 
-**Parameters:**
-- `arr` : numpy.ndarray
-  - A binary array (0s and 1s) of any dimension
+#### Parameters
 
-**Returns:**
-- numpy.ndarray
-  - The squared Euclidean distance transform
+- **arr**: A NumPy array containing binary values (0s and 1s)
+  - Can be 1D, 2D, or 3D
+  - Must be a NumPy array type
 
-**Example:**
+#### Returns
+
+- A NumPy array containing the squared Euclidean distance from each 0 pixel to the nearest 1 pixel
+- The output has the same shape and type as the input array
+
+#### Examples
 
 ```python
 import numpy as np
-from py_distance_transforms import transform
+import distance_transforms as dts
 
-arr = np.array([
-    [0, 1, 1, 0, 1],
-    [0, 0, 0, 1, 0],
-    [1, 1, 0, 0, 0]
-], dtype=np.float32)
-
-result = transform(arr)
-print(result)
+# Basic usage with NumPy
+arr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)
+result = dts.transform(arr)
 ```
 
-### transform_cuda
+### `transform_cuda`
 
 ```python
-transform_cuda(tensor)
+import distance_transforms as dts
+import torch
+
+result = dts.transform_cuda(tensor)
 ```
 
-GPU-accelerated version of the distance transform function.
+Computes the squared Euclidean distance transform of a binary array using PyTorch tensors on CUDA.
 
-**Parameters:**
-- `tensor` : torch.Tensor
-  - A binary tensor (0s and 1s) of any dimension, located on a CUDA device
+#### Parameters
 
-**Returns:**
-- torch.Tensor
-  - The squared Euclidean distance transform, located on the same CUDA device
+- **tensor**: A PyTorch tensor containing binary values (0s and 1s)
+  - Must be a CUDA tensor (on GPU)
+  - Can be 1D, 2D, or 3D
 
-**Example:**
+#### Returns
+
+- A PyTorch tensor containing the squared Euclidean distance from each 0 pixel to the nearest 1 pixel
+- The output has the same shape, type, and device as the input tensor
+
+#### Examples
 
 ```python
 import torch
-from py_distance_transforms import transform_cuda
+import distance_transforms as dts
 
 # Create a tensor on GPU
-tensor = torch.zeros((10, 10), device='cuda')
-tensor[2, 2] = 1
-tensor[7, 7] = 1
+tensor = torch.rand((100, 100), device='cuda')
+tensor = (tensor > 0.5).float()
 
-result = transform_cuda(tensor)
-print(result)
+# Apply transform on GPU
+result = dts.transform_cuda(tensor)
 ```
 
-## Utility Functions
+## Implementation Details
 
-### numpy_to_torch
+### CPU Implementation
 
-```python
-numpy_to_torch(arr, device='cuda')
-```
+When running on CPU with `transform()`, `distance_transforms` wraps the Julia implementation from `DistanceTransforms.jl`:
 
-Converts a NumPy array to a PyTorch tensor on the specified device.
+- The NumPy array is converted to a Julia array
+- The binary indicator function is applied to prepare the data
+- The distance transform is computed in Julia
+- The result is converted back to a NumPy array with the same dtype as the input
 
-**Parameters:**
-- `arr` : numpy.ndarray
-  - Input NumPy array
-- `device` : str, optional
-  - Device to place the tensor on. Default is 'cuda'
+### GPU Implementation
 
-**Returns:**
-- torch.Tensor
-  - PyTorch tensor on the specified device
+When using `transform_cuda()` with CUDA tensors:
 
-### torch_to_numpy
+- The PyTorch tensor is shared with Julia using DLPack without copying
+- The computation is performed using Julia's GPU optimizations
+- The result is shared back to PyTorch using DLPack
 
-```python
-torch_to_numpy(tensor)
-```
+### Performance Considerations
 
-Converts a PyTorch tensor to a NumPy array.
-
-**Parameters:**
-- `tensor` : torch.Tensor
-  - Input PyTorch tensor
-
-**Returns:**
-- numpy.ndarray
-  - NumPy array
-
-## Full Function List
-
-| Function | Description |
-|----------|-------------|
-| `transform` | Computes squared Euclidean distance transform on CPU |
-| `transform_cuda` | Computes squared Euclidean distance transform on GPU |
-| `numpy_to_torch` | Converts NumPy array to PyTorch tensor |
-| `torch_to_numpy` | Converts PyTorch tensor to NumPy array |
-
-## Integration with Other Libraries
-
-### NumPy
-
-py-distance-transforms works seamlessly with NumPy arrays:
-
-```python
-import numpy as np
-from py_distance_transforms import transform
-
-# Create a NumPy array
-arr = np.zeros((100, 100), dtype=np.float32)
-arr[25:75, 25:75] = 1
-
-# Apply transform
-result = transform(arr)
-```
-
-### PyTorch
-
-For PyTorch integration, use the CUDA-specific functions:
-
-```python
-import torch
-from py_distance_transforms import transform_cuda
-
-# Create a PyTorch tensor
-tensor = torch.zeros((100, 100), device='cuda')
-tensor[25:75, 25:75] = 1
-
-# Apply transform
-result = transform_cuda(tensor)
-```
-
-### scikit-image
-
-Works alongside scikit-image for more advanced image processing:
-
-```python
-import numpy as np
-from skimage import io, color, morphology
-from py_distance_transforms import transform
-
-# Load and process image
-img = io.imread('image.png', as_gray=True)
-binary = img > 0.5
-
-# Apply morphological operations
-cleaned = morphology.remove_small_objects(binary)
-
-# Apply distance transform
-dist = transform(cleaned.astype(np.float32))
-```
+- GPU acceleration works best for large arrays (typically 128×128 or larger)
+- The first call to either function may be slower due to Julia's JIT compilation

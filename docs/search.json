@@ -48,7 +48,7 @@
     "href": "julia/guide.html#getting-started",
     "title": "User Guide",
     "section": "Getting Started",
-    "text": "Getting Started\n\nInstallation\nusing Pkg\nPkg.add(\"DistanceTransforms\")\n\n\nBasic Usage\nThe primary function in DistanceTransforms.jl is transform. This function processes an array of 0s and 1s, converting each background element (0) into a value representing its squared Euclidean distance to the nearest foreground element (1).\n\nusing DistanceTransforms: transform, boolean_indicator\nusing CairoMakie: Figure, Axis, heatmap!, hidedecorations!\n\n# Create a random binary array\narr = rand([0, 1], 10, 10)\n\n# Apply distance transform\ntransformed = transform(boolean_indicator(arr))\n\n# Create visualization\nfig = Figure(size = (800, 400))\nax1 = Axis(fig[1, 1], title = \"Original\")\nax2 = Axis(fig[1, 2], title = \"Distance Transform\")\nheatmap!(ax1, arr, colormap = :grays)\nheatmap!(ax2, transformed, colormap = :grays)\nfig\n\n\n\n\n\n\n\n\n\n\nReal-World Example\nLet’s apply a distance transform to a real image:\n\nusing Images\n\n# Download and load example image\nimg = load(download(\"http://docs.opencv.org/3.1.0/water_coins.jpg\"))\n\n# Convert to binary image\nimg_bw = Gray.(img) .&gt; 0.5\n\n# Apply distance transform\nimg_tfm = transform(boolean_indicator(img_bw))\n\n# Visualize\nfig = Figure(size = (900, 300))\nax1 = Axis(fig[1, 1], title = \"Original Image\")\nax2 = Axis(fig[1, 2], title = \"Segmented Image\")\nax3 = Axis(fig[1, 3], title = \"Distance Transform\")\nheatmap!(ax1, rotr90(img), colormap = :grays)\nheatmap!(ax2, rotr90(img_bw), colormap = :grays)\nheatmap!(ax3, rotr90(img_tfm), colormap = :grays)\nhidedecorations!.([ax1, ax2, ax3])\nfig\n\n\n\n\n\n\n\n\n\n\nUnderstanding Euclidean Distance\nThe library, by default, returns the squared Euclidean distance. If you need the true Euclidean distance, you can take the square root of each element:\n\n# Create sample binary array\narray2 = [\n    0 1 1 0 1\n    0 0 0 1 0\n    1 1 0 0 0\n]\n\n# Convert to boolean indicator\narray2_bool = boolean_indicator(array2)\n\n# Apply squared Euclidean distance transform\nsq_euc_transform = transform(array2_bool)\n\n# Convert to true Euclidean distance\neuc_transform = sqrt.(sq_euc_transform)\n\n# Display results\nprintln(\"Squared Euclidean Distance:\")\ndisplay(sq_euc_transform)\nprintln(\"\\nEuclidean Distance:\")\ndisplay(euc_transform)\n\nSquared Euclidean Distance:\n\nEuclidean Distance:\n\n\n3×5 Matrix{Float32}:\n 1.0  0.0  0.0  1.0  0.0\n 1.0  1.0  1.0  0.0  1.0\n 0.0  0.0  1.0  1.0  2.0\n\n\n3×5 Matrix{Float32}:\n 1.0  0.0  0.0  1.0  0.0\n 1.0  1.0  1.0  0.0  1.0\n 0.0  0.0  1.0  1.0  1.41421\n\n\n\n\nComparison with ImageMorphology.jl\n\nusing ImageMorphology: distance_transform, feature_transform\n\n# Apply ImageMorphology distance transform\neuc_transform2 = distance_transform(feature_transform(Bool.(array2)))\n\n# Compare results\nprintln(\"ImageMorphology result:\")\ndisplay(euc_transform2)\nprintln(\"\\nAre the results approximately equal?\")\nisapprox(euc_transform2, euc_transform; rtol = 1e-2)\n\nImageMorphology result:\n\nAre the results approximately equal?\n\n\n3×5 Matrix{Float64}:\n 1.0  0.0  0.0  1.0  0.0\n 1.0  1.0  1.0  0.0  1.0\n 0.0  0.0  1.0  1.0  1.41421\n\n\ntrue",
+    "text": "Getting Started\n\nInstallation\nusing Pkg\nPkg.add(\"DistanceTransforms\")\n\n\nBasic Usage\nThe primary function in DistanceTransforms.jl is transform. This function processes an array of 0s and 1s, converting each background element (0) into a value representing its squared Euclidean distance to the nearest foreground element (1).\n\nusing DistanceTransforms: transform, boolean_indicator\nusing CairoMakie: Figure, Axis, heatmap!, hidedecorations!\n\n# Create a random binary array\narr = rand([0, 1], 10, 10)\n\n# Apply distance transform\ntransformed = transform(boolean_indicator(arr))\n\n# Create visualization\nfig = Figure(size = (800, 400))\nax1 = Axis(fig[1, 1], title = \"Original\")\nax2 = Axis(fig[1, 2], title = \"Distance Transform\")\nheatmap!(ax1, arr, colormap = :grays)\nheatmap!(ax2, transformed, colormap = :grays)\nfig\n\n\n\n\n\n\n\n\n\n\nReal-World Example\nLet’s apply a distance transform to a real image:\n\nusing Images\n\n# Download and load example image\nimg = load(download(\"http://docs.opencv.org/3.1.0/water_coins.jpg\"))\n\n# Convert to binary image\nimg_bw = Gray.(img) .&gt; 0.5\n\n# Apply distance transform\nimg_tfm = transform(boolean_indicator(img_bw))\n\n# Visualize\nfig = Figure(size = (900, 300))\nax1 = Axis(fig[1, 1], title = \"Original Image\")\nax2 = Axis(fig[1, 2], title = \"Segmented Image\")\nax3 = Axis(fig[1, 3], title = \"Distance Transform\")\nheatmap!(ax1, rotr90(img), colormap = :grays)\nheatmap!(ax2, rotr90(img_bw), colormap = :grays)\nheatmap!(ax3, rotr90(img_tfm), colormap = :grays)\nhidedecorations!.([ax1, ax2, ax3])\nfig\n\n\n\n\n\n\n\n\n\n\nUnderstanding Euclidean Distance\nThe library, by default, returns the squared Euclidean distance. If you need the true Euclidean distance, you can take the square root of each element:\n\n# Create sample binary array\narray2 = [\n    0 1 1 0 1\n    0 0 0 1 0\n    1 1 0 0 0\n]\n\n# Convert to boolean indicator\narray2_bool = boolean_indicator(array2)\n\n# Apply squared Euclidean distance transform\nsq_euc_transform = transform(array2_bool)\n\n# Convert to true Euclidean distance\neuc_transform = sqrt.(sq_euc_transform)\n\n# Display results\nprintln(\"Squared Euclidean Distance: $(sq_euc_transform)\")\nprintln(\"Euclidean Distance: $(euc_transform)\")\n\nSquared Euclidean Distance: Float32[1.0 0.0 0.0 1.0 0.0; 1.0 1.0 1.0 0.0 1.0; 0.0 0.0 1.0 1.0 2.0]\nEuclidean Distance: Float32[1.0 0.0 0.0 1.0 0.0; 1.0 1.0 1.0 0.0 1.0; 0.0 0.0 1.0 1.0 1.4142135]\n\n\n\n\nComparison with ImageMorphology.jl\n\nusing ImageMorphology: distance_transform, feature_transform\n\n# Apply ImageMorphology distance transform\neuc_transform2 = distance_transform(feature_transform(Bool.(array2)))\n\n# Compare results\nprintln(\"Are the results approximately equal?\")\nisapprox(euc_transform2, euc_transform; rtol = 1e-2)\n\nAre the results approximately equal?\n\n\ntrue",
     "crumbs": [
       "Home",
       "User Guide"
@@ -59,7 +59,7 @@
     "href": "julia/guide.html#advanced-features",
     "title": "User Guide",
     "section": "Advanced Features",
-    "text": "Advanced Features\n\nMulti-threading\nDistanceTransforms.jl efficiently utilizes multi-threading, particularly in its Felzenszwalb distance transform algorithm.\n⚠️ Julia might only load with 1 thread which makes the actual benchmark below meaningless and potentially confusing. Use this for understanding how to use the threaded kwarg\n\nusing BenchmarkTools\nusing Base.Threads: nthreads\n\n# Create a random binary array\nx = boolean_indicator(rand([0, 1], 1000, 1000))\n\n# Single-threaded benchmark\nsingle_threaded = @benchmark transform($x; threaded = false)\n\n# Multi-threaded benchmark\nmulti_threaded = @benchmark transform($x; threaded = true)\n\n# Display results\nprintln(\"Number of threads: $(nthreads())\")\nprintln(\"Single-threaded minimum time: $(minimum(single_threaded).time / 1e6) ms\")\nprintln(\"Multi-threaded minimum time: $(minimum(multi_threaded).time / 1e6) ms\")\nprintln(\"Speedup factor: $(minimum(single_threaded).time / minimum(multi_threaded).time)\")\n\nNumber of threads: 1\nSingle-threaded minimum time: 17.071291 ms\nMulti-threaded minimum time: 17.319625 ms\nSpeedup factor: 0.9856616987954416\n\n\n\n\nGPU Acceleration\nDistanceTransforms.jl extends its performance capabilities with GPU acceleration. The library uses Julia’s multiple dispatch to automatically leverage GPU resources when available.\n\nCUDA Example\nusing CUDA\nusing DistanceTransforms\n\n# Create a random array on GPU\nx_gpu = CUDA.rand([0, 1], 1000, 1000)\nx_gpu = boolean_indicator(x_gpu)\n\n# The transform function automatically uses GPU\nresult_gpu = transform(x_gpu)\n\n# Transfer result back to CPU if needed\nresult_cpu = Array(result_gpu)\n\n\nMetal Example\nusing Metal\nusing DistanceTransforms\n\n# Create a random array on GPU\nx_gpu = Metal.rand([0, 1], 1000, 1000)\nx_gpu = boolean_indicator(x_gpu)\n\n# The transform function automatically uses GPU\nresult_gpu = transform(x_gpu)\n\n# Transfer result back to CPU if needed\nresult_cpu = Array(result_gpu)\n\n\n\nPerformance Benchmarks\nPerformance comparison across different implementations for 2D and 3D distance transforms:\n\n\n\nPerformance Comparison\n\n\nAs shown in the graph, the GPU implementation demonstrates superior performance, especially for larger arrays.\n\n\nBest Practices\n\nFor small arrays (&lt;100x100): CPU with multi-threading is often sufficient\nFor medium arrays: Multi-threaded CPU may be faster than GPU due to lower overhead\nFor large arrays (&gt;1000x1000): GPU acceleration provides the best performance\nFor 3D data: GPU acceleration is strongly recommended due to the computational complexity",
+    "text": "Advanced Features\n\nMulti-threading\nDistanceTransforms.jl efficiently utilizes multi-threading, particularly in its Felzenszwalb distance transform algorithm.\n⚠️ Julia might only load with 1 thread which makes the actual benchmark below meaningless and potentially confusing. Use this for understanding how to use the threaded kwarg ⚠️\n\nusing BenchmarkTools\nusing Base.Threads: nthreads\n\n# Create a random binary array\nx = boolean_indicator(rand([0, 1], 1000, 1000))\n\n# Single-threaded benchmark\nsingle_threaded = @benchmark transform($x; threaded = false)\n\n# Multi-threaded benchmark\nmulti_threaded = @benchmark transform($x; threaded = true)\n\n# Display results\nprintln(\"Number of threads: $(nthreads())\")\nprintln(\"Single-threaded minimum time: $(minimum(single_threaded).time / 1e6) ms\")\nprintln(\"Multi-threaded minimum time: $(minimum(multi_threaded).time / 1e6) ms\")\nprintln(\"Speedup factor: $(minimum(single_threaded).time / minimum(multi_threaded).time)\")\n\nNumber of threads: 1\nSingle-threaded minimum time: 17.508084 ms\nMulti-threaded minimum time: 17.558 ms\nSpeedup factor: 0.9971570793940084\n\n\n\n\nGPU Acceleration\nDistanceTransforms.jl extends its performance capabilities with GPU acceleration. The library uses Julia’s multiple dispatch to automatically leverage GPU resources when available.\n\nCUDA Example\nusing CUDA\nusing DistanceTransforms\n\n# Create a random array on GPU\nx_gpu = CUDA.rand([0, 1], 1000, 1000)\nx_gpu = boolean_indicator(x_gpu)\n\n# The transform function automatically uses GPU\nresult_gpu = transform(x_gpu)\n\n# Transfer result back to CPU if needed\nresult_cpu = Array(result_gpu)\n\n\nMetal Example\nusing Metal\nusing DistanceTransforms\n\n# Create a random array on GPU\nx_gpu = Metal.rand([0, 1], 1000, 1000)\nx_gpu = boolean_indicator(x_gpu)\n\n# The transform function automatically uses GPU\nresult_gpu = transform(x_gpu)\n\n# Transfer result back to CPU if needed\nresult_cpu = Array(result_gpu)\n\n\n\nPerformance Benchmarks\nPerformance comparison across different implementations for 2D and 3D distance transforms:\n\n\n\nPerformance Comparison\n\n\nAs shown in the graph, the GPU implementation demonstrates superior performance, especially for larger arrays.\n\n\nBest Practices\n\nFor small arrays (&lt;100x100): CPU with multi-threading is often sufficient\nFor medium arrays: Multi-threaded CPU may be faster than GPU due to lower overhead\nFor large arrays (&gt;1000x1000): GPU acceleration provides the best performance\nFor 3D data: GPU acceleration is strongly recommended due to the computational complexity",
     "crumbs": [
       "Home",
       "User Guide"
@@ -91,6 +91,13 @@
     "text": "Features\n\n\n\n\n\n\n\nFeature\nDescription\n\n\n\n\n🚀 High Performance\nOptimized algorithms for CPU and GPU\n\n\n🧵 Multi-threading\nParallel processing on CPU\n\n\n🖥️ GPU Acceleration\nSupport for NVIDIA (CUDA), AMD (ROCm), Apple (Metal), and Intel (oneAPI)\n\n\n🐍 Python Integration\nFull Python support via distance_transforms\n\n\n📏 Versatile Dimensions\nWorks with 1D, 2D, and 3D arrays\n\n\n📚 Well Documented\nComprehensive guides and examples"
   },
   {
+    "objectID": "index.html#acknowledgements",
+    "href": "index.html#acknowledgements",
+    "title": "Distance Transforms",
+    "section": "Acknowledgements",
+    "text": "Acknowledgements\nThis project would not be possible without several excellent Julia packages:\n\nKernelAbstractions.jl: Provides hardware-agnostic GPU code that runs across different GPU platforms\nAcceleratedKernels.jl: Makes it dead simple to write GPU kernels with normal Julia code\nPythonCall.jl: Powers the Python interoperability layer for seamless integration\nDLPack.jl: Enables zero-copy tensor sharing with PyTorch for efficient GPU operations"
+  },
+  {
     "objectID": "index.html#why-this-library",
     "href": "index.html#why-this-library",
     "title": "Distance Transforms",
@@ -102,14 +109,14 @@
     "href": "index.html#choose-your-language",
     "title": "Distance Transforms",
     "section": "Choose Your Language",
-    "text": "Choose Your Language\n\n\n\nJulia\nusing DistanceTransforms\narr = rand([0, 1], 10, 10)\nresult = transform(boolean_indicator(arr))\nGet started with Julia →\n\n\n\nPython\nimport numpy as np\nfrom py_distance_transforms import transform\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\nresult = transform(arr)\nGet started with Python →"
+    "text": "Choose Your Language\n\n\n\nJulia\nusing DistanceTransforms\narr = rand([0, 1], 10, 10)\nresult = transform(boolean_indicator(arr))\nGet started with Julia →\n\n\n\nPython\nimport numpy as np\nimport distance_transforms as dts\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\nresult = dts.transform(arr)\nGet started with Python →"
   },
   {
     "objectID": "index.html#installation",
     "href": "index.html#installation",
     "title": "Distance Transforms",
     "section": "Installation",
-    "text": "Installation\n\n\n\nJulia\nusing Pkg\nPkg.add(\"DistanceTransforms\")\n\n\n\nPython\npip install py_distance_transforms"
+    "text": "Installation\n\n\n\nJulia\nusing Pkg\nPkg.add(\"DistanceTransforms\")\n\n\n\nPython\npip install distance_transforms"
   },
   {
     "objectID": "index.html#citation",
@@ -128,56 +135,100 @@
   {
     "objectID": "python/index.html",
     "href": "python/index.html",
-    "title": "py-distance-transforms",
+    "title": "Overview",
     "section": "",
-    "text": "py_distance_transforms is a Python package that provides efficient distance transform operations on arrays. It is a wrapper around the Julia package DistanceTransforms.jl, bringing its high-performance capabilities to the Python ecosystem.",
+    "text": "distance_transforms is a high-performance Python package for computing distance transforms. It offers significant performance improvements over traditional implementations, especially for large arrays.",
     "crumbs": [
       "Home",
-      "py-distance-transforms"
+      "Overview"
     ]
   },
   {
     "objectID": "python/index.html#installation",
     "href": "python/index.html#installation",
-    "title": "py-distance-transforms",
+    "title": "Overview",
     "section": "Installation",
-    "text": "Installation\nInstall py_distance_transforms using pip:\npip install py_distance_transforms",
+    "text": "Installation\nInstall distance_transforms using pip:\npip install distance_transforms",
     "crumbs": [
       "Home",
-      "py-distance-transforms"
+      "Overview"
     ]
   },
   {
     "objectID": "python/index.html#quick-example",
     "href": "python/index.html#quick-example",
-    "title": "py-distance-transforms",
+    "title": "Overview",
     "section": "Quick Example",
-    "text": "Quick Example\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom py_distance_transforms import transform\n\n# Create a random binary array\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\n\n# Apply distance transform\nresult = transform(arr)\n\n# Visualize\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))\nax1.imshow(arr, cmap='gray')\nax1.set_title('Original')\nax2.imshow(result, cmap='gray')\nax2.set_title('Distance Transform')\nplt.show()\n\n\n\nExample distance transform visualization",
+    "text": "Quick Example\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport distance_transforms as dts\n\n# Create a random binary array\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\n\n# Apply distance transform\nresult = dts.transform(arr)",
     "crumbs": [
       "Home",
-      "py-distance-transforms"
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "python/index.html#what-is-a-distance-transform",
+    "href": "python/index.html#what-is-a-distance-transform",
+    "title": "Overview",
+    "section": "What is a Distance Transform?",
+    "text": "What is a Distance Transform?\nA distance transform converts a binary image into a grayscale image where the value of each pixel is the distance to the nearest foreground pixel (typically marked as 1 in the binary image). This transformation is useful in various applications including:\n\nPath planning and navigation\nMorphological operations\nFeature extraction\nMedical image analysis\nComputer vision algorithms",
+    "crumbs": [
+      "Home",
+      "Overview"
     ]
   },
   {
     "objectID": "python/index.html#key-features",
     "href": "python/index.html#key-features",
-    "title": "py-distance-transforms",
+    "title": "Overview",
     "section": "Key Features",
-    "text": "Key Features\n\nHigh Performance: Directly leverages the optimized Julia implementation\nGPU Support: CUDA acceleration for NVIDIA GPUs\nSimple API: Clean, Pythonic interface\nNumPy Integration: Works seamlessly with NumPy arrays\nPyTorch Support: Compatible with PyTorch tensors\nMulti-Dimensional: Works with 1D, 2D, and 3D arrays",
+    "text": "Key Features\n\nHigh Performance: Optimized algorithms for CPU and GPU\nJulia Integration: Powered by DistanceTransforms.jl for maximum efficiency\nGPU Acceleration: Support for NVIDIA GPUs through PyTorch and CUDA\nSimple API: Clean, intuitive Python interface\nNumPy Integration: Works seamlessly with NumPy arrays\nPyTorch Support: Native support for PyTorch CUDA tensors\nMulti-Dimensional: Works with 1D, 2D, and 3D arrays",
     "crumbs": [
       "Home",
-      "py-distance-transforms"
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "python/index.html#performance-comparison",
+    "href": "python/index.html#performance-comparison",
+    "title": "Overview",
+    "section": "Performance Comparison",
+    "text": "Performance Comparison\ndistance_transforms significantly outperforms traditional implementations:\nimport numpy as np\nimport torch\nimport time\nimport distance_transforms as dts\nfrom scipy.ndimage import distance_transform_edt\n\n# Create a large 3D array\nsize = (100, 100, 100)\narr = np.random.choice([0, 1], size=size).astype(np.float32)\n\n# Benchmark SciPy\nstart = time.time()\nscipy_result = distance_transform_edt(arr == 0) ** 2\nprint(f\"SciPy time: {time.time() - start:.3f}s\")\n\n# Benchmark distance_transforms (CPU)\nstart = time.time()\ndts_result = dts.transform(arr)\nprint(f\"distance_transforms CPU time: {time.time() - start:.3f}s\")\n\n# Benchmark distance_transforms (GPU)\nif torch.cuda.is_available():\n    tensor = torch.tensor(arr, device='cuda')\n    start = time.time()\n    dts_gpu_result = dts.transform_cuda(tensor)\n    print(f\"distance_transforms GPU time: {time.time() - start:.3f}s\")\nTypical results on modern hardware: - SciPy: ~1.200s - distance_transforms (CPU): ~0.500s - distance_transforms (GPU): ~0.120s",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "python/index.html#api-preview",
+    "href": "python/index.html#api-preview",
+    "title": "Overview",
+    "section": "API Preview",
+    "text": "API Preview\n# CPU transform with NumPy\nimport numpy as np\nimport distance_transforms as dts\narr = np.random.choice([0, 1], size=(100, 100)).astype(np.float32)\nresult = dts.transform(arr)\n\n# GPU transform with PyTorch\nimport torch\nimport distance_transforms as dts\ntensor = torch.rand((100, 100), device='cuda')\ntensor = (tensor &gt; 0.5).float()\nresult = dts.transform_cuda(tensor)",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "python/index.html#when-to-use-distance-transforms",
+    "href": "python/index.html#when-to-use-distance-transforms",
+    "title": "Overview",
+    "section": "When to Use Distance Transforms",
+    "text": "When to Use Distance Transforms\nDistance transforms are particularly useful in:\n\nMedical Image Analysis: Segment organs, measure distances between anatomical structures\nComputer Vision: Object recognition, shape analysis, skeletonization\nPath Planning: Navigation algorithms in robotics\nDeep Learning: Custom loss functions like Hausdorff distance for segmentation tasks",
+    "crumbs": [
+      "Home",
+      "Overview"
     ]
   },
   {
     "objectID": "python/index.html#next-steps",
     "href": "python/index.html#next-steps",
-    "title": "py-distance-transforms",
+    "title": "Overview",
     "section": "Next Steps",
-    "text": "Next Steps\n\nExplore the User Guide for comprehensive documentation\nCheck the API Reference for detailed function information",
+    "text": "Next Steps\n\nExplore the User Guide for comprehensive documentation\nCheck the API Reference for detailed function information\nVisit our GitHub repository for the latest updates",
     "crumbs": [
       "Home",
-      "py-distance-transforms"
+      "Overview"
     ]
   },
   {
@@ -185,7 +236,7 @@
     "href": "python/guide.html",
     "title": "User Guide",
     "section": "",
-    "text": "This guide covers both basic and advanced usage of the py-distance-transforms library.",
+    "text": "This guide covers both basic and advanced usage of the distance_transforms library.",
     "crumbs": [
       "Home",
       "User Guide"
@@ -196,7 +247,7 @@
     "href": "python/guide.html#getting-started",
     "title": "User Guide",
     "section": "Getting Started",
-    "text": "Getting Started\n\nInstallation\npip install py_distance_transforms\nFor GPU support, make sure you have PyTorch with CUDA installed:\npip install torch --extra-index-url https://download.pytorch.org/whl/cu118\n\n\nBasic Usage\nThe primary function in py_distance_transforms is transform. This function takes a binary array (with 0s and 1s) and calculates the squared Euclidean distance from each 0 pixel to the nearest 1 pixel.\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom py_distance_transforms import transform\n\n# Create a random binary array\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\n\n# Apply distance transform\nresult = transform(arr)\n\n# Visualize\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))\nax1.imshow(arr, cmap='gray')\nax1.set_title('Original')\nax2.imshow(result, cmap='gray')\nax2.set_title('Distance Transform')\nplt.tight_layout()\nplt.show()\n\n\nReal-World Example\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom py_distance_transforms import transform\nfrom skimage import io, color, filters\n\n# Load image and process\nimg = io.imread(\"sample.jpg\")\nimg_gray = color.rgb2gray(img)\nimg_binary = img_gray &gt; filters.threshold_otsu(img_gray)\nimg_dist = transform(img_binary.astype(np.float32))\n\n# Visualize\nfig, axes = plt.subplots(1, 3, figsize=(15, 5))\naxes[0].imshow(img)\naxes[0].set_title('Original Image')\naxes[1].imshow(img_binary, cmap='gray')\naxes[1].set_title('Binary Image')\naxes[2].imshow(img_dist, cmap='viridis')\naxes[2].set_title('Distance Transform')",
+    "text": "Getting Started\n\nInstallation\npip install distance_transforms\nFor GPU support, make sure you have PyTorch with CUDA installed.\n\n\nBasic Usage\nThe primary function in distance_transforms is transform. This function takes a binary array (with 0s and 1s) and calculates the squared Euclidean distance from each 0 pixel to the nearest 1 pixel.\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport distance_transforms as dts\n\n# Create a random binary array\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\n\n# Apply distance transform\nresult = dts.transform(arr)\n\n# Visualize\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))\nax1.imshow(arr, cmap='gray')\nax1.set_title('Original')\nax2.imshow(result, cmap='gray')\nax2.set_title('Distance Transform')\nplt.tight_layout()\nplt.show()\n\n\nReal-World Example\nimport numpy as np\nimport matplotlib.pyplot as plt\nimport distance_transforms as dts\nfrom skimage import io, color, filters\n\n# Load image and process\nimg = io.imread(\"sample.jpg\")\nimg_gray = color.rgb2gray(img)\nimg_binary = img_gray &gt; filters.threshold_otsu(img_gray)\nimg_dist = dts.transform(img_binary.astype(np.float32))\n\n# Visualize\nfig, axes = plt.subplots(1, 3, figsize=(15, 5))\naxes[0].imshow(img)\naxes[0].set_title('Original Image')\naxes[1].imshow(img_binary, cmap='gray')\naxes[1].set_title('Binary Image')\naxes[2].imshow(img_dist, cmap='viridis')\naxes[2].set_title('Distance Transform')\nplt.tight_layout()\nplt.show()",
     "crumbs": [
       "Home",
       "User Guide"
@@ -207,18 +258,18 @@
     "href": "python/guide.html#advanced-features",
     "title": "User Guide",
     "section": "Advanced Features",
-    "text": "Advanced Features\n\nGPU Acceleration\npy_distance_transforms supports GPU acceleration for NVIDIA GPUs using PyTorch tensors.\nimport torch\nfrom py_distance_transforms import transform_cuda\n\n# Create a tensor on GPU\nx_gpu = torch.rand((100, 100), device='cuda')\nx_gpu = (x_gpu &gt; 0.5).float()\n\n# Apply transform on GPU\nresult_gpu = transform_cuda(x_gpu)\n\n\nWorking with 3D Data\npy_distance_transforms supports 3D arrays as well:\nimport numpy as np\nfrom py_distance_transforms import transform\n\n# Create a 3D binary array\narr_3d = np.zeros((20, 20, 20), dtype=np.float32)\narr_3d[5, 5, 5] = 1\narr_3d[15, 15, 15] = 1\n\n# Apply distance transform\nresult_3d = transform(arr_3d)",
+    "text": "Advanced Features\n\nGPU Acceleration\ndistance_transforms provides a specific function for GPU acceleration using PyTorch tensors: transform_cuda.\nimport torch\nimport distance_transforms as dts\n\n# Create a tensor on GPU\nx_gpu = torch.rand((100, 100), device='cuda')\nx_gpu = (x_gpu &gt; 0.5).float()  # Convert to binary (0s and 1s)\n\n# Apply transform on GPU\nresult_gpu = dts.transform_cuda(x_gpu)\n\n\nWorking with 3D Data\nBoth transform and transform_cuda support 3D arrays as well:\nimport numpy as np\nimport distance_transforms as dts\n\n# Create a 3D binary array\narr_3d = np.zeros((20, 20, 20), dtype=np.float32)\narr_3d[5, 5, 5] = 1\narr_3d[15, 15, 15] = 1\n\n# Apply distance transform\nresult_3d = dts.transform(arr_3d)",
     "crumbs": [
       "Home",
       "User Guide"
     ]
   },
   {
-    "objectID": "python/guide.html#performance-comparison",
-    "href": "python/guide.html#performance-comparison",
+    "objectID": "python/guide.html#performance-benchmarks",
+    "href": "python/guide.html#performance-benchmarks",
     "title": "User Guide",
-    "section": "Performance Comparison",
-    "text": "Performance Comparison\npy_distance_transforms generally outperforms other Python implementations, especially for large arrays and when using GPU acceleration:\n\n\n\nImplementation\n100×100\n1000×1000\n100×100×100\n\n\n\n\nSciPy\n2.5 ms\n250 ms\n1200 ms\n\n\npy_distance_transforms (CPU)\n1.2 ms\n120 ms\n500 ms\n\n\npy_distance_transforms (GPU)\n0.8 ms\n25 ms\n120 ms\n\n\n\nTimes are approximate and may vary based on hardware.",
+    "section": "Performance Benchmarks",
+    "text": "Performance Benchmarks\ndistance_transforms generally outperforms other Python implementations, especially for large arrays and when using GPU acceleration:\n\n\n\nImplementation\n100×100\n1000×1000\n100×100×100\n\n\n\n\nSciPy\n2.5 ms\n250 ms\n1200 ms\n\n\ndistance_transforms (CPU)\n1.2 ms\n120 ms\n500 ms\n\n\ndistance_transforms (GPU)\n0.8 ms\n25 ms\n120 ms\n\n\n\nTimes are approximate and may vary based on hardware.\n\nBenchmarking Code Example\nYou can benchmark the performance yourself:\nimport numpy as np\nimport torch\nimport time\nimport distance_transforms as dts\nfrom scipy.ndimage import distance_transform_edt\n\n# Create test data\nsize = (224, 224)\narr = np.random.choice([0, 1], size=size).astype(np.float32)\ntensor = torch.tensor(arr, device='cuda')\n\n# Benchmark distance_transforms (CPU)\nstart = time.time()\nresult_cpu = dts.transform(arr)\ncpu_time = time.time() - start\n\n# Benchmark distance_transforms (GPU)\nstart = time.time()\nresult_gpu = dts.transform_cuda(tensor)\ngpu_time = time.time() - start\n\n# Benchmark SciPy\nstart = time.time()\nresult_scipy = distance_transform_edt(arr == 0) ** 2\nscipy_time = time.time() - start\n\nprint(f\"CPU time: {cpu_time:.4f}s\")\nprint(f\"GPU time: {gpu_time:.4f}s\")\nprint(f\"SciPy time: {scipy_time:.4f}s\")\nprint(f\"GPU speedup vs. CPU: {cpu_time/gpu_time:.1f}x\")\nprint(f\"GPU speedup vs. SciPy: {scipy_time/gpu_time:.1f}x\")",
     "crumbs": [
       "Home",
       "User Guide"
@@ -229,7 +280,29 @@
     "href": "python/guide.html#integration-with-deep-learning",
     "title": "User Guide",
     "section": "Integration with Deep Learning",
-    "text": "Integration with Deep Learning\npy_distance_transforms can be used in deep learning workflows, particularly for tasks like computing Hausdorff distance loss:\nimport torch\nfrom py_distance_transforms import transform_cuda\n\ndef hausdorff_loss(pred, target):\n    # Convert predictions to binary\n    pred_binary = (pred &gt; 0.5).float()\n    \n    # Calculate distance transforms\n    pred_dt = transform_cuda(pred_binary)\n    target_dt = transform_cuda(target)\n    \n    # Compute Hausdorff distances\n    d_pt = torch.mean(target * pred_dt)\n    d_tp = torch.mean(pred_binary * target_dt)\n    \n    return d_pt + d_tp",
+    "text": "Integration with Deep Learning\ndistance_transforms can be integrated with deep learning workflows, particularly for tasks like computing Hausdorff distance loss:\nimport torch\nimport torch.nn.functional as F\nimport distance_transforms as dts\n\ndef hausdorff_loss(pred, target):\n    # Convert predictions to binary\n    pred_binary = (pred &gt; 0.5).float()\n    \n    # Calculate distance transforms\n    pred_dt = dts.transform_cuda(pred_binary)\n    target_dt = dts.transform_cuda(target)\n    \n    # Compute Hausdorff distances\n    d_pt = torch.mean(target * pred_dt)\n    d_tp = torch.mean(pred_binary * target_dt)\n    \n    return d_pt + d_tp\n\nExample in a PyTorch Training Loop\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\nimport distance_transforms as dts\n\n# Define a simple model\nmodel = nn.Sequential(\n    nn.Conv2d(1, 16, 3, padding=1),\n    nn.ReLU(),\n    nn.Conv2d(16, 1, 3, padding=1),\n    nn.Sigmoid()\n)\n\noptimizer = optim.Adam(model.parameters(), lr=0.001)\n\n# Training loop with Hausdorff loss\ndef train(model, dataloader, epochs=10):\n    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')\n    model.to(device)\n    \n    for epoch in range(epochs):\n        for inputs, targets in dataloader:\n            inputs, targets = inputs.to(device), targets.to(device)\n            \n            # Forward pass\n            outputs = model(inputs)\n            \n            # Calculate loss\n            dice_loss = F.binary_cross_entropy(outputs, targets)\n            \n            # Add Hausdorff distance loss\n            outputs_binary = (outputs &gt; 0.5).float()\n            targets_binary = (targets &gt; 0.5).float()\n            \n            pred_dt = dts.transform_cuda(outputs_binary)\n            target_dt = dts.transform_cuda(targets_binary)\n            \n            hausdorff = torch.mean(targets_binary * pred_dt) + torch.mean(outputs_binary * target_dt)\n            \n            # Combine losses\n            loss = dice_loss + 0.5 * hausdorff\n            \n            # Backward pass and optimize\n            optimizer.zero_grad()\n            loss.backward()\n            optimizer.step()\n            \n        print(f\"Epoch {epoch+1}, Loss: {loss.item():.4f}\")",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/guide.html#first-time-import-note",
+    "href": "python/guide.html#first-time-import-note",
+    "title": "User Guide",
+    "section": "First-Time Import Note",
+    "text": "First-Time Import Note\nThe first time you import distance_transforms, it may take a while (up to 8 minutes) as it sets up the Julia environment and precompiles the necessary Julia packages. Subsequent imports will be much faster.\n# First import may be slow\nimport distance_transforms as dts  # May take up to 8 minutes\n\n# Create a small test array to verify everything works\nimport numpy as np\ntest_arr = np.random.choice([0, 1], size=(5, 5)).astype(np.float32)\nresult = dts.transform(test_arr)\nprint(result)",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/guide.html#implementation-details",
+    "href": "python/guide.html#implementation-details",
+    "title": "User Guide",
+    "section": "Implementation Details",
+    "text": "Implementation Details\n\nHow it Works\ndistance_transforms is a Python wrapper around the Julia package DistanceTransforms.jl. The package uses the following approach:\n\nFor CPU operations:\n\nTakes a NumPy array and converts it to a Julia array\nApplies the boolean indicator function to prepare the data\nComputes the distance transform in Julia\nConverts the result back to a NumPy array\n\nFor GPU operations:\n\nTakes a PyTorch CUDA tensor and shares it with Julia using DLPack (no copying)\nApplies the boolean indicator function in Julia\nComputes the distance transform in Julia using GPU acceleration\nShares the result back to PyTorch using DLPack",
     "crumbs": [
       "Home",
       "User Guide"
@@ -240,7 +313,7 @@
     "href": "python/guide.html#next-steps",
     "title": "User Guide",
     "section": "Next Steps",
-    "text": "Next Steps\nFor more advanced usage examples and detailed API information, refer to the API Reference.",
+    "text": "Next Steps\nFor detailed API information and function signatures, refer to the API Reference.",
     "crumbs": [
       "Home",
       "User Guide"
@@ -251,7 +324,7 @@
     "href": "python/api.html",
     "title": "API Reference",
     "section": "",
-    "text": "This page documents all the exported functions in py-distance-transforms.",
+    "text": "This page documents all the exported functions in the distance_transforms Python package.",
     "crumbs": [
       "Home",
       "API Reference"
@@ -262,40 +335,18 @@
     "href": "python/api.html#core-functions",
     "title": "API Reference",
     "section": "Core Functions",
-    "text": "Core Functions\n\ntransform\ntransform(arr)\nComputes the squared Euclidean distance transform of a binary array.\nParameters: - arr : numpy.ndarray - A binary array (0s and 1s) of any dimension\nReturns: - numpy.ndarray - The squared Euclidean distance transform\nExample:\nimport numpy as np\nfrom py_distance_transforms import transform\n\narr = np.array([\n    [0, 1, 1, 0, 1],\n    [0, 0, 0, 1, 0],\n    [1, 1, 0, 0, 0]\n], dtype=np.float32)\n\nresult = transform(arr)\nprint(result)\n\n\ntransform_cuda\ntransform_cuda(tensor)\nGPU-accelerated version of the distance transform function.\nParameters: - tensor : torch.Tensor - A binary tensor (0s and 1s) of any dimension, located on a CUDA device\nReturns: - torch.Tensor - The squared Euclidean distance transform, located on the same CUDA device\nExample:\nimport torch\nfrom py_distance_transforms import transform_cuda\n\n# Create a tensor on GPU\ntensor = torch.zeros((10, 10), device='cuda')\ntensor[2, 2] = 1\ntensor[7, 7] = 1\n\nresult = transform_cuda(tensor)\nprint(result)",
+    "text": "Core Functions\n\ntransform\nimport distance_transforms as dts\n\nresult = dts.transform(arr)\nComputes the squared Euclidean distance transform of a binary array using NumPy arrays.\n\nParameters\n\narr: A NumPy array containing binary values (0s and 1s)\n\nCan be 1D, 2D, or 3D\nMust be a NumPy array type\n\n\n\n\nReturns\n\nA NumPy array containing the squared Euclidean distance from each 0 pixel to the nearest 1 pixel\nThe output has the same shape and type as the input array\n\n\n\nExamples\nimport numpy as np\nimport distance_transforms as dts\n\n# Basic usage with NumPy\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\nresult = dts.transform(arr)\n\n\n\ntransform_cuda\nimport distance_transforms as dts\nimport torch\n\nresult = dts.transform_cuda(tensor)\nComputes the squared Euclidean distance transform of a binary array using PyTorch tensors on CUDA.\n\nParameters\n\ntensor: A PyTorch tensor containing binary values (0s and 1s)\n\nMust be a CUDA tensor (on GPU)\nCan be 1D, 2D, or 3D\n\n\n\n\nReturns\n\nA PyTorch tensor containing the squared Euclidean distance from each 0 pixel to the nearest 1 pixel\nThe output has the same shape, type, and device as the input tensor\n\n\n\nExamples\nimport torch\nimport distance_transforms as dts\n\n# Create a tensor on GPU\ntensor = torch.rand((100, 100), device='cuda')\ntensor = (tensor &gt; 0.5).float()\n\n# Apply transform on GPU\nresult = dts.transform_cuda(tensor)",
     "crumbs": [
       "Home",
       "API Reference"
     ]
   },
   {
-    "objectID": "python/api.html#utility-functions",
-    "href": "python/api.html#utility-functions",
+    "objectID": "python/api.html#implementation-details",
+    "href": "python/api.html#implementation-details",
     "title": "API Reference",
-    "section": "Utility Functions",
-    "text": "Utility Functions\n\nnumpy_to_torch\nnumpy_to_torch(arr, device='cuda')\nConverts a NumPy array to a PyTorch tensor on the specified device.\nParameters: - arr : numpy.ndarray - Input NumPy array - device : str, optional - Device to place the tensor on. Default is ‘cuda’\nReturns: - torch.Tensor - PyTorch tensor on the specified device\n\n\ntorch_to_numpy\ntorch_to_numpy(tensor)\nConverts a PyTorch tensor to a NumPy array.\nParameters: - tensor : torch.Tensor - Input PyTorch tensor\nReturns: - numpy.ndarray - NumPy array",
-    "crumbs": [
-      "Home",
-      "API Reference"
-    ]
-  },
-  {
-    "objectID": "python/api.html#full-function-list",
-    "href": "python/api.html#full-function-list",
-    "title": "API Reference",
-    "section": "Full Function List",
-    "text": "Full Function List\n\n\n\n\n\n\n\nFunction\nDescription\n\n\n\n\ntransform\nComputes squared Euclidean distance transform on CPU\n\n\ntransform_cuda\nComputes squared Euclidean distance transform on GPU\n\n\nnumpy_to_torch\nConverts NumPy array to PyTorch tensor\n\n\ntorch_to_numpy\nConverts PyTorch tensor to NumPy array",
-    "crumbs": [
-      "Home",
-      "API Reference"
-    ]
-  },
-  {
-    "objectID": "python/api.html#integration-with-other-libraries",
-    "href": "python/api.html#integration-with-other-libraries",
-    "title": "API Reference",
-    "section": "Integration with Other Libraries",
-    "text": "Integration with Other Libraries\n\nNumPy\npy-distance-transforms works seamlessly with NumPy arrays:\nimport numpy as np\nfrom py_distance_transforms import transform\n\n# Create a NumPy array\narr = np.zeros((100, 100), dtype=np.float32)\narr[25:75, 25:75] = 1\n\n# Apply transform\nresult = transform(arr)\n\n\nPyTorch\nFor PyTorch integration, use the CUDA-specific functions:\nimport torch\nfrom py_distance_transforms import transform_cuda\n\n# Create a PyTorch tensor\ntensor = torch.zeros((100, 100), device='cuda')\ntensor[25:75, 25:75] = 1\n\n# Apply transform\nresult = transform_cuda(tensor)\n\n\nscikit-image\nWorks alongside scikit-image for more advanced image processing:\nimport numpy as np\nfrom skimage import io, color, morphology\nfrom py_distance_transforms import transform\n\n# Load and process image\nimg = io.imread('image.png', as_gray=True)\nbinary = img &gt; 0.5\n\n# Apply morphological operations\ncleaned = morphology.remove_small_objects(binary)\n\n# Apply distance transform\ndist = transform(cleaned.astype(np.float32))",
+    "section": "Implementation Details",
+    "text": "Implementation Details\n\nCPU Implementation\nWhen running on CPU with transform(), distance_transforms wraps the Julia implementation from DistanceTransforms.jl:\n\nThe NumPy array is converted to a Julia array\nThe binary indicator function is applied to prepare the data\nThe distance transform is computed in Julia\nThe result is converted back to a NumPy array with the same dtype as the input\n\n\n\nGPU Implementation\nWhen using transform_cuda() with CUDA tensors:\n\nThe PyTorch tensor is shared with Julia using DLPack without copying\nThe computation is performed using Julia’s GPU optimizations\nThe result is shared back to PyTorch using DLPack\n\n\n\nPerformance Considerations\n\nGPU acceleration works best for large arrays (typically 128×128 or larger)\nThe first call to either function may be slower due to Julia’s JIT compilation",
     "crumbs": [
       "Home",
       "API Reference"
@@ -306,42 +357,35 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "DistanceTransforms is a high-performance library for computing distance transforms, available for both Julia and Python. The library is designed to be efficient, versatile, and easy to use, with support for multi-threading and GPU acceleration.\n\n\nDistanceTransforms.jl was developed by Dale Black and contributors to address the need for fast, GPU-accelerated distance transforms in Julia. The Python wrapper, py-distance-transforms, was later added to make these capabilities accessible to the Python community.\n\n\n\n\nFast CPU implementation using the Felzenszwalb algorithm\nMulti-threading support for enhanced CPU performance\nGPU acceleration for NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)\nSupport for arrays of various dimensions (1D, 2D, 3D)\nClean, simple API in both Julia and Python\nComprehensive documentation and examples\n\n\n\n\nDistance transforms have numerous applications across different fields:\n\nImage Processing: Segmentation, skeletonization, feature extraction\nComputer Vision: Object recognition, shape analysis\nMedical Imaging: Registration, segmentation, analysis\nComputational Geometry: Voronoi diagrams, medial axis transforms\nMachine Learning: Distance-based features, loss functions\n\n\n\n\nThe core algorithm implemented in DistanceTransforms.jl is based on the work of Felzenszwalb and Huttenlocher, which provides an efficient method for computing the Euclidean distance transform in O(n) time complexity.\nFor GPU acceleration, the library uses KernelAbstractions.jl, which allows the code to be hardware-agnostic and run efficiently across different GPU architectures.\n\n\n\nDistanceTransforms.jl and its Python wrapper wouldn’t be possible without the contributions of many individuals and the support of the Julia and Python communities. We’d like to specifically acknowledge:\n\nThe original authors of the distance transform algorithms\nContributors to related Julia packages like ImageMorphology.jl\nThe developers of KernelAbstractions.jl, which enables the hardware-agnostic GPU implementation\nPythonCall.jl and juliacall for enabling the Python wrapper\n\n\n\n\nIf you use DistanceTransforms in your research, please cite:\n@software{DistanceTransforms,\n  author = {Black, Dale and Contributors},\n  title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},\n  url = {https://github.com/Dale-Black/DistanceTransforms.jl},\n  year = {2023}\n}\n\n\n\nDistanceTransforms is available under the MIT License.\nMIT License\n\nCopyright (c) 2023 Dale Black and contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n\n\nFor questions, issues, or contributions: - GitHub: DistanceTransforms.jl - GitHub: py-distance-transforms"
-  },
-  {
-    "objectID": "about.html#project-history",
-    "href": "about.html#project-history",
-    "title": "About",
-    "section": "",
-    "text": "DistanceTransforms.jl was developed by Dale Black and contributors to address the need for fast, GPU-accelerated distance transforms in Julia. The Python wrapper, py-distance-transforms, was later added to make these capabilities accessible to the Python community."
+    "text": "DistanceTransforms is a high-performance library for computing distance transforms, available for both Julia and Python. The library provides efficient, GPU-accelerated distance transform operations with a simple API.\n\n\n\nHigh Performance: Optimized for CPU and GPU\nMulti-platform: Julia package with Python bindings\nGPU Support: NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)\nVersatile: Works with 1D, 2D, and 3D arrays\nSimple API: Clean, intuitive interfaces in both languages\n\n\n\n\nDistance transforms have numerous applications across different fields:\n\nMedical Imaging: Organ segmentation, distance metrics between structures\nComputer Vision: Object recognition, shape analysis, feature extraction\nPath Planning: Navigation algorithms in robotics\nDeep Learning: Custom loss functions like Hausdorff distance\n\n\n\n\nThe core algorithm is based on the Felzenszwalb method, providing O(n) time complexity. For GPU acceleration, the library uses KernelAbstractions.jl, allowing hardware-agnostic implementation across different GPU architectures.\nThe Python wrapper (distance_transforms) provides seamless integration with NumPy and PyTorch, enabling Python users to leverage the high-performance Julia implementation.\n\n\n\nThis project would not be possible without several excellent Julia packages:\n\nKernelAbstractions.jl: Provides hardware-agnostic GPU code that runs across different GPU platforms\nAcceleratedKernels.jl: Makes it dead simple to write GPU kernels with normal Julia code\nPythonCall.jl: Powers the Python interoperability layer for seamless integration\nDLPack.jl: Enables zero-copy tensor sharing with PyTorch for efficient GPU operations\n\nWe are grateful to the developers of these packages and the broader Julia and Python communities for their ongoing support and contributions.\n\n\n\nIf you use DistanceTransforms in your research, please cite:\n@software{DistanceTransforms,\n  author = {Black, Dale and Contributors},\n  title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},\n  url = {https://github.com/Dale-Black/DistanceTransforms.jl},\n  year = {2023}\n}\n\n\n\nDistanceTransforms is available under the MIT License.\n\n\n\n\nDistanceTransforms.jl (Julia)\ndistance_transforms (Python)"
   },
   {
     "objectID": "about.html#features",
     "href": "about.html#features",
     "title": "About",
     "section": "",
-    "text": "Fast CPU implementation using the Felzenszwalb algorithm\nMulti-threading support for enhanced CPU performance\nGPU acceleration for NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)\nSupport for arrays of various dimensions (1D, 2D, 3D)\nClean, simple API in both Julia and Python\nComprehensive documentation and examples"
+    "text": "High Performance: Optimized for CPU and GPU\nMulti-platform: Julia package with Python bindings\nGPU Support: NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)\nVersatile: Works with 1D, 2D, and 3D arrays\nSimple API: Clean, intuitive interfaces in both languages"
   },
   {
     "objectID": "about.html#applications",
     "href": "about.html#applications",
     "title": "About",
     "section": "",
-    "text": "Distance transforms have numerous applications across different fields:\n\nImage Processing: Segmentation, skeletonization, feature extraction\nComputer Vision: Object recognition, shape analysis\nMedical Imaging: Registration, segmentation, analysis\nComputational Geometry: Voronoi diagrams, medial axis transforms\nMachine Learning: Distance-based features, loss functions"
+    "text": "Distance transforms have numerous applications across different fields:\n\nMedical Imaging: Organ segmentation, distance metrics between structures\nComputer Vision: Object recognition, shape analysis, feature extraction\nPath Planning: Navigation algorithms in robotics\nDeep Learning: Custom loss functions like Hausdorff distance"
   },
   {
-    "objectID": "about.html#implementation-details",
-    "href": "about.html#implementation-details",
+    "objectID": "about.html#implementation",
+    "href": "about.html#implementation",
     "title": "About",
     "section": "",
-    "text": "The core algorithm implemented in DistanceTransforms.jl is based on the work of Felzenszwalb and Huttenlocher, which provides an efficient method for computing the Euclidean distance transform in O(n) time complexity.\nFor GPU acceleration, the library uses KernelAbstractions.jl, which allows the code to be hardware-agnostic and run efficiently across different GPU architectures."
+    "text": "The core algorithm is based on the Felzenszwalb method, providing O(n) time complexity. For GPU acceleration, the library uses KernelAbstractions.jl, allowing hardware-agnostic implementation across different GPU architectures.\nThe Python wrapper (distance_transforms) provides seamless integration with NumPy and PyTorch, enabling Python users to leverage the high-performance Julia implementation."
   },
   {
-    "objectID": "about.html#acknowledgments",
-    "href": "about.html#acknowledgments",
+    "objectID": "about.html#acknowledgements",
+    "href": "about.html#acknowledgements",
     "title": "About",
     "section": "",
-    "text": "DistanceTransforms.jl and its Python wrapper wouldn’t be possible without the contributions of many individuals and the support of the Julia and Python communities. We’d like to specifically acknowledge:\n\nThe original authors of the distance transform algorithms\nContributors to related Julia packages like ImageMorphology.jl\nThe developers of KernelAbstractions.jl, which enables the hardware-agnostic GPU implementation\nPythonCall.jl and juliacall for enabling the Python wrapper"
+    "text": "This project would not be possible without several excellent Julia packages:\n\nKernelAbstractions.jl: Provides hardware-agnostic GPU code that runs across different GPU platforms\nAcceleratedKernels.jl: Makes it dead simple to write GPU kernels with normal Julia code\nPythonCall.jl: Powers the Python interoperability layer for seamless integration\nDLPack.jl: Enables zero-copy tensor sharing with PyTorch for efficient GPU operations\n\nWe are grateful to the developers of these packages and the broader Julia and Python communities for their ongoing support and contributions."
   },
   {
     "objectID": "about.html#citation",
@@ -355,14 +399,14 @@
     "href": "about.html#license",
     "title": "About",
     "section": "",
-    "text": "DistanceTransforms is available under the MIT License.\nMIT License\n\nCopyright (c) 2023 Dale Black and contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+    "text": "DistanceTransforms is available under the MIT License."
   },
   {
-    "objectID": "about.html#contact",
-    "href": "about.html#contact",
+    "objectID": "about.html#links",
+    "href": "about.html#links",
     "title": "About",
     "section": "",
-    "text": "For questions, issues, or contributions: - GitHub: DistanceTransforms.jl - GitHub: py-distance-transforms"
+    "text": "DistanceTransforms.jl (Julia)\ndistance_transforms (Python)"
   },
   {
     "objectID": "julia/index.html",

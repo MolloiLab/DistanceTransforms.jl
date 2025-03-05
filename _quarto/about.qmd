@@ -7,45 +7,41 @@ format:
 
 # About DistanceTransforms
 
-DistanceTransforms is a high-performance library for computing distance transforms, available for both Julia and Python. The library is designed to be efficient, versatile, and easy to use, with support for multi-threading and GPU acceleration.
-
-## Project History
-
-DistanceTransforms.jl was developed by Dale Black and contributors to address the need for fast, GPU-accelerated distance transforms in Julia. The Python wrapper, py-distance-transforms, was later added to make these capabilities accessible to the Python community.
+DistanceTransforms is a high-performance library for computing distance transforms, available for both Julia and Python. The library provides efficient, GPU-accelerated distance transform operations with a simple API.
 
 ## Features
 
-- Fast CPU implementation using the Felzenszwalb algorithm
-- Multi-threading support for enhanced CPU performance
-- GPU acceleration for NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)
-- Support for arrays of various dimensions (1D, 2D, 3D)
-- Clean, simple API in both Julia and Python
-- Comprehensive documentation and examples
+- **High Performance**: Optimized for CPU and GPU
+- **Multi-platform**: Julia package with Python bindings
+- **GPU Support**: NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)
+- **Versatile**: Works with 1D, 2D, and 3D arrays
+- **Simple API**: Clean, intuitive interfaces in both languages
 
 ## Applications
 
 Distance transforms have numerous applications across different fields:
 
-- **Image Processing**: Segmentation, skeletonization, feature extraction
-- **Computer Vision**: Object recognition, shape analysis
-- **Medical Imaging**: Registration, segmentation, analysis
-- **Computational Geometry**: Voronoi diagrams, medial axis transforms
-- **Machine Learning**: Distance-based features, loss functions
+- **Medical Imaging**: Organ segmentation, distance metrics between structures
+- **Computer Vision**: Object recognition, shape analysis, feature extraction
+- **Path Planning**: Navigation algorithms in robotics
+- **Deep Learning**: Custom loss functions like Hausdorff distance
 
-## Implementation Details
+## Implementation
 
-The core algorithm implemented in DistanceTransforms.jl is based on the work of Felzenszwalb and Huttenlocher, which provides an efficient method for computing the Euclidean distance transform in O(n) time complexity.
+The core algorithm is based on the Felzenszwalb method, providing O(n) time complexity. For GPU acceleration, the library uses KernelAbstractions.jl, allowing hardware-agnostic implementation across different GPU architectures.
 
-For GPU acceleration, the library uses KernelAbstractions.jl, which allows the code to be hardware-agnostic and run efficiently across different GPU architectures.
+The Python wrapper (`distance_transforms`) provides seamless integration with NumPy and PyTorch, enabling Python users to leverage the high-performance Julia implementation.
 
-## Acknowledgments
+## Acknowledgements
 
-DistanceTransforms.jl and its Python wrapper wouldn't be possible without the contributions of many individuals and the support of the Julia and Python communities. We'd like to specifically acknowledge:
+This project would not be possible without several excellent Julia packages:
 
-- The original authors of the distance transform algorithms
-- Contributors to related Julia packages like ImageMorphology.jl
-- The developers of KernelAbstractions.jl, which enables the hardware-agnostic GPU implementation
-- PythonCall.jl and juliacall for enabling the Python wrapper
+- **KernelAbstractions.jl**: Provides hardware-agnostic GPU code that runs across different GPU platforms
+- **AcceleratedKernels.jl**: Makes it dead simple to write GPU kernels with normal Julia code
+- **PythonCall.jl**: Powers the Python interoperability layer for seamless integration
+- **DLPack.jl**: Enables zero-copy tensor sharing with PyTorch for efficient GPU operations
+
+We are grateful to the developers of these packages and the broader Julia and Python communities for their ongoing support and contributions.
 
 ## Citation
 
@@ -64,32 +60,7 @@ If you use DistanceTransforms in your research, please cite:
 
 DistanceTransforms is available under the MIT License.
 
-```
-MIT License
+## Links
 
-Copyright (c) 2023 Dale Black and contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-## Contact
-
-For questions, issues, or contributions:
-- GitHub: [DistanceTransforms.jl](https://github.com/Dale-Black/DistanceTransforms.jl)
-- GitHub: [py-distance-transforms](https://github.com/Dale-Black/py-distance-transforms)
+- [DistanceTransforms.jl](https://github.com/Dale-Black/DistanceTransforms.jl) (Julia)
+- [distance_transforms](https://github.com/Dale-Black/py-distance-transforms) (Python)

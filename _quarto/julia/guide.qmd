@@ -94,10 +94,8 @@ sq_euc_transform = transform(array2_bool)
 euc_transform = sqrt.(sq_euc_transform)
 
 # Display results
-println("Squared Euclidean Distance:")
-display(sq_euc_transform)
-println("\nEuclidean Distance:")
-display(euc_transform)
+println("Squared Euclidean Distance: $(sq_euc_transform)")
+println("Euclidean Distance: $(euc_transform)")
 ```
 
 ### Comparison with ImageMorphology.jl
@@ -109,9 +107,7 @@ using ImageMorphology: distance_transform, feature_transform
 euc_transform2 = distance_transform(feature_transform(Bool.(array2)))
 
 # Compare results
-println("ImageMorphology result:")
-display(euc_transform2)
-println("\nAre the results approximately equal?")
+println("Are the results approximately equal?")
 isapprox(euc_transform2, euc_transform; rtol = 1e-2)
 ```
 
@@ -121,7 +117,7 @@ isapprox(euc_transform2, euc_transform; rtol = 1e-2)
 
 DistanceTransforms.jl efficiently utilizes multi-threading, particularly in its Felzenszwalb distance transform algorithm.
 
-⚠️ Julia might only load with `1 thread` which makes the actual benchmark below meaningless and potentially confusing. Use this for understanding how to use the `threaded` kwarg
+⚠️ Julia might only load with `1 thread` which makes the actual benchmark below meaningless and potentially confusing. Use this for understanding how to use the `threaded` kwarg ⚠️
 
 ```{julia}
 using BenchmarkTools
