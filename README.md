@@ -7,76 +7,71 @@
 
 DistanceTransforms.jl is a Julia package that provides efficient distance transform operations on arrays (CPU & GPU).
 
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Quick Start](#quick-start)
-- [Transforms](#transforms)
-- [Advanced Usage](#advanced-usage)
-- [Python](#python)
-
-## Getting Started
-
-To get started with DistanceTransforms.jl, you'll first need to import the package:
+## Installation
 
 ```julia
-using DistanceTransforms
+using Pkg
+Pkg.add("DistanceTransforms")
 ```
-
-The most up-to-date version of DistanceTransforms.jl can be found on the main/master branch of the [GitHub repository](https://github.com/Dale-Black/DistanceTransforms.jl). If you're using an unregistered version, you may need to add the package explicitly.
-
-For detailed documentation and tutorials, you can refer to the [official notebook](https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl).
 
 ## Quick Start
 
-Distance transforms are essential for many computer vision-related tasks. With DistanceTransforms.jl, you can easily apply efficient distance transform operations on arrays in Julia.
-
-For example, to use the quintessential distance transform operation:
-
 ```julia
 using DistanceTransforms
 
+# Create a simple binary array
 arr = [
     0 1 1 0
     0 0 0 0
     1 1 0 0
 ]
 
+# Apply distance transform
 result = transform(boolean_indicator(arr))
 ```
 
-## Transforms
+## Features
 
-The library is built around a common `transform` interface, allowing users to apply various distance transform algorithms to arrays using a unified approach.
+- **Fast CPU implementation** using the Felzenszwalb algorithm
+- **Multi-threading support** for enhanced CPU performance
+- **GPU acceleration** for NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)
+- **Simple API** with unified transform interface
+- **Multi-dimensional support** for 1D, 2D, and 3D arrays
 
 ## Advanced Usage
 
-DistanceTransforms.jl offers advanced features such as multi-threading and GPU acceleration. These capabilities significantly enhance performance, especially for large data sets and high-resolution images.
-
 ### Multi-threading
 
-DistanceTransforms.jl efficiently utilizes multi-threading, particularly in its Felzenszwalb distance transform algorithm. This parallelization improves performance for large data sets and high-resolution images.
-
 ```julia
-x = boolean_indicator(rand([0f0, 1f0], 100, 100))
-single_threaded = @benchmark transform($x; threaded = false)
-multi_threaded = @benchmark transform($x; threaded = true)
+# Compare single vs multi-threaded performance
+result = transform(arr; threaded = true)  # default
+result = transform(arr; threaded = false) # single-threaded
 ```
 
 ### GPU Acceleration
 
-DistanceTransforms.jl extends its performance capabilities by embracing GPU acceleration. The same `transform` function used for CPU computations automatically adapts to leverage GPU resources when available.
-
 ```julia
+using CUDA
+# Automatically uses GPU implementation for CUDA arrays
 x_gpu = CUDA.CuArray(boolean_indicator(rand([0, 1], 100, 100)))
-gpu_transformed = transform(x_gpu)
+gpu_result = transform(x_gpu)
 ```
 
-For benchmarks and more details on advanced usage, refer to the [advanced usage notebook](https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl).
+## Python Support
 
-## Python
+For Python users, check out [distance_transforms](https://github.com/MolloiLab/py-distance-transforms), a Python wrapper providing the same functionality.
 
-Check out the corresponding Python (wrapper) package: [py-distance-transforms](https://github.com/MolloiLab/py-distance-transforms)
+```python
+import numpy as np
+import distance_transforms as dts
+
+arr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)
+result = dts.transform(arr)
+```
+
+## Documentation
+
+For comprehensive documentation and examples, visit our [documentation site](https://molloilab.github.io/DistanceTransforms.jl/).
 
 
 [docs-img]: https://img.shields.io/badge/docs-dev-blue.svg
@@ -90,6 +85,3 @@ Check out the corresponding Python (wrapper) package: [py-distance-transforms](h
 
 [cov-img]: https://codecov.io/gh/MolloiLab/DistanceTransforms.jl/branch/master/graph/badge.svg
 [cov-url]: https://codecov.io/gh/MolloiLab/DistanceTransforms.jl
-
-[nightly-img]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml/badge.svg?branch=master
-[nightly-url]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/Nightly.yml
