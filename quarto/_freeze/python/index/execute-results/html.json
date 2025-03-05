@@ -1,0 +1,12 @@
+{
+  "hash": "27251b917b92c051e7399cc55f1e420f",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Python API\"\nsidebar: python\nformat:\n  html:\n    toc: true\n---\n\n\n\n\n# py-distance-transforms\n\npy_distance_transforms is a Python package that provides efficient distance transform operations on arrays. It is a wrapper around the Julia package DistanceTransforms.jl, bringing its high-performance capabilities to the Python ecosystem.\n\n## Installation\n\nInstall py_distance_transforms using pip:\n\n```bash\npip install py_distance_transforms\n```\n\n## Quick Example\n\n::: {#dac5e62d .cell execution_count=1}\n``` {.python .cell-code}\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom py_distance_transforms import transform\n\n# Create a random binary array\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\n\n# Apply distance transform\nresult = transform(arr)\n\n# Visualize\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))\nax1.imshow(arr, cmap='gray')\nax1.set_title('Original')\nax2.imshow(result, cmap='gray')\nax2.set_title('Distance Transform')\nplt.show()\n```\n\n::: {.cell-output .cell-output-stdout}\n```\nDetected IPython. Loading juliacall extension. See https://juliapy.github.io/PythonCall.jl/stable/compat/#IPython\nStatus `~/miniconda3/julia_env/Project.toml`\n⌅ [052768ef] CUDA v5.4.2\n⌅ [53c2dc0f] DLPack v0.3.0\n  [71182807] DistanceTransforms v0.2.2\n  [6099a3de] PythonCall v0.9.24\nInfo Packages marked with ⌅ have new versions available but compatibility constraints restrict them from upgrading. To see why use `status --outdated`\n```\n:::\n\n::: {.cell-output .cell-output-display}\n![](index_files/figure-html/cell-2-output-2.png){width=781 height=400}\n:::\n:::\n\n\n## Key Features\n\n- **High Performance**: Directly leverages the optimized Julia implementation\n- **GPU Support**: CUDA acceleration for NVIDIA GPUs\n- **Simple API**: Clean, Pythonic interface\n- **NumPy Integration**: Works seamlessly with NumPy arrays\n- **PyTorch Support**: Compatible with PyTorch tensors\n- **Multi-Dimensional**: Works with 1D, 2D, and 3D arrays\n\n## Next Steps\n\n- Explore the [User Guide](guide.qmd) for comprehensive documentation\n- Check the [API Reference](api.qmd) for detailed function information\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
