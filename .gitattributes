@@ -1,0 +1,3 @@
+# Exclude from language statistics
+docs/** linguist-documentation
+_quarto/** linguist-documentation
