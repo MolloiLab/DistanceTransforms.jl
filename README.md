@@ -1,6 +1,6 @@
 # DistanceTransforms
 
-[![Glass Notebook][glassnotebook-img]][glassnotebook-url]
+[![Documentation][docs-img]][docs-url]
 [![CI Stable][ci-img]][ci-url]
 [![Build status][buildkite-img]][buildkite-url]
 [![Coverage][cov-img]][cov-url]
