@@ -1,0 +1,54 @@
+---
+title: "DistanceTransforms.jl"
+sidebar: julia
+format:
+  html:
+    toc: false
+---
+
+DistanceTransforms.jl is a high-performance Julia package for computing distance transforms. It offers significant performance improvements over traditional implementations, especially for large arrays.
+
+## Installation
+
+Install DistanceTransforms.jl using Julia's package manager:
+
+```julia
+using Pkg
+Pkg.add("DistanceTransforms")
+```
+
+## Quick Example
+
+```{julia}
+using DistanceTransforms
+using CairoMakie
+
+# Create a sample binary array
+arr = rand([0, 1], 10, 10)
+
+# Apply distance transform
+result = transform(boolean_indicator(arr))
+
+# Visualize
+fig = Figure(size = (800, 400))
+ax1 = Axis(fig[1, 1], title = "Original")
+ax2 = Axis(fig[1, 2], title = "Distance Transform")
+heatmap!(ax1, arr, colormap = :grays)
+heatmap!(ax2, result, colormap = :grays)
+fig
+```
+
+## Key Features
+
+- **Fast Distance Transform**: Employs the efficient Felzenszwalb algorithm
+- **Multi-threading**: Parallelized computation on CPU
+- **GPU Support**: 
+  - NVIDIA (CUDA) 
+  - AMD (ROCm)
+  - Apple (Metal)
+- **Flexible Input**: Works with arrays of various dimensions (1D, 2D, 3D)
+
+## Next Steps
+
+- Explore the [User Guide](guide.qmd) for comprehensive documentation
+- Check the [API Reference](api.qmd) for detailed function information

@@ -1,0 +1,55 @@
+---
+title: "py-distance-transforms"
+sidebar: python
+format:
+  html:
+    toc: true
+---
+
+py_distance_transforms is a Python package that provides efficient distance transform operations on arrays. It is a wrapper around the Julia package DistanceTransforms.jl, bringing its high-performance capabilities to the Python ecosystem.
+
+## Installation
+
+Install py_distance_transforms using pip:
+
+```bash
+pip install py_distance_transforms
+```
+
+## Quick Example
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from py_distance_transforms import transform
+
+# Create a random binary array
+arr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)
+
+# Apply distance transform
+result = transform(arr)
+
+# Visualize
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+ax1.imshow(arr, cmap='gray')
+ax1.set_title('Original')
+ax2.imshow(result, cmap='gray')
+ax2.set_title('Distance Transform')
+plt.show()
+```
+
+![Example distance transform visualization](../images/various_dts.png)
+
+## Key Features
+
+- **High Performance**: Directly leverages the optimized Julia implementation
+- **GPU Support**: CUDA acceleration for NVIDIA GPUs
+- **Simple API**: Clean, Pythonic interface
+- **NumPy Integration**: Works seamlessly with NumPy arrays
+- **PyTorch Support**: Compatible with PyTorch tensors
+- **Multi-Dimensional**: Works with 1D, 2D, and 3D arrays
+
+## Next Steps
+
+- Explore the [User Guide](guide.qmd) for comprehensive documentation
+- Check the [API Reference](api.qmd) for detailed function information
