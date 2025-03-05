@@ -1,0 +1,124 @@
+---
+title: "Distance Transforms"
+format:
+  html:
+    toc: true
+    css: |
+      .column {
+        padding: 0 15px;
+      }
+      pre {
+        margin: 1em 0;
+      }
+      .columns pre {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+---
+
+<style>
+.add-space-r{
+  padding-right: 2%;
+}
+
+.add-space-l{
+  padding-left: 2%;
+}
+</style>
+
+[`DistanceTransforms.jl`](julia/index.qmd) and [`distance_transforms`](python/index.qmd) provides efficient, GPU-accelerated, distance transform operations for arrays in both Julia and Python. Distance transforms are essential in computer vision, image processing, and machine learning tasks.
+
+![Example of a distance transform applied to various shapes](images/various_dts.png)
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| 🚀 **High Performance** | Optimized algorithms for CPU and GPU |
+| 🧵 **Multi-threading** | Parallel processing on CPU |
+| 🖥️ **GPU Acceleration** | Support for NVIDIA (CUDA), AMD (ROCm), Apple (Metal), and Intel (oneAPI) |
+| 🐍 **Python Integration** | Full Python support via `distance_transforms` |
+| 📏 **Versatile Dimensions** | Works with 1D, 2D, and 3D arrays |
+| 📚 **Well Documented** | Comprehensive guides and examples |
+
+## Why This Library?
+
+| | Distance Transforms | ImageMorphology.jl | SciPy |
+|-----------------------|:---------------------:|:---------------:|:---------------:|
+| Fast Distance Transform     | ✅✅ | ✅ | ✅ |
+| CPU Single-Threaded Support | ✅ | ✅ | ✅ |
+| CPU Multi-Threaded Support  | ✅ | ✅ | ❌ |
+| NVIDIA/CUDA Support         | ✅ | ❌ | ❌ |
+| AMD/ROCM Support            | ✅ | ❌ | ❌ |
+| Apple/Metal Support         | ✅ | ❌ | ❌ |
+| Intel/oneAPI Support        | ✅ | ❌ | ❌ |
+| Python Integration          | ✅ | ❌ | ✅ |
+
+## Choose Your Language
+
+:::: {.columns}
+
+::: {.column width="50%" .add-space-r}
+### Julia
+
+```julia
+using DistanceTransforms
+arr = rand([0, 1], 10, 10)
+result = transform(boolean_indicator(arr))
+```
+
+[Get started with Julia →](julia/index.qmd)
+:::
+
+::: {.column width="50%" .add-space-l}
+### Python
+
+```python
+import numpy as np
+from py_distance_transforms import transform
+arr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)
+result = transform(arr)
+```
+
+[Get started with Python →](python/index.qmd)
+:::
+
+::::
+
+## Installation
+
+:::: {.columns}
+
+::: {.column width="50%" .add-space-r}
+### Julia
+```julia
+using Pkg
+Pkg.add("DistanceTransforms")
+```
+:::
+
+::: {.column width="50%" .add-space-l}
+### Python
+```bash
+pip install py_distance_transforms
+```
+:::
+
+::::
+
+## Citation
+
+If you use DistanceTransforms in your research, please cite:
+
+```bibtex
+@software{DistanceTransforms,
+  author = {Black, Dale and Contributors},
+  title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},
+  url = {https://github.com/Dale-Black/DistanceTransforms.jl},
+  year = {2023}
+}
+```
+
+## License
+
+DistanceTransforms is available under the MIT License.

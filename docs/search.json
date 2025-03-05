@@ -1,0 +1,422 @@
+[
+  {
+    "objectID": "julia/api.html",
+    "href": "julia/api.html",
+    "title": "API Reference",
+    "section": "",
+    "text": "This page documents all the exported functions and types in DistanceTransforms.jl.\n## `boolean_indicator`\n\n```julia\nboolean_indicator(f::AbstractArray)\nboolean_indicator(f::AbstractGPUArray)\nboolean_indicator(f::BitArray)\nCreate a float representation of a boolean indicator array where 0 represents the background and 1 represents the foreground. This function converts a logical array into a floating-point array where foreground values (logical 1) are marked as 0.0f0 (float representation of 0), and background values (logical 0) are marked with a large float number 1.0f10. This representation is useful in distance transform operations to differentiate between the foreground and the background.\n\nArguments\n\nf: An array of boolean values or an AbstractGPUArray of boolean values, where true indicates the foreground and false indicates the background.\n\n\n\nReturns\n\nA floating-point array of the same dimensions as f, with foreground values set to 0.0f0 and background values set to 1.0f10.\n\n\n\nPerformance\n\nIf f is a BitArray, the conversion uses LoopVectorization.jl for a potential speedup. The warning check arguments are disabled for performance reasons.\nIf f is an AbstractGPUArray, the computation is offloaded to the GPU using a custom kernel, boolean_indicator_kernel, which is expected to yield a significant speedup on compatible hardware.\n\n\n\nExamples\nf = BitArray([true, false, true, false])\nf_float = boolean_indicator(f)\n# f_float will be Float32[0.0f0, 1.0f10, 0.0f0, 1.0f10]\n\nf_gpu = CUDA.zeros(Bool, 10) # assuming CUDA.jl is used for GPU arrays\nf_gpu[5] = true\nf_float_gpu = boolean_indicator(f_gpu)\n# f_float_gpu will be a GPU array with the fifth element as 0.0f0 and others as 1.0f10\n\n\nNotes\n\nThe choice of 1.0f10 as the large number is arbitrary and can be adjusted if needed for specific applications.\nWhen f is an AbstractGPUArray, the boolean_indicator_kernel kernel function is used to perform the operation in parallel on the GPU.\nThe KernelAbstractions.synchronize(backend) call ensures that all GPU operations are completed before returning the result.\n\n\n\n\ntransform\ntransform(f::AbstractVector)\ntransform(img::AbstractMatrix; threaded=true)\ntransform(vol::AbstractArray{&lt;:Real,3}; threaded=true)\ntransform(img::AbstractGPUMatrix)\nNon-in-place squared Euclidean distance transforms that return a new array with the result. They allocate necessary intermediate arrays internally.\n\nThe first function operates on vectors.\nThe second function operates on matrices with optional threading.\nThe third function operates on 3D arrays with optional threading.\nThe fourth function is specialized for GPU matrices.\n\nThe threaded parameter can be used to enable or disable parallel computation on the CPU.\n\nArguments\n\nf/img/vol: Input vector, matrix, or 3D array to be transformed.\n\n\n\nExamples\nf = rand([0f0, 1f0], 10)\nf_bool = boolean_indicator(f)\nf_tfm = transform(f_bool)\n\n\n\n\ntransform!\ntransform!(f::AbstractVector, output, v, z)\ntransform!(img::AbstractMatrix, output, v, z; threaded=true)\ntransform!(vol::AbstractArray{&lt;:Real,3}, output, v, z, temp; threaded=true)\ntransform!(img::AbstractGPUMatrix, output, v, z)\nIn-place squared Euclidean distance transforms. These functions apply the transform to the input data and store the result in the output argument.\n\nThe first function operates on vectors.\nThe second function operates on matrices with optional threading.\nThe third function operates on 3D arrays with optional threading.\nThe fourth function is specialized for GPU matrices.\n\nThe intermediate arrays v and z (and temp for 3D arrays) are used for computation. The threaded parameter enables parallel computation on the CPU.\n\nArguments\n\nf: Input vector, matrix, or 3D array.\noutput: Preallocated array to store the result.\nv: Preallocated array for indices, matching the dimensions of f.\nz: Preallocated array for intermediate values, one element larger than f.\ntemp: Preallocated array for intermediate values when transforming 3D arrays, matching the dimensions of output.\n\n\n\nExamples\nf = rand([0f0, 1f0], 10)\nf_bool = boolean_indicator(f)\noutput = similar(f)\nv = ones(Int32, size(f))\nz = ones(eltype(f), size(f) .+ 1)\ntransform!(f_bool, output, v, z)\n\n:::\n:::\n\n\n\n\n\n\n:::{#quarto-navigation-envelope .hidden}\n[Julia]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyLXRpdGxl\"}\n[Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXItdGl0bGU=\"}\n[User Guide]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1wcmV2\"}\n[Overview]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyOi9qdWxpYS9pbmRleC5odG1sT3ZlcnZpZXc=\"}\n[User Guide]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyOi9qdWxpYS9ndWlkZS5odG1sVXNlci1HdWlkZQ==\"}\n[API Reference]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyOi9qdWxpYS9hcGkuaHRtbEFQSS1SZWZlcmVuY2U=\"}\n[Home]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6SG9tZQ==\"}\n[/index.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2luZGV4Lmh0bWw=\"}\n[Julia]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6SnVsaWE=\"}\n[Overview]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6T3ZlcnZpZXc=\"}\n[/julia/index.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2p1bGlhL2luZGV4Lmh0bWw=\"}\n[User Guide]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6VXNlciBHdWlkZQ==\"}\n[/julia/guide.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2p1bGlhL2d1aWRlLmh0bWw=\"}\n[API Reference]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6QVBJIFJlZmVyZW5jZQ==\"}\n[/julia/api.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2p1bGlhL2FwaS5odG1s\"}\n[Python]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6UHl0aG9u\"}\n[/python/index.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3B5dGhvbi9pbmRleC5odG1s\"}\n[/python/guide.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3B5dGhvbi9ndWlkZS5odG1s\"}\n[/python/api.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3B5dGhvbi9hcGkuaHRtbA==\"}\n[About]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6QWJvdXQ=\"}\n[/about.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2Fib3V0Lmh0bWw=\"}\n[https://github.com/Dale-Black/DistanceTransforms.jl]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6aHR0cHM6Ly9naXRodWIuY29tL0RhbGUtQmxhY2svRGlzdGFuY2VUcmFuc2Zvcm1zLmps\"}\n[API Reference]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWJyZWFkY3J1bWJzLUFQSS1SZWZlcmVuY2U=\"}\n\n:::{.hidden .quarto-markdown-envelope-contents render-id=\"Zm9vdGVyLWxlZnQ=\"}\nCopyright 2024, Dale Black\n:::\n\n:::\n\n\n\n:::{#quarto-meta-markdown .hidden}\n[API Reference – Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW1ldGF0aXRsZQ==\"}\n[API Reference – Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLXR3aXR0ZXJjYXJkdGl0bGU=\"}\n[API Reference – Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW9nY2FyZHRpdGxl\"}\n[Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW1ldGFzaXRlbmFtZQ==\"}\n[Efficient distance transform operations for CPU and GPU in Julia and Python]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLXR3aXR0ZXJjYXJkZGVzYw==\"}\n[Efficient distance transform operations for CPU and GPU in Julia and Python]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW9nY2FyZGRkZXNj\"}\n:::\n\n\n\n\n&lt;!-- --&gt;\n\n::: {.quarto-embedded-source-code}\n```````````````````{.markdown shortcodes=\"false\"}\n---\ntitle: \"API Reference\"\nsidebar: julia\nformat:\n  html:\n    toc: true\n    cold-fold: true\nexecute:\n  engine: julia\n---\n\nThis page documents all the exported functions and types in DistanceTransforms.jl.\n\nquarto-executable-code-5450563D\n\n```julia\n#| echo: false\n\n\nusing DistanceTransforms\nusing Markdown\n\n\"\"\"\n    generate_markdown_docs()\n    \nGenerate Markdown documentation for all exported functions in DistanceTransforms.jl,\nreturning a single string with properly formatted markdown.\n\"\"\"\nfunction generate_markdown_docs()\n    # Get all exported names from DistanceTransforms\n    all_names = names(DistanceTransforms)\n    exported_functions = filter(x -&gt; x != :DistanceTransforms, all_names)\n    \n    # Create a string buffer to collect all output\n    result = IOBuffer()\n    \n    # Generate documentation for each function\n    for name in exported_functions\n        \n        # Get the documentation and convert it to string\n        doc = getproperty(DistanceTransforms, name)\n        doc_string = string(Docs.doc(doc))\n        \n        # Write the documentation\n        write(result, doc_string)\n        write(result, \"\\n\\n---\\n\\n\")\n    end\n    \n    # Return the collected documentation as a string\n    return String(take!(result))\nend\n\n# Call the function to generate the documentation\ndocs = generate_markdown_docs()\n\nprintln(docs)\n```````````````````",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "julia/api.html#transform",
+    "href": "julia/api.html#transform",
+    "title": "API Reference",
+    "section": "transform",
+    "text": "transform\ntransform(f::AbstractVector)\ntransform(img::AbstractMatrix; threaded=true)\ntransform(vol::AbstractArray{&lt;:Real,3}; threaded=true)\ntransform(img::AbstractGPUMatrix)\nNon-in-place squared Euclidean distance transforms that return a new array with the result. They allocate necessary intermediate arrays internally.\n\nThe first function operates on vectors.\nThe second function operates on matrices with optional threading.\nThe third function operates on 3D arrays with optional threading.\nThe fourth function is specialized for GPU matrices.\n\nThe threaded parameter can be used to enable or disable parallel computation on the CPU.\n\nArguments\n\nf/img/vol: Input vector, matrix, or 3D array to be transformed.\n\n\n\nExamples\nf = rand([0f0, 1f0], 10)\nf_bool = boolean_indicator(f)\nf_tfm = transform(f_bool)",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "julia/api.html#transform-1",
+    "href": "julia/api.html#transform-1",
+    "title": "API Reference",
+    "section": "transform!",
+    "text": "transform!\ntransform!(f::AbstractVector, output, v, z)\ntransform!(img::AbstractMatrix, output, v, z; threaded=true)\ntransform!(vol::AbstractArray{&lt;:Real,3}, output, v, z, temp; threaded=true)\ntransform!(img::AbstractGPUMatrix, output, v, z)\nIn-place squared Euclidean distance transforms. These functions apply the transform to the input data and store the result in the output argument.\n\nThe first function operates on vectors.\nThe second function operates on matrices with optional threading.\nThe third function operates on 3D arrays with optional threading.\nThe fourth function is specialized for GPU matrices.\n\nThe intermediate arrays v and z (and temp for 3D arrays) are used for computation. The threaded parameter enables parallel computation on the CPU.\n\nArguments\n\nf: Input vector, matrix, or 3D array.\noutput: Preallocated array to store the result.\nv: Preallocated array for indices, matching the dimensions of f.\nz: Preallocated array for intermediate values, one element larger than f.\ntemp: Preallocated array for intermediate values when transforming 3D arrays, matching the dimensions of output.\n\n\n\nExamples\nf = rand([0f0, 1f0], 10)\nf_bool = boolean_indicator(f)\noutput = similar(f)\nv = ones(Int32, size(f))\nz = ones(eltype(f), size(f) .+ 1)\ntransform!(f_bool, output, v, z)\n\n:::\n:::\n\n\n\n\n\n\n:::{#quarto-navigation-envelope .hidden}\n[Julia]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyLXRpdGxl\"}\n[Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXItdGl0bGU=\"}\n[User Guide]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1wcmV2\"}\n[Overview]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyOi9qdWxpYS9pbmRleC5odG1sT3ZlcnZpZXc=\"}\n[User Guide]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyOi9qdWxpYS9ndWlkZS5odG1sVXNlci1HdWlkZQ==\"}\n[API Reference]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1zaWRlYmFyOi9qdWxpYS9hcGkuaHRtbEFQSS1SZWZlcmVuY2U=\"}\n[Home]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6SG9tZQ==\"}\n[/index.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2luZGV4Lmh0bWw=\"}\n[Julia]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6SnVsaWE=\"}\n[Overview]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6T3ZlcnZpZXc=\"}\n[/julia/index.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2p1bGlhL2luZGV4Lmh0bWw=\"}\n[User Guide]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6VXNlciBHdWlkZQ==\"}\n[/julia/guide.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2p1bGlhL2d1aWRlLmh0bWw=\"}\n[API Reference]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6QVBJIFJlZmVyZW5jZQ==\"}\n[/julia/api.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2p1bGlhL2FwaS5odG1s\"}\n[Python]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6UHl0aG9u\"}\n[/python/index.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3B5dGhvbi9pbmRleC5odG1s\"}\n[/python/guide.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3B5dGhvbi9ndWlkZS5odG1s\"}\n[/python/api.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L3B5dGhvbi9hcGkuaHRtbA==\"}\n[About]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6QWJvdXQ=\"}\n[/about.html]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6L2Fib3V0Lmh0bWw=\"}\n[https://github.com/Dale-Black/DistanceTransforms.jl]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWludC1uYXZiYXI6aHR0cHM6Ly9naXRodWIuY29tL0RhbGUtQmxhY2svRGlzdGFuY2VUcmFuc2Zvcm1zLmps\"}\n[API Reference]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLWJyZWFkY3J1bWJzLUFQSS1SZWZlcmVuY2U=\"}\n\n:::{.hidden .quarto-markdown-envelope-contents render-id=\"Zm9vdGVyLWxlZnQ=\"}\nCopyright 2024, Dale Black\n:::\n\n:::\n\n\n\n:::{#quarto-meta-markdown .hidden}\n[API Reference – Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW1ldGF0aXRsZQ==\"}\n[API Reference – Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLXR3aXR0ZXJjYXJkdGl0bGU=\"}\n[API Reference – Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW9nY2FyZHRpdGxl\"}\n[Distance Transforms]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW1ldGFzaXRlbmFtZQ==\"}\n[Efficient distance transform operations for CPU and GPU in Julia and Python]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLXR3aXR0ZXJjYXJkZGVzYw==\"}\n[Efficient distance transform operations for CPU and GPU in Julia and Python]{.hidden .quarto-markdown-envelope-contents render-id=\"cXVhcnRvLW9nY2FyZGRkZXNj\"}\n:::\n\n\n\n\n&lt;!-- --&gt;\n\n::: {.quarto-embedded-source-code}\n```````````````````{.markdown shortcodes=\"false\"}\n---\ntitle: \"API Reference\"\nsidebar: julia\nformat:\n  html:\n    toc: true\n    cold-fold: true\nexecute:\n  engine: julia\n---\n\nThis page documents all the exported functions and types in DistanceTransforms.jl.\n\nquarto-executable-code-5450563D\n\n```julia\n#| echo: false\n\n\nusing DistanceTransforms\nusing Markdown\n\n\"\"\"\n    generate_markdown_docs()\n    \nGenerate Markdown documentation for all exported functions in DistanceTransforms.jl,\nreturning a single string with properly formatted markdown.\n\"\"\"\nfunction generate_markdown_docs()\n    # Get all exported names from DistanceTransforms\n    all_names = names(DistanceTransforms)\n    exported_functions = filter(x -&gt; x != :DistanceTransforms, all_names)\n    \n    # Create a string buffer to collect all output\n    result = IOBuffer()\n    \n    # Generate documentation for each function\n    for name in exported_functions\n        \n        # Get the documentation and convert it to string\n        doc = getproperty(DistanceTransforms, name)\n        doc_string = string(Docs.doc(doc))\n        \n        # Write the documentation\n        write(result, doc_string)\n        write(result, \"\\n\\n---\\n\\n\")\n    end\n    \n    # Return the collected documentation as a string\n    return String(take!(result))\nend\n\n# Call the function to generate the documentation\ndocs = generate_markdown_docs()\n\nprintln(docs)\n```````````````````",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "julia/guide.html",
+    "href": "julia/guide.html",
+    "title": "User Guide",
+    "section": "",
+    "text": "This guide covers both basic and advanced usage of DistanceTransforms.jl.",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "julia/guide.html#getting-started",
+    "href": "julia/guide.html#getting-started",
+    "title": "User Guide",
+    "section": "Getting Started",
+    "text": "Getting Started\n\nInstallation\nusing Pkg\nPkg.add(\"DistanceTransforms\")\n\n\nBasic Usage\nThe primary function in DistanceTransforms.jl is transform. This function processes an array of 0s and 1s, converting each background element (0) into a value representing its squared Euclidean distance to the nearest foreground element (1).\n\nusing DistanceTransforms: transform, boolean_indicator\nusing CairoMakie: Figure, Axis, heatmap!, hidedecorations!\n\n# Create a random binary array\narr = rand([0, 1], 10, 10)\n\n# Apply distance transform\ntransformed = transform(boolean_indicator(arr))\n\n# Create visualization\nfig = Figure(size = (800, 400))\nax1 = Axis(fig[1, 1], title = \"Original\")\nax2 = Axis(fig[1, 2], title = \"Distance Transform\")\nheatmap!(ax1, arr, colormap = :grays)\nheatmap!(ax2, transformed, colormap = :grays)\nfig\n\n\n\n\n\n\n\n\n\n\nReal-World Example\nLet’s apply a distance transform to a real image:\n\nusing Images\n\n# Download and load example image\nimg = load(download(\"http://docs.opencv.org/3.1.0/water_coins.jpg\"))\n\n# Convert to binary image\nimg_bw = Gray.(img) .&gt; 0.5\n\n# Apply distance transform\nimg_tfm = transform(boolean_indicator(img_bw))\n\n# Visualize\nfig = Figure(size = (900, 300))\nax1 = Axis(fig[1, 1], title = \"Original Image\")\nax2 = Axis(fig[1, 2], title = \"Segmented Image\")\nax3 = Axis(fig[1, 3], title = \"Distance Transform\")\nheatmap!(ax1, rotr90(img), colormap = :grays)\nheatmap!(ax2, rotr90(img_bw), colormap = :grays)\nheatmap!(ax3, rotr90(img_tfm), colormap = :grays)\nhidedecorations!.([ax1, ax2, ax3])\nfig\n\n\n\n\n\n\n\n\n\n\nUnderstanding Euclidean Distance\nThe library, by default, returns the squared Euclidean distance. If you need the true Euclidean distance, you can take the square root of each element:\n\n# Create sample binary array\narray2 = [\n    0 1 1 0 1\n    0 0 0 1 0\n    1 1 0 0 0\n]\n\n# Convert to boolean indicator\narray2_bool = boolean_indicator(array2)\n\n# Apply squared Euclidean distance transform\nsq_euc_transform = transform(array2_bool)\n\n# Convert to true Euclidean distance\neuc_transform = sqrt.(sq_euc_transform)\n\n# Display results\nprintln(\"Squared Euclidean Distance:\")\ndisplay(sq_euc_transform)\nprintln(\"\\nEuclidean Distance:\")\ndisplay(euc_transform)\n\nSquared Euclidean Distance:\n\nEuclidean Distance:\n\n\n3×5 Matrix{Float32}:\n 1.0  0.0  0.0  1.0  0.0\n 1.0  1.0  1.0  0.0  1.0\n 0.0  0.0  1.0  1.0  2.0\n\n\n3×5 Matrix{Float32}:\n 1.0  0.0  0.0  1.0  0.0\n 1.0  1.0  1.0  0.0  1.0\n 0.0  0.0  1.0  1.0  1.41421\n\n\n\n\nComparison with ImageMorphology.jl\n\nusing ImageMorphology: distance_transform, feature_transform\n\n# Apply ImageMorphology distance transform\neuc_transform2 = distance_transform(feature_transform(Bool.(array2)))\n\n# Compare results\nprintln(\"ImageMorphology result:\")\ndisplay(euc_transform2)\nprintln(\"\\nAre the results approximately equal?\")\nisapprox(euc_transform2, euc_transform; rtol = 1e-2)\n\nImageMorphology result:\n\nAre the results approximately equal?\n\n\n3×5 Matrix{Float64}:\n 1.0  0.0  0.0  1.0  0.0\n 1.0  1.0  1.0  0.0  1.0\n 0.0  0.0  1.0  1.0  1.41421\n\n\ntrue",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "julia/guide.html#advanced-features",
+    "href": "julia/guide.html#advanced-features",
+    "title": "User Guide",
+    "section": "Advanced Features",
+    "text": "Advanced Features\n\nMulti-threading\nDistanceTransforms.jl efficiently utilizes multi-threading, particularly in its Felzenszwalb distance transform algorithm.\n⚠️ Julia might only load with 1 thread which makes the actual benchmark below meaningless and potentially confusing. Use this for understanding how to use the threaded kwarg\n\nusing BenchmarkTools\nusing Base.Threads: nthreads\n\n# Create a random binary array\nx = boolean_indicator(rand([0, 1], 1000, 1000))\n\n# Single-threaded benchmark\nsingle_threaded = @benchmark transform($x; threaded = false)\n\n# Multi-threaded benchmark\nmulti_threaded = @benchmark transform($x; threaded = true)\n\n# Display results\nprintln(\"Number of threads: $(nthreads())\")\nprintln(\"Single-threaded minimum time: $(minimum(single_threaded).time / 1e6) ms\")\nprintln(\"Multi-threaded minimum time: $(minimum(multi_threaded).time / 1e6) ms\")\nprintln(\"Speedup factor: $(minimum(single_threaded).time / minimum(multi_threaded).time)\")\n\nNumber of threads: 1\nSingle-threaded minimum time: 17.071291 ms\nMulti-threaded minimum time: 17.319625 ms\nSpeedup factor: 0.9856616987954416\n\n\n\n\nGPU Acceleration\nDistanceTransforms.jl extends its performance capabilities with GPU acceleration. The library uses Julia’s multiple dispatch to automatically leverage GPU resources when available.\n\nCUDA Example\nusing CUDA\nusing DistanceTransforms\n\n# Create a random array on GPU\nx_gpu = CUDA.rand([0, 1], 1000, 1000)\nx_gpu = boolean_indicator(x_gpu)\n\n# The transform function automatically uses GPU\nresult_gpu = transform(x_gpu)\n\n# Transfer result back to CPU if needed\nresult_cpu = Array(result_gpu)\n\n\nMetal Example\nusing Metal\nusing DistanceTransforms\n\n# Create a random array on GPU\nx_gpu = Metal.rand([0, 1], 1000, 1000)\nx_gpu = boolean_indicator(x_gpu)\n\n# The transform function automatically uses GPU\nresult_gpu = transform(x_gpu)\n\n# Transfer result back to CPU if needed\nresult_cpu = Array(result_gpu)\n\n\n\nPerformance Benchmarks\nPerformance comparison across different implementations for 2D and 3D distance transforms:\n\n\n\nPerformance Comparison\n\n\nAs shown in the graph, the GPU implementation demonstrates superior performance, especially for larger arrays.\n\n\nBest Practices\n\nFor small arrays (&lt;100x100): CPU with multi-threading is often sufficient\nFor medium arrays: Multi-threaded CPU may be faster than GPU due to lower overhead\nFor large arrays (&gt;1000x1000): GPU acceleration provides the best performance\nFor 3D data: GPU acceleration is strongly recommended due to the computational complexity",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "julia/guide.html#algorithm-details",
+    "href": "julia/guide.html#algorithm-details",
+    "title": "User Guide",
+    "section": "Algorithm Details",
+    "text": "Algorithm Details\nOn the CPU, DistanceTransforms.jl uses the squared Euclidean distance transform algorithm by Felzenszwalb and Huttenlocher, known for its accuracy and efficiency. On the GPU, thanks to the amazing AcceleratedKernels.jl and KernelAbstraction.jl packages, the algorithm is essentially identical.",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Distance Transforms",
+    "section": "",
+    "text": "DistanceTransforms.jl and distance_transforms provides efficient, GPU-accelerated, distance transform operations for arrays in both Julia and Python. Distance transforms are essential in computer vision, image processing, and machine learning tasks."
+  },
+  {
+    "objectID": "index.html#features",
+    "href": "index.html#features",
+    "title": "Distance Transforms",
+    "section": "Features",
+    "text": "Features\n\n\n\n\n\n\n\nFeature\nDescription\n\n\n\n\n🚀 High Performance\nOptimized algorithms for CPU and GPU\n\n\n🧵 Multi-threading\nParallel processing on CPU\n\n\n🖥️ GPU Acceleration\nSupport for NVIDIA (CUDA), AMD (ROCm), Apple (Metal), and Intel (oneAPI)\n\n\n🐍 Python Integration\nFull Python support via distance_transforms\n\n\n📏 Versatile Dimensions\nWorks with 1D, 2D, and 3D arrays\n\n\n📚 Well Documented\nComprehensive guides and examples"
+  },
+  {
+    "objectID": "index.html#why-this-library",
+    "href": "index.html#why-this-library",
+    "title": "Distance Transforms",
+    "section": "Why This Library?",
+    "text": "Why This Library?\n\n\n\n\n\n\n\n\n\n\nDistance Transforms\nImageMorphology.jl\nSciPy\n\n\n\n\nFast Distance Transform\n✅✅\n✅\n✅\n\n\nCPU Single-Threaded Support\n✅\n✅\n✅\n\n\nCPU Multi-Threaded Support\n✅\n✅\n❌\n\n\nNVIDIA/CUDA Support\n✅\n❌\n❌\n\n\nAMD/ROCM Support\n✅\n❌\n❌\n\n\nApple/Metal Support\n✅\n❌\n❌\n\n\nIntel/oneAPI Support\n✅\n❌\n❌\n\n\nPython Integration\n✅\n❌\n✅"
+  },
+  {
+    "objectID": "index.html#choose-your-language",
+    "href": "index.html#choose-your-language",
+    "title": "Distance Transforms",
+    "section": "Choose Your Language",
+    "text": "Choose Your Language\n\n\n\nJulia\nusing DistanceTransforms\narr = rand([0, 1], 10, 10)\nresult = transform(boolean_indicator(arr))\nGet started with Julia →\n\n\n\nPython\nimport numpy as np\nfrom py_distance_transforms import transform\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\nresult = transform(arr)\nGet started with Python →"
+  },
+  {
+    "objectID": "index.html#installation",
+    "href": "index.html#installation",
+    "title": "Distance Transforms",
+    "section": "Installation",
+    "text": "Installation\n\n\n\nJulia\nusing Pkg\nPkg.add(\"DistanceTransforms\")\n\n\n\nPython\npip install py_distance_transforms"
+  },
+  {
+    "objectID": "index.html#citation",
+    "href": "index.html#citation",
+    "title": "Distance Transforms",
+    "section": "Citation",
+    "text": "Citation\nIf you use DistanceTransforms in your research, please cite:\n@software{DistanceTransforms,\n  author = {Black, Dale and Contributors},\n  title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},\n  url = {https://github.com/Dale-Black/DistanceTransforms.jl},\n  year = {2023}\n}"
+  },
+  {
+    "objectID": "index.html#license",
+    "href": "index.html#license",
+    "title": "Distance Transforms",
+    "section": "License",
+    "text": "License\nDistanceTransforms is available under the MIT License."
+  },
+  {
+    "objectID": "python/index.html",
+    "href": "python/index.html",
+    "title": "py-distance-transforms",
+    "section": "",
+    "text": "py_distance_transforms is a Python package that provides efficient distance transform operations on arrays. It is a wrapper around the Julia package DistanceTransforms.jl, bringing its high-performance capabilities to the Python ecosystem.",
+    "crumbs": [
+      "Home",
+      "py-distance-transforms"
+    ]
+  },
+  {
+    "objectID": "python/index.html#installation",
+    "href": "python/index.html#installation",
+    "title": "py-distance-transforms",
+    "section": "Installation",
+    "text": "Installation\nInstall py_distance_transforms using pip:\npip install py_distance_transforms",
+    "crumbs": [
+      "Home",
+      "py-distance-transforms"
+    ]
+  },
+  {
+    "objectID": "python/index.html#quick-example",
+    "href": "python/index.html#quick-example",
+    "title": "py-distance-transforms",
+    "section": "Quick Example",
+    "text": "Quick Example\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom py_distance_transforms import transform\n\n# Create a random binary array\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\n\n# Apply distance transform\nresult = transform(arr)\n\n# Visualize\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))\nax1.imshow(arr, cmap='gray')\nax1.set_title('Original')\nax2.imshow(result, cmap='gray')\nax2.set_title('Distance Transform')\nplt.show()\n\n\n\nExample distance transform visualization",
+    "crumbs": [
+      "Home",
+      "py-distance-transforms"
+    ]
+  },
+  {
+    "objectID": "python/index.html#key-features",
+    "href": "python/index.html#key-features",
+    "title": "py-distance-transforms",
+    "section": "Key Features",
+    "text": "Key Features\n\nHigh Performance: Directly leverages the optimized Julia implementation\nGPU Support: CUDA acceleration for NVIDIA GPUs\nSimple API: Clean, Pythonic interface\nNumPy Integration: Works seamlessly with NumPy arrays\nPyTorch Support: Compatible with PyTorch tensors\nMulti-Dimensional: Works with 1D, 2D, and 3D arrays",
+    "crumbs": [
+      "Home",
+      "py-distance-transforms"
+    ]
+  },
+  {
+    "objectID": "python/index.html#next-steps",
+    "href": "python/index.html#next-steps",
+    "title": "py-distance-transforms",
+    "section": "Next Steps",
+    "text": "Next Steps\n\nExplore the User Guide for comprehensive documentation\nCheck the API Reference for detailed function information",
+    "crumbs": [
+      "Home",
+      "py-distance-transforms"
+    ]
+  },
+  {
+    "objectID": "python/guide.html",
+    "href": "python/guide.html",
+    "title": "User Guide",
+    "section": "",
+    "text": "This guide covers both basic and advanced usage of the py-distance-transforms library.",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/guide.html#getting-started",
+    "href": "python/guide.html#getting-started",
+    "title": "User Guide",
+    "section": "Getting Started",
+    "text": "Getting Started\n\nInstallation\npip install py_distance_transforms\nFor GPU support, make sure you have PyTorch with CUDA installed:\npip install torch --extra-index-url https://download.pytorch.org/whl/cu118\n\n\nBasic Usage\nThe primary function in py_distance_transforms is transform. This function takes a binary array (with 0s and 1s) and calculates the squared Euclidean distance from each 0 pixel to the nearest 1 pixel.\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom py_distance_transforms import transform\n\n# Create a random binary array\narr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)\n\n# Apply distance transform\nresult = transform(arr)\n\n# Visualize\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))\nax1.imshow(arr, cmap='gray')\nax1.set_title('Original')\nax2.imshow(result, cmap='gray')\nax2.set_title('Distance Transform')\nplt.tight_layout()\nplt.show()\n\n\nReal-World Example\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom py_distance_transforms import transform\nfrom skimage import io, color, filters\n\n# Load image and process\nimg = io.imread(\"sample.jpg\")\nimg_gray = color.rgb2gray(img)\nimg_binary = img_gray &gt; filters.threshold_otsu(img_gray)\nimg_dist = transform(img_binary.astype(np.float32))\n\n# Visualize\nfig, axes = plt.subplots(1, 3, figsize=(15, 5))\naxes[0].imshow(img)\naxes[0].set_title('Original Image')\naxes[1].imshow(img_binary, cmap='gray')\naxes[1].set_title('Binary Image')\naxes[2].imshow(img_dist, cmap='viridis')\naxes[2].set_title('Distance Transform')",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/guide.html#advanced-features",
+    "href": "python/guide.html#advanced-features",
+    "title": "User Guide",
+    "section": "Advanced Features",
+    "text": "Advanced Features\n\nGPU Acceleration\npy_distance_transforms supports GPU acceleration for NVIDIA GPUs using PyTorch tensors.\nimport torch\nfrom py_distance_transforms import transform_cuda\n\n# Create a tensor on GPU\nx_gpu = torch.rand((100, 100), device='cuda')\nx_gpu = (x_gpu &gt; 0.5).float()\n\n# Apply transform on GPU\nresult_gpu = transform_cuda(x_gpu)\n\n\nWorking with 3D Data\npy_distance_transforms supports 3D arrays as well:\nimport numpy as np\nfrom py_distance_transforms import transform\n\n# Create a 3D binary array\narr_3d = np.zeros((20, 20, 20), dtype=np.float32)\narr_3d[5, 5, 5] = 1\narr_3d[15, 15, 15] = 1\n\n# Apply distance transform\nresult_3d = transform(arr_3d)",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/guide.html#performance-comparison",
+    "href": "python/guide.html#performance-comparison",
+    "title": "User Guide",
+    "section": "Performance Comparison",
+    "text": "Performance Comparison\npy_distance_transforms generally outperforms other Python implementations, especially for large arrays and when using GPU acceleration:\n\n\n\nImplementation\n100×100\n1000×1000\n100×100×100\n\n\n\n\nSciPy\n2.5 ms\n250 ms\n1200 ms\n\n\npy_distance_transforms (CPU)\n1.2 ms\n120 ms\n500 ms\n\n\npy_distance_transforms (GPU)\n0.8 ms\n25 ms\n120 ms\n\n\n\nTimes are approximate and may vary based on hardware.",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/guide.html#integration-with-deep-learning",
+    "href": "python/guide.html#integration-with-deep-learning",
+    "title": "User Guide",
+    "section": "Integration with Deep Learning",
+    "text": "Integration with Deep Learning\npy_distance_transforms can be used in deep learning workflows, particularly for tasks like computing Hausdorff distance loss:\nimport torch\nfrom py_distance_transforms import transform_cuda\n\ndef hausdorff_loss(pred, target):\n    # Convert predictions to binary\n    pred_binary = (pred &gt; 0.5).float()\n    \n    # Calculate distance transforms\n    pred_dt = transform_cuda(pred_binary)\n    target_dt = transform_cuda(target)\n    \n    # Compute Hausdorff distances\n    d_pt = torch.mean(target * pred_dt)\n    d_tp = torch.mean(pred_binary * target_dt)\n    \n    return d_pt + d_tp",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/guide.html#next-steps",
+    "href": "python/guide.html#next-steps",
+    "title": "User Guide",
+    "section": "Next Steps",
+    "text": "Next Steps\nFor more advanced usage examples and detailed API information, refer to the API Reference.",
+    "crumbs": [
+      "Home",
+      "User Guide"
+    ]
+  },
+  {
+    "objectID": "python/api.html",
+    "href": "python/api.html",
+    "title": "API Reference",
+    "section": "",
+    "text": "This page documents all the exported functions in py-distance-transforms.",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "python/api.html#core-functions",
+    "href": "python/api.html#core-functions",
+    "title": "API Reference",
+    "section": "Core Functions",
+    "text": "Core Functions\n\ntransform\ntransform(arr)\nComputes the squared Euclidean distance transform of a binary array.\nParameters: - arr : numpy.ndarray - A binary array (0s and 1s) of any dimension\nReturns: - numpy.ndarray - The squared Euclidean distance transform\nExample:\nimport numpy as np\nfrom py_distance_transforms import transform\n\narr = np.array([\n    [0, 1, 1, 0, 1],\n    [0, 0, 0, 1, 0],\n    [1, 1, 0, 0, 0]\n], dtype=np.float32)\n\nresult = transform(arr)\nprint(result)\n\n\ntransform_cuda\ntransform_cuda(tensor)\nGPU-accelerated version of the distance transform function.\nParameters: - tensor : torch.Tensor - A binary tensor (0s and 1s) of any dimension, located on a CUDA device\nReturns: - torch.Tensor - The squared Euclidean distance transform, located on the same CUDA device\nExample:\nimport torch\nfrom py_distance_transforms import transform_cuda\n\n# Create a tensor on GPU\ntensor = torch.zeros((10, 10), device='cuda')\ntensor[2, 2] = 1\ntensor[7, 7] = 1\n\nresult = transform_cuda(tensor)\nprint(result)",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "python/api.html#utility-functions",
+    "href": "python/api.html#utility-functions",
+    "title": "API Reference",
+    "section": "Utility Functions",
+    "text": "Utility Functions\n\nnumpy_to_torch\nnumpy_to_torch(arr, device='cuda')\nConverts a NumPy array to a PyTorch tensor on the specified device.\nParameters: - arr : numpy.ndarray - Input NumPy array - device : str, optional - Device to place the tensor on. Default is ‘cuda’\nReturns: - torch.Tensor - PyTorch tensor on the specified device\n\n\ntorch_to_numpy\ntorch_to_numpy(tensor)\nConverts a PyTorch tensor to a NumPy array.\nParameters: - tensor : torch.Tensor - Input PyTorch tensor\nReturns: - numpy.ndarray - NumPy array",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "python/api.html#full-function-list",
+    "href": "python/api.html#full-function-list",
+    "title": "API Reference",
+    "section": "Full Function List",
+    "text": "Full Function List\n\n\n\n\n\n\n\nFunction\nDescription\n\n\n\n\ntransform\nComputes squared Euclidean distance transform on CPU\n\n\ntransform_cuda\nComputes squared Euclidean distance transform on GPU\n\n\nnumpy_to_torch\nConverts NumPy array to PyTorch tensor\n\n\ntorch_to_numpy\nConverts PyTorch tensor to NumPy array",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "python/api.html#integration-with-other-libraries",
+    "href": "python/api.html#integration-with-other-libraries",
+    "title": "API Reference",
+    "section": "Integration with Other Libraries",
+    "text": "Integration with Other Libraries\n\nNumPy\npy-distance-transforms works seamlessly with NumPy arrays:\nimport numpy as np\nfrom py_distance_transforms import transform\n\n# Create a NumPy array\narr = np.zeros((100, 100), dtype=np.float32)\narr[25:75, 25:75] = 1\n\n# Apply transform\nresult = transform(arr)\n\n\nPyTorch\nFor PyTorch integration, use the CUDA-specific functions:\nimport torch\nfrom py_distance_transforms import transform_cuda\n\n# Create a PyTorch tensor\ntensor = torch.zeros((100, 100), device='cuda')\ntensor[25:75, 25:75] = 1\n\n# Apply transform\nresult = transform_cuda(tensor)\n\n\nscikit-image\nWorks alongside scikit-image for more advanced image processing:\nimport numpy as np\nfrom skimage import io, color, morphology\nfrom py_distance_transforms import transform\n\n# Load and process image\nimg = io.imread('image.png', as_gray=True)\nbinary = img &gt; 0.5\n\n# Apply morphological operations\ncleaned = morphology.remove_small_objects(binary)\n\n# Apply distance transform\ndist = transform(cleaned.astype(np.float32))",
+    "crumbs": [
+      "Home",
+      "API Reference"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "DistanceTransforms is a high-performance library for computing distance transforms, available for both Julia and Python. The library is designed to be efficient, versatile, and easy to use, with support for multi-threading and GPU acceleration.\n\n\nDistanceTransforms.jl was developed by Dale Black and contributors to address the need for fast, GPU-accelerated distance transforms in Julia. The Python wrapper, py-distance-transforms, was later added to make these capabilities accessible to the Python community.\n\n\n\n\nFast CPU implementation using the Felzenszwalb algorithm\nMulti-threading support for enhanced CPU performance\nGPU acceleration for NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)\nSupport for arrays of various dimensions (1D, 2D, 3D)\nClean, simple API in both Julia and Python\nComprehensive documentation and examples\n\n\n\n\nDistance transforms have numerous applications across different fields:\n\nImage Processing: Segmentation, skeletonization, feature extraction\nComputer Vision: Object recognition, shape analysis\nMedical Imaging: Registration, segmentation, analysis\nComputational Geometry: Voronoi diagrams, medial axis transforms\nMachine Learning: Distance-based features, loss functions\n\n\n\n\nThe core algorithm implemented in DistanceTransforms.jl is based on the work of Felzenszwalb and Huttenlocher, which provides an efficient method for computing the Euclidean distance transform in O(n) time complexity.\nFor GPU acceleration, the library uses KernelAbstractions.jl, which allows the code to be hardware-agnostic and run efficiently across different GPU architectures.\n\n\n\nDistanceTransforms.jl and its Python wrapper wouldn’t be possible without the contributions of many individuals and the support of the Julia and Python communities. We’d like to specifically acknowledge:\n\nThe original authors of the distance transform algorithms\nContributors to related Julia packages like ImageMorphology.jl\nThe developers of KernelAbstractions.jl, which enables the hardware-agnostic GPU implementation\nPythonCall.jl and juliacall for enabling the Python wrapper\n\n\n\n\nIf you use DistanceTransforms in your research, please cite:\n@software{DistanceTransforms,\n  author = {Black, Dale and Contributors},\n  title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},\n  url = {https://github.com/Dale-Black/DistanceTransforms.jl},\n  year = {2023}\n}\n\n\n\nDistanceTransforms is available under the MIT License.\nMIT License\n\nCopyright (c) 2023 Dale Black and contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n\n\n\nFor questions, issues, or contributions: - GitHub: DistanceTransforms.jl - GitHub: py-distance-transforms"
+  },
+  {
+    "objectID": "about.html#project-history",
+    "href": "about.html#project-history",
+    "title": "About",
+    "section": "",
+    "text": "DistanceTransforms.jl was developed by Dale Black and contributors to address the need for fast, GPU-accelerated distance transforms in Julia. The Python wrapper, py-distance-transforms, was later added to make these capabilities accessible to the Python community."
+  },
+  {
+    "objectID": "about.html#features",
+    "href": "about.html#features",
+    "title": "About",
+    "section": "",
+    "text": "Fast CPU implementation using the Felzenszwalb algorithm\nMulti-threading support for enhanced CPU performance\nGPU acceleration for NVIDIA (CUDA), AMD (ROCm), and Apple (Metal)\nSupport for arrays of various dimensions (1D, 2D, 3D)\nClean, simple API in both Julia and Python\nComprehensive documentation and examples"
+  },
+  {
+    "objectID": "about.html#applications",
+    "href": "about.html#applications",
+    "title": "About",
+    "section": "",
+    "text": "Distance transforms have numerous applications across different fields:\n\nImage Processing: Segmentation, skeletonization, feature extraction\nComputer Vision: Object recognition, shape analysis\nMedical Imaging: Registration, segmentation, analysis\nComputational Geometry: Voronoi diagrams, medial axis transforms\nMachine Learning: Distance-based features, loss functions"
+  },
+  {
+    "objectID": "about.html#implementation-details",
+    "href": "about.html#implementation-details",
+    "title": "About",
+    "section": "",
+    "text": "The core algorithm implemented in DistanceTransforms.jl is based on the work of Felzenszwalb and Huttenlocher, which provides an efficient method for computing the Euclidean distance transform in O(n) time complexity.\nFor GPU acceleration, the library uses KernelAbstractions.jl, which allows the code to be hardware-agnostic and run efficiently across different GPU architectures."
+  },
+  {
+    "objectID": "about.html#acknowledgments",
+    "href": "about.html#acknowledgments",
+    "title": "About",
+    "section": "",
+    "text": "DistanceTransforms.jl and its Python wrapper wouldn’t be possible without the contributions of many individuals and the support of the Julia and Python communities. We’d like to specifically acknowledge:\n\nThe original authors of the distance transform algorithms\nContributors to related Julia packages like ImageMorphology.jl\nThe developers of KernelAbstractions.jl, which enables the hardware-agnostic GPU implementation\nPythonCall.jl and juliacall for enabling the Python wrapper"
+  },
+  {
+    "objectID": "about.html#citation",
+    "href": "about.html#citation",
+    "title": "About",
+    "section": "",
+    "text": "If you use DistanceTransforms in your research, please cite:\n@software{DistanceTransforms,\n  author = {Black, Dale and Contributors},\n  title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},\n  url = {https://github.com/Dale-Black/DistanceTransforms.jl},\n  year = {2023}\n}"
+  },
+  {
+    "objectID": "about.html#license",
+    "href": "about.html#license",
+    "title": "About",
+    "section": "",
+    "text": "DistanceTransforms is available under the MIT License.\nMIT License\n\nCopyright (c) 2023 Dale Black and contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+  },
+  {
+    "objectID": "about.html#contact",
+    "href": "about.html#contact",
+    "title": "About",
+    "section": "",
+    "text": "For questions, issues, or contributions: - GitHub: DistanceTransforms.jl - GitHub: py-distance-transforms"
+  },
+  {
+    "objectID": "julia/index.html",
+    "href": "julia/index.html",
+    "title": "Overview",
+    "section": "",
+    "text": "DistanceTransforms.jl is a high-performance Julia package for computing distance transforms. It offers significant performance improvements over traditional implementations, especially for large arrays.",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "julia/index.html#installation",
+    "href": "julia/index.html#installation",
+    "title": "Overview",
+    "section": "Installation",
+    "text": "Installation\nInstall DistanceTransforms.jl using Julia’s package manager:\nusing Pkg\nPkg.add(\"DistanceTransforms\")",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "julia/index.html#quick-example",
+    "href": "julia/index.html#quick-example",
+    "title": "Overview",
+    "section": "Quick Example",
+    "text": "Quick Example\n\nusing DistanceTransforms: transform, boolean_indicator\nusing CairoMakie: Figure, Axis, heatmap!\n\n# Create a sample binary array\narr = rand([0, 1], 10, 10)\n\n# Apply distance transform\nresult = transform(boolean_indicator(arr))\n\n# Visualize\nfig = Figure(size = (800, 400))\nax1 = Axis(fig[1, 1], title = \"Original\")\nax2 = Axis(fig[1, 2], title = \"Distance Transform\")\nheatmap!(ax1, arr, colormap = :grays)\nheatmap!(ax2, result, colormap = :grays)\nfig",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "julia/index.html#key-features",
+    "href": "julia/index.html#key-features",
+    "title": "Overview",
+    "section": "Key Features",
+    "text": "Key Features\n\nFast Distance Transform: Employs the efficient Felzenszwalb algorithm\nMulti-threading: Parallelized computation on CPU\nGPU Support:\n\nNVIDIA (CUDA)\nAMD (ROCm)\nApple (Metal)\nIntel (oneAPI)\n\nFlexible Input: Works with arrays of various dimensions (1D, 2D, 3D)",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "julia/index.html#next-steps",
+    "href": "julia/index.html#next-steps",
+    "title": "Overview",
+    "section": "Next Steps",
+    "text": "Next Steps\n\nExplore the User Guide for comprehensive documentation\nCheck the API Reference for detailed function information",
+    "crumbs": [
+      "Home",
+      "Overview"
+    ]
+  }
+]

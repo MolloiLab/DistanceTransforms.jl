@@ -1,0 +1,55 @@
+---
+title: "API Reference"
+sidebar: julia
+format:
+  html:
+    toc: true
+    cold-fold: true
+execute:
+  engine: julia
+---
+
+This page documents all the exported functions and types in DistanceTransforms.jl.
+
+```{julia}
+#| echo: false
+
+
+using DistanceTransforms
+using Markdown
+
+"""
+    generate_markdown_docs()
+    
+Generate Markdown documentation for all exported functions in DistanceTransforms.jl,
+returning a single string with properly formatted markdown.
+"""
+function generate_markdown_docs()
+    # Get all exported names from DistanceTransforms
+    all_names = names(DistanceTransforms)
+    exported_functions = filter(x -> x != :DistanceTransforms, all_names)
+    
+    # Create a string buffer to collect all output
+    result = IOBuffer()
+    
+    # Generate documentation for each function
+    for name in exported_functions
+        
+        # Get the documentation and convert it to string
+        doc = getproperty(DistanceTransforms, name)
+        doc_string = string(Docs.doc(doc))
+        
+        # Write the documentation
+        write(result, doc_string)
+        write(result, "\n\n---\n\n")
+    end
+    
+    # Return the collected documentation as a string
+    return String(take!(result))
+end
+
+# Call the function to generate the documentation
+docs = generate_markdown_docs()
+
+println(docs)
+```
