@@ -1,6 +1,6 @@
 # DistanceTransforms
 
-[![Glass Notebook][glassnotebook-img]][glassnotebook-url]
+[![Documentation][docs-img]][docs-url]
 [![CI Stable][ci-img]][ci-url]
 [![Build status][buildkite-img]][buildkite-url]
 [![Coverage][cov-img]][cov-url]
@@ -79,8 +79,8 @@ For benchmarks and more details on advanced usage, refer to the [advanced usage 
 Check out the corresponding Python (wrapper) package: [py-distance-transforms](https://github.com/MolloiLab/py-distance-transforms)
 
 
-[glassnotebook-img]: https://img.shields.io/badge/Docs-Glass%20Notebook-aquamarine.svg
-[glassnotebook-url]: https://glassnotebook.io/r/DxnIPJnIqpEqiQnJgqiBP/index.jl
+[docs-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-url]: https://molloilab.github.io/DistanceTransforms.jl/
 
 [ci-img]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml/badge.svg?branch=master
 [ci-url]: https://github.com/MolloiLab/DistanceTransforms.jl/actions/workflows/CI.yml
