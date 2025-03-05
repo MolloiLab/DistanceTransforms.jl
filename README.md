@@ -73,7 +73,6 @@ result = dts.transform(arr)
 
 For comprehensive documentation and examples, visit our [documentation site](https://molloilab.github.io/DistanceTransforms.jl/).
 
-
 [docs-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-url]: https://molloilab.github.io/DistanceTransforms.jl/
 
