@@ -51,7 +51,7 @@ If you use DistanceTransforms in your research, please cite:
 @software{DistanceTransforms,
   author = {Black, Dale and Contributors},
   title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},
-  url = {https://github.com/Dale-Black/DistanceTransforms.jl},
+  url = {https://github.com/MolloiLab/DistanceTransforms.jl},
   year = {2023}
 }
 ```
@@ -62,5 +62,5 @@ DistanceTransforms is available under the MIT License.
 
 ## Links
 
-- [DistanceTransforms.jl](https://github.com/Dale-Black/DistanceTransforms.jl) (Julia)
-- [distance_transforms](https://github.com/Dale-Black/py-distance-transforms) (Python)
+- [DistanceTransforms.jl](https://github.com/MolloiLab/DistanceTransforms.jl) (Julia)
+- [distance_transforms](https://github.com/MolloiLab/distance_transforms) (Python)

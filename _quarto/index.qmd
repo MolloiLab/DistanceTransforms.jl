@@ -112,7 +112,7 @@ If you use DistanceTransforms in your research, please cite:
 @software{DistanceTransforms,
   author = {Black, Dale and Contributors},
   title = {DistanceTransforms: Fast Distance Transforms for Julia and Python},
-  url = {https://github.com/Dale-Black/DistanceTransforms.jl},
+  url = {https://github.com/MolloiLab/DistanceTransforms.jl},
   year = {2023}
 }
 ```

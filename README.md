@@ -59,7 +59,7 @@ gpu_result = transform(x_gpu)
 
 ## Python Support
 
-For Python users, check out [distance_transforms](https://github.com/MolloiLab/py-distance-transforms), a Python wrapper providing the same functionality.
+For Python users, check out [distance_transforms](https://github.com/MolloiLab/distance_transforms), a Python wrapper providing the same functionality.
 
 ```python
 import numpy as np

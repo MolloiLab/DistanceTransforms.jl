@@ -8,7 +8,7 @@ website:
   favicon: "images/favicon.ico"
   
   navbar:
-    logo: "https://raw.githubusercontent.com/Dale-Black/DistanceTransforms.jl/master/docs/logo.svg"
+    logo: "https://raw.githubusercontent.com/MolloiLab/DistanceTransforms.jl/master/docs/logo.svg"
     background: primary
     search: true
     left:
@@ -34,7 +34,7 @@ website:
         href: about.qmd
     right:
       - icon: github
-        href: https://github.com/Dale-Black/DistanceTransforms.jl
+        href: https://github.com/MolloiLab/DistanceTransforms.jl
         aria-label: GitHub
 
   sidebar:
@@ -60,9 +60,9 @@ website:
     left: "Copyright 2024, Dale Black"
     right:
       - icon: github
-        href: https://github.com/Dale-Black/DistanceTransforms.jl
+        href: https://github.com/MolloiLab/DistanceTransforms.jl
       - icon: github
-        href: https://github.com/Dale-Black/py-distance-transforms
+        href: https://github.com/MolloiLab/distance_transforms
 
 format:
   html:
