@@ -69,6 +69,23 @@ arr = np.random.choice([0, 1], size=(10, 10)).astype(np.float32)
 result = dts.transform(arr)
 ```
 
+## Citation
+
+If you use DistanceTransforms in your research, please cite:
+
+```bibtex
+@ARTICLE{10912438,
+  author={Black, Dale and Li, Wenbo and Zhang, Qiyu and Molloi, Sabee},
+  journal={IEEE Access}, 
+  title={Accelerating Euclidean Distance Transforms: A Fast and Flexible Approach with Multi-Vendor GPU, Multi-Threading, and Multi-Language Support}, 
+  year={2025},
+  volume={},
+  number={},
+  pages={1-1},
+  keywords={Transforms;Graphics processing units;Benchmark testing;Euclidean distance;Three-dimensional displays;Image segmentation;Hardware;Python;Metals;Arrays;Distance Transform;Hardware Acceleration;Hausdorff Distance;High Performance Computing;Image Processing;Medical Image Analysis;Parallel Computing;Segmentation;Skeletonization},
+  doi={10.1109/ACCESS.2025.3548563}}
+```
+
 ## Documentation
 
 For comprehensive documentation and examples, visit our [documentation site](https://molloilab.github.io/DistanceTransforms.jl/).
