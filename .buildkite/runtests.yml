@@ -92,3 +92,26 @@ steps:
       rocmgpu: "*"
     if: build.message !~ /\[skip tests\]/
     timeout_in_minutes: 10 
+  - label: "Metal: Julia {{matrix.version}}"
+    matrix:
+      setup:
+        version:
+          - "1.10"
+    plugins:
+      - JuliaCI/julia#v1:
+          version: "{{matrix.version}}"
+      - JuliaCI/julia-coverage#v1:
+          codecov: true
+    command: |
+      julia -e 'using Pkg
+
+                println("--- :julia: Instantiating environment")
+                Pkg.add("Metal")
+                Pkg.develop(path=".")
+
+                println("+++ :julia: Running tests")
+                Pkg.test("DistanceTransforms"; coverage=true, test_args=["Metal"])'
+    agents:
+      queue: "metal"
+    if: build.message !~ /\[skip tests\]/
+    timeout_in_minutes: 10
