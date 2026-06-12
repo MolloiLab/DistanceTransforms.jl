@@ -1,94 +1,6 @@
 steps:
   - group: ":racehorse: Benchmarks"
     steps:
-      - label: "CPU: Run Benchmarks (1 thread)"
-        key: "cpu-benchmarks-1"
-        plugins:
-          - JuliaCI/julia#v1:
-              version: "1.10"
-        command: |
-          julia --project=benchmarks -e '
-              using Pkg;
-              Pkg.instantiate();
-              Pkg.develop(path=pwd());
-          '
-          julia --project=benchmarks --threads=1 benchmarks/runbenchmarks.jl
-        artifacts:
-          - "benchmarks/results/CPUbenchmarks1threads.json"
-        agents:
-          queue: "benchmark"
-        env:
-          BENCHMARK_GROUP: CPU
-          JULIA_NUM_THREADS: 1
-        if: build.message !~ /\[skip benchmarks\]/
-        timeout_in_minutes: 12
-
-      - label: "CPU: Run Benchmarks (2 threads)"
-        key: "cpu-benchmarks-2"
-        plugins:
-          - JuliaCI/julia#v1:
-              version: "1.10"
-        command: |
-          julia --project=benchmarks -e '
-              using Pkg;
-              Pkg.instantiate();
-              Pkg.develop(path=pwd());
-          '
-          julia --project=benchmarks --threads=2 benchmarks/runbenchmarks.jl
-        artifacts:
-          - "benchmarks/results/CPUbenchmarks2threads.json"
-        agents:
-          queue: "benchmark"
-        env:
-          BENCHMARK_GROUP: CPU
-          JULIA_NUM_THREADS: 2
-        if: build.message !~ /\[skip benchmarks\]/
-        timeout_in_minutes: 12
-
-      - label: "CPU: Run Benchmarks (4 threads)"
-        key: "cpu-benchmarks-4"
-        plugins:
-          - JuliaCI/julia#v1:
-              version: "1.10"
-        command: |
-          julia --project=benchmarks -e '
-              using Pkg;
-              Pkg.instantiate();
-              Pkg.develop(path=pwd());
-          '
-          julia --project=benchmarks --threads=4 benchmarks/runbenchmarks.jl
-        artifacts:
-          - "benchmarks/results/CPUbenchmarks4threads.json"
-        agents:
-          queue: "benchmark"
-        env:
-          BENCHMARK_GROUP: CPU
-          JULIA_NUM_THREADS: 4
-        if: build.message !~ /\[skip benchmarks\]/
-        timeout_in_minutes: 12
-
-      - label: "CPU: Run Benchmarks (8 threads)"
-        key: "cpu-benchmarks-8"
-        plugins:
-          - JuliaCI/julia#v1:
-              version: "1.10"
-        command: |
-          julia --project=benchmarks -e '
-              using Pkg;
-              Pkg.instantiate();
-              Pkg.develop(path=pwd());
-          '
-          julia --project=benchmarks --threads=8 benchmarks/runbenchmarks.jl
-        artifacts:
-          - "benchmarks/results/CPUbenchmarks8threads.json"
-        agents:
-          queue: "benchmark"
-        env:
-          BENCHMARK_GROUP: CPU
-          JULIA_NUM_THREADS: 8
-        if: build.message !~ /\[skip benchmarks\]/
-        timeout_in_minutes: 12
-
       - label: "CUDA: Run Benchmarks"
         key: "cuda-benchmarks"
         plugins:
@@ -105,8 +17,7 @@ steps:
         artifacts:
           - "benchmarks/results/CUDAbenchmarks.json"
         agents:
-          queue: "juliagpu"
-          cuda: "*"
+          queue: "cuda"
         env:
           BENCHMARK_GROUP: CUDA
         if: build.message !~ /\[skip benchmarks\]/
@@ -128,8 +39,7 @@ steps:
         artifacts:
           - "benchmarks/results/AMDGPUbenchmarks.json"
         agents:
-          queue: "juliagpu"
-          rocm: "*"
+          queue: "rocm"
           rocmgpu: "*"
         env:
           BENCHMARK_GROUP: AMDGPU
@@ -152,8 +62,7 @@ steps:
         artifacts:
           - "benchmarks/results/oneAPIbenchmarks.json"
         agents:
-          queue: "juliagpu"
-          intel: "*"
+          queue: "oneapi"
         env:
           BENCHMARK_GROUP: oneAPI
           if: build.message !~ /\[skip benchmarks\]/
@@ -175,9 +84,7 @@ steps:
         artifacts:
           - "benchmarks/results/Metalbenchmarks.json"
         agents:
-          queue: "juliaecosystem"
-          os: "macos"
-          arch: "aarch64"
+          queue: "metal"
         env:
           BENCHMARK_GROUP: Metal
           if: build.message !~ /\[skip benchmarks\]/
@@ -188,10 +95,6 @@ steps:
       - label: "Combine Benchmarks"
         key: "combine-benchmarks"
         depends_on:
-          - "cpu-benchmarks-1"  # Update these
-          - "cpu-benchmarks-2"
-          - "cpu-benchmarks-4"
-          - "cpu-benchmarks-8"
           - "cuda-benchmarks"
           - "oneapi-benchmarks"
           - "amdgpu-benchmarks"
@@ -208,7 +111,8 @@ steps:
         artifacts:
           - "benchmarks/results/combinedbenchmarks.json"
         agents:
-          queue: "benchmark"
+          queue: "cuda"
+          benchmark: "*"
         env:
           if: build.message !~ /\[skip benchmarks\]/
           timeout_in_minutes: 12
