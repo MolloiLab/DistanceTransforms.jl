@@ -1,0 +1,86 @@
+name: Snapshot — build & publish
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+concurrency:
+  group: snapshot-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  SNAPSHOT_WT_REF: main
+  SNAPSHOT_PI_REF: main
+  BINARYEN_VERSION: version_125
+  WASMTOOLS_VERSION: 1.244.0
+  SNAPSHOT_OPTIMIZE: size
+  SNAPSHOT_INGEST_URL: https://snapshot.show
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Runaway guard: a healthy notebook/app build finishes in minutes. If one runs
+    # this long it's hung or far too heavy for a free runner — fail fast instead of
+    # burning ~6h of the repo's Actions budget. Raise this if your build legitimately
+    # needs longer.
+    timeout-minutes: 45
+    steps:
+      - name: Checkout notebooks repo
+        uses: actions/checkout@v4
+        with: { path: repo }
+      - name: Checkout WasmTarget.jl (sibling)
+        uses: actions/checkout@v4
+        with: { repository: GroupTherapyOrg/WasmTarget.jl, ref: "${{ env.SNAPSHOT_WT_REF }}", path: WasmTarget.jl }
+      - name: Checkout PlutoIslands.jl
+        uses: actions/checkout@v4
+        with: { repository: GroupTherapyOrg/PlutoIslands.jl, ref: "${{ env.SNAPSHOT_PI_REF }}", path: PlutoIslands.jl }
+      - uses: julia-actions/setup-julia@v2
+        with: { version: "1.12" }
+      - uses: julia-actions/cache@v2
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Install Binaryen (wasm-opt, wasm-merge)
+        run: |
+          curl -fsSL "https://github.com/WebAssembly/binaryen/releases/download/${BINARYEN_VERSION}/binaryen-${BINARYEN_VERSION}-x86_64-linux.tar.gz" | tar -xz
+          echo "$PWD/binaryen-${BINARYEN_VERSION}/bin" >> "$GITHUB_PATH"
+      - name: Install wasm-tools
+        run: |
+          curl -fsSL "https://github.com/bytecodealliance/wasm-tools/releases/download/v${WASMTOOLS_VERSION}/wasm-tools-${WASMTOOLS_VERSION}-x86_64-linux.tar.gz" | tar -xz
+          echo "$PWD/wasm-tools-${WASMTOOLS_VERSION}-x86_64-linux" >> "$GITHUB_PATH"
+      - name: Instantiate engine
+        run: julia --project=PlutoIslands.jl -e 'using Pkg; Pkg.Registry.add("General"); Pkg.instantiate()'
+      - name: Fetch Snapshot driver + collection builder
+        run: |
+          curl -fsSL "${SNAPSHOT_INGEST_URL%/}/ci/export.jl" -o export.jl
+          curl -fsSL "${SNAPSHOT_INGEST_URL%/}/ci/collection.jl" -o collection.jl
+      - name: Build collection site (compile notebooks, wasm-opt'd + verified)
+        run: julia --project=PlutoIslands.jl export.jl repo _stage
+      - name: Package the site as one zip
+        run: |
+          ok=$(jq -r '.ok' _stage/manifest.json)
+          [ "${ok:-0}" -gt 0 ] || { echo "no notebooks published"; exit 1; }
+          ( cd _stage && zip -qr "$GITHUB_WORKSPACE/site.zip" . )
+          ls -la site.zip
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with: { subject-path: "site.zip" }
+      - name: Publish site to Snapshot (OIDC)
+        run: |
+          OIDC=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=snapshot" | jq -r '.value')
+          owner="${GITHUB_REPOSITORY%%/*}"; reponame="${GITHUB_REPOSITORY##*/}"
+          slug=$(jq -r '.slug' _stage/manifest.json); index=$(jq -r '.index' _stage/manifest.json)
+          digest=$(sha256sum site.zip | awk '{print $1}')
+          echo "publishing $slug (sha256:$digest)"
+          curl -fsS -X POST "${SNAPSHOT_INGEST_URL%/}/ingest" \
+            -H "authorization: Bearer ${OIDC}" \
+            -H "x-snapshot-auth: oidc" \
+            -H "x-snapshot-owner: ${owner}" \
+            -H "x-snapshot-repo: ${reponame}" \
+            -H "x-snapshot-notebook: ${slug}" \
+            -H "x-snapshot-kind: collection" \
+            -H "x-snapshot-commit: ${GITHUB_SHA}" \
+            -H "x-snapshot-index: ${index}" \
+            -H "x-snapshot-attestation: sha256:${digest}" \
+            -H "content-type: application/zip" \
+            --data-binary "@site.zip"
